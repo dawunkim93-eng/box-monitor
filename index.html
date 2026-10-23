@@ -79,11 +79,11 @@
   </div>
   <table>
     <thead><tr>
-      <th class="nm">⭐ 종목</th><th>우선</th><th>현재가</th><th>당일</th><th>ATR</th>
+      <th class="nm">⭐ 종목</th><th>우선</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
       <th class="hidem">하단~상단</th><th>위치</th><th>하단대비</th>
       <th class="hidem">유지</th><th class="hidem">갭</th>
     </tr></thead>
-    <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
+    <tbody id="rows"><tr><td colspan="11">로딩 중…</td></tr></tbody>
   </table>
   <div class="stamp" id="foot">우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
 </div>
@@ -139,15 +139,17 @@ function render(){
     const fav = FAVS.has(r.code);
     const sCell=(r.score==null?"-":
       `${(r.score>=7?`<span style="color:var(--amber)">🥇</span>`:"")}${r.score}점<span class="sub">·탈출${r.esc_p??""}%</span>`
-      +((r.score_m!=null&&r.score!==r.score_m)?`<span class="sub"> (아침 ${r.score_m})</span>`:""));
+      +((r.score_m!=null&&r.score>r.score_m)?` <span class="up">▲</span>`
+        :((r.score_m!=null&&r.score<r.score_m)?` <span class="dn">▼</span>`:""));
     return `<tr${rc?` class="${rc}"`:""}>
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}</td>
       <td>${sCell}</td>
+      <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
       <td>${fmt(r.price)}${r.no_trade?`<span class="deep" title="장중 시세 조회 실패 — 정지·미거재 의심"> ⛔</span>`:""}</td>
       <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
-      <td>${r.atr!=null?r.atr.toFixed(1):"-"}</td>
+      <td class="hidem">${r.atr!=null?r.atr.toFixed(1):"-"}</td>
       <td class="hidem">${fmt(r.lo)}~${fmt(r.hi)}</td>
       <td>${pbar}${(r.pos!=null&&r.pos<25)?` <span class="warn">⚠️</span>`:""}</td>
       <td>${lowpct}</td>
