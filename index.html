@@ -141,9 +141,10 @@ function render(){
       `${(r.score>=7?`<span style="color:var(--amber)">🥇</span>`:"")}${r.score}점<span class="sub">·탈출${r.esc_p??""}%</span>`);
     return `<tr${rc?` class="${rc}"`:""}>
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
-        ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b></td>
+        ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
+        ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}</td>
       <td>${sCell}</td>
-      <td>${fmt(r.price)}</td>
+      <td>${fmt(r.price)}${r.no_trade?`<span class="deep" title="장중 시세 조회 실패 — 정지·미거재 의심"> ⛔</span>`:""}</td>
       <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
       <td>${r.atr!=null?r.atr.toFixed(1):"-"}</td>
       <td class="hidem">${fmt(r.lo)}~${fmt(r.hi)}</td>
