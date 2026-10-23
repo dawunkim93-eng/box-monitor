@@ -134,7 +134,7 @@ function render(){
     const rc = isbrk?"brk":(r.pos!=null&&r.pos<15?"low":(r.pos!=null&&r.pos>85?"hi":""));
     const pcol = r.pos==null?"var(--dim)":(r.pos<40?"var(--blue)":r.pos>80?"var(--green)":"var(--txt)");
     const pbar = r.pos==null?"-"
-      :`<span class="posbar"><i style="width:${Math.min(100,r.pos).toFixed(0)}%;background:${pcol}"></i></span> ${r.pos.toFixed(0)}%`;
+      :`<span class="posbar"><i style="width:${Math.min(100,r.pos).toFixed(0)}%;background:${pcol}"></i></span>`;
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
     const fav = FAVS.has(r.code);
     const sCell=(r.score==null?"-":
