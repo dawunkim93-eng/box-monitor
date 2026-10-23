@@ -68,7 +68,8 @@
   <h2 class="sec">전체 목록</h2>
   <div class="toolbar">
     <span class="sub">정렬</span>
-    <button data-s="atr" class="on">ATR</button>
+    <button data-s="prio" class="on">우선순위</button>
+    <button data-s="atr">ATR</button>
     <button data-s="pos">위치 낮은 순</button>
     <button data-s="pctlow">하단 대비 낮은 순</button>
     <button data-s="name">이름</button>
@@ -78,17 +79,17 @@
   </div>
   <table>
     <thead><tr>
-      <th class="nm">⭐ 종목</th><th>현재가</th><th>당일</th><th>ATR</th>
+      <th class="nm">⭐ 종목</th><th>우선</th><th>현재가</th><th>당일</th><th>ATR</th>
       <th class="hidem">하단~상단</th><th>위치</th><th>하단대비</th>
       <th class="hidem">유지</th><th class="hidem">갭</th>
     </tr></thead>
-    <tbody id="rows"><tr><td colspan="9">로딩 중…</td></tr></tbody>
+    <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
   </table>
-  <div class="stamp" id="foot">60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot">우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측<br>60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
 </div>
 <script>
 const $=s=>document.querySelector(s);
-let DATA=null, SORT="atr",
+let DATA=null, SORT="prio",
     FAVS=new Set(JSON.parse(localStorage.getItem("boxfavs")||"[]"));
 const fmt=n=>n==null?"-":Math.round(n).toLocaleString("ko-KR");
 const pct=n=>n==null?"-":(n>0?"+":"")+n.toFixed(1)+"%";
@@ -120,11 +121,14 @@ function render(){
   const favonly=$("#favonly").checked;
   if(favonly) rows=rows.filter(r=>FAVS.has(r.code));
   const srt={
+    prio:(x,y)=>((y.score||0)-(x.score||0))||((y.atr||0)-(x.atr||0)),
     atr:(x,y)=>(y.atr||0)-(x.atr||0),
     pos:(x,y)=>(x.pos==null?999:x.pos)-(y.pos==null?999:y.pos),
     pctlow:(x,y)=>(x.pct_low==null?999:x.pct_low)-(y.pct_low==null?999:y.pct_low),
     name:(x,y)=>x.name.localeCompare(y.name,"ko")};
-  rows.sort(srt[SORT]||srt.atr);
+  rows.sort(srt[SORT]||srt.prio);
+  const golds=rows.filter(r=>(r.score||0)>=7).length;
+  $("#stats").innerHTML+=`<div class="chip">🥇 안정 박스(7점+) <b>${golds}</b>종목</div>`;
   $("#rows").innerHTML=rows.map(r=>{
     const isbrk = r.pct_low!=null && r.pct_low<0;
     const rc = isbrk?"brk":(r.pos!=null&&r.pos<15?"low":(r.pos!=null&&r.pos>85?"hi":""));
@@ -133,14 +137,17 @@ function render(){
       :`<span class="posbar"><i style="width:${Math.min(100,r.pos).toFixed(0)}%;background:${pcol}"></i></span> ${r.pos.toFixed(0)}%`;
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
     const fav = FAVS.has(r.code);
+    const sCell=(r.score==null?"-":
+      `${(r.score>=7?`<span style="color:var(--amber)">🥇</span>`:"")}${r.score}점<span class="sub">·탈출${r.esc_p??""}%</span>`);
     return `<tr${rc?` class="${rc}"`:""}>
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b></td>
+      <td>${sCell}</td>
       <td>${fmt(r.price)}</td>
       <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
       <td>${r.atr!=null?r.atr.toFixed(1):"-"}</td>
       <td class="hidem">${fmt(r.lo)}~${fmt(r.hi)}</td>
-      <td>${pbar}</td>
+      <td>${pbar}${(r.pos!=null&&r.pos<25)?` <span class="warn">⚠️</span>`:""}</td>
       <td>${lowpct}</td>
       <td class="hidem">${r.days!=null?r.days:"-"}일</td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
