@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>박스권 모니터</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --line:#262b35; --txt:#e6e8ee; --dim:#8b93a3;
+    --red:#e5484d; --blue:#3b82f6; --green:#22c55e; --amber:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;
+       font-size:14px;line-height:1.45}
+  .wrap{max-width:1100px;margin:0 auto;padding:14px}
+  h1{font-size:19px;margin:6px 0 2px} .sub{color:var(--dim);font-size:12px}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:8px;
+        padding:6px 10px;font-size:12.5px}
+  .chip b{font-size:14px}
+  h2.sec{font-size:14.5px;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+  .alert{border:1px solid var(--red);border-left:4px solid var(--red);background:#1d1114;
+         border-radius:6px;padding:7px 10px;margin:5px 0;display:flex;
+         justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .alert .n{font-weight:700}
+  .deep{color:var(--red);font-weight:700}
+  .warn{color:var(--amber)}
+  .toolbar{display:flex;gap:6px;align-items:center;margin:10px 0 6px;flex-wrap:wrap;flex-direction:row}
+  .toolbar button{background:var(--card);border:1px solid var(--line);color:var(--txt);
+                  border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer}
+  .toolbar button.on{border-color:var(--blue);color:var(--blue)}
+  table{width:100%;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  th,td{padding:6px 7px;text-align:right;white-space:nowrap;font-size:12.8px}
+  th{color:var(--dim);font-weight:600;border-bottom:1px solid var(--line);
+     background:#1b1f28}
+  th.nm,td.nm{text-align:left}
+  tr.brk{background:#2a1215}          /* 이탈 */
+  tr.low{background:#101b2c}          /* 하단 근접 */
+  tr.hi{background:#0f221a}           /* 상단부 */
+  tr.star td{border-top:1px solid #6b5518}
+  .posbar{display:inline-block;width:60px;height:8px;background:#22262f;
+          border-radius:4px;vertical-align:middle;overflow:hidden}
+  .posbar i{display:block;height:100%;border-radius:4px}
+  .fav{cursor:pointer;font-size:15px;color:#3a3f4a;user-select:none}
+  .fav.on{color:var(--amber)}
+  .tag{color:var(--green);font-weight:700}
+  .up{color:var(--green)} .dn{color:var(--red)}
+  .stamp{color:var(--dim);font-size:11.5px;margin-top:10px;text-align:center}
+  @media(max-width:640px){ .wrap{padding:8px}
+    th,td{padding:5px 4px;font-size:11.8px}
+    th.hidem,td.hidem{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>📦 박스권 모니터</h1>
+      <div class="sub">60일 높이 1.25~2.2 · 추세≤20% · ATR≥3% · 20일 연속 · 거래대금 10억+ · 관찰 전용</div>
+    </div>
+    <div class="sub" id="stamp">로딩 중…</div>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="alertsec"></div>
+  <h2 class="sec">전체 목록</h2>
+  <div class="toolbar">
+    <span class="sub">정렬</span>
+    <button data-s="atr" class="on">ATR</button>
+    <button data-s="pos">위치 낮은 순</button>
+    <button data-s="pctlow">하단 대비 낮은 순</button>
+    <button data-s="name">이름</button>
+    <label style="margin-left:8px;font-size:12.5px;color:var(--dim)">
+      <input type="checkbox" id="favonly" style="vertical-align:middle"> ⭐즐겨찾기만
+    </label>
+  </div>
+  <table>
+    <thead><tr>
+      <th class="nm">⭐ 종목</th><th>현재가</th><th>당일</th><th>ATR</th>
+      <th class="hidem">하단~상단</th><th>위치</th><th>하단대비</th>
+      <th class="hidem">유지</th><th class="hidem">갭</th>
+    </tr></thead>
+    <tbody id="rows"><tr><td colspan="9">로딩 중…</td></tr></tbody>
+  </table>
+  <div class="stamp" id="foot">60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+let DATA=null, SORT="atr",
+    FAVS=new Set(JSON.parse(localStorage.getItem("boxfavs")||"[]"));
+const fmt=n=>n==null?"-":Math.round(n).toLocaleString("ko-KR");
+const pct=n=>n==null?"-":(n>0?"+":"")+n.toFixed(1)+"%";
+const cn=n=>n==null?"":(n>0?"up":n<0?"dn":"");
+function saveFavs(){localStorage.setItem("boxfavs",JSON.stringify([...FAVS]));}
+document.querySelectorAll(".toolbar button").forEach(b=>{
+  b.addEventListener("click",()=>{SORT=b.dataset.s;
+    document.querySelectorAll(".toolbar button").forEach(x=>x.classList.toggle("on",x===b));
+    render();});
+});
+$("#favonly").addEventListener("change",render);
+function render(){
+  if(!DATA)return;
+  const d=DATA;
+  $("#stamp").textContent=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")}`;
+  $("#stats").innerHTML=
+    `<div class="chip">박스 유지 <b>${d.live_count}</b>종목</div>
+     <div class="chip">재무강화 <b>${d.strong_count}</b>종목</div>
+     <div class="chip">⚠️ 장중 이탈 <b>${(d.alerts||[]).length}건</b></div>`;
+  const a=d.alerts||[];
+  $("#alertsec").innerHTML=a.length?
+    `<h2 class="sec">⚠️ 장중 이탈 (현재가 &lt; 박스 하단)</h2>`+
+    a.map(x=>`<div class="alert"><span><span class="n">${x.name}</span>
+      ${fmt(x.price)}원 · 하단 ${fmt(x.lo)} 대비 <span class="deep">${pct(x.pct_low)}</span>
+      ${x.deep?`<span class="deep">⛔심화</span>`:""}</span>
+      <span class="warn">${x.time||""} 감지</span></div>`).join("")
+    :`<div class="sub" style="margin:6px 0 10px">오늘 장중 이탈 감지 없음</div>`;
+  let rows=(d.rows||[]).slice();
+  const favonly=$("#favonly").checked;
+  if(favonly) rows=rows.filter(r=>FAVS.has(r.code));
+  const srt={
+    atr:(x,y)=>(y.atr||0)-(x.atr||0),
+    pos:(x,y)=>(x.pos==null?999:x.pos)-(y.pos==null?999:y.pos),
+    pctlow:(x,y)=>(x.pct_low==null?999:x.pct_low)-(y.pct_low==null?999:y.pct_low),
+    name:(x,y)=>x.name.localeCompare(y.name,"ko")};
+  rows.sort(srt[SORT]||srt.atr);
+  $("#rows").innerHTML=rows.map(r=>{
+    const isbrk = r.pct_low!=null && r.pct_low<0;
+    const rc = isbrk?"brk":(r.pos!=null&&r.pos<15?"low":(r.pos!=null&&r.pos>85?"hi":""));
+    const pcol = r.pos==null?"var(--dim)":(r.pos<40?"var(--blue)":r.pos>80?"var(--green)":"var(--txt)");
+    const pbar = r.pos==null?"-"
+      :`<span class="posbar"><i style="width:${Math.min(100,r.pos).toFixed(0)}%;background:${pcol}"></i></span> ${r.pos.toFixed(0)}%`;
+    const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
+    const fav = FAVS.has(r.code);
+    return `<tr${rc?` class="${rc}"`:""}>
+      <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
+        ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b></td>
+      <td>${fmt(r.price)}</td>
+      <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
+      <td>${r.atr!=null?r.atr.toFixed(1):"-"}</td>
+      <td class="hidem">${fmt(r.lo)}~${fmt(r.hi)}</td>
+      <td>${pbar}</td>
+      <td>${lowpct}</td>
+      <td class="hidem">${r.days!=null?r.days:"-"}일</td>
+      <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
+    </tr>`;}).join("");
+  document.querySelectorAll(".fav").forEach(el=>
+    el.addEventListener("click",()=>{
+      const c=el.dataset.c;
+      FAVS.has(c)?FAVS.delete(c):FAVS.add(c);
+      saveFavs();render();
+    }));
+}
+async function load(){
+  try{
+    const r=await fetch("data/box_live.json?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    DATA=await r.json(); render();
+  }catch(e){
+    $("#stamp").innerHTML=`<span style="color:var(--red)">조회 실패: ${e.message}</span>`;
+  }
+}
+load(); setInterval(load,60000);
+</script>
+</body>
+</html>
