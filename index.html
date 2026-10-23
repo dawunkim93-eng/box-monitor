@@ -85,7 +85,7 @@
     </tr></thead>
     <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
   </table>
-  <div class="stamp" id="foot">우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측<br>60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot">우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
 </div>
 <script>
 const $=s=>document.querySelector(s);
@@ -138,7 +138,8 @@ function render(){
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
     const fav = FAVS.has(r.code);
     const sCell=(r.score==null?"-":
-      `${(r.score>=7?`<span style="color:var(--amber)">🥇</span>`:"")}${r.score}점<span class="sub">·탈출${r.esc_p??""}%</span>`);
+      `${(r.score>=7?`<span style="color:var(--amber)">🥇</span>`:"")}${r.score}점<span class="sub">·탈출${r.esc_p??""}%</span>`
+      +((r.score_m!=null&&r.score!==r.score_m)?`<span class="sub"> (아침 ${r.score_m})</span>`:""));
     return `<tr${rc?` class="${rc}"`:""}>
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
