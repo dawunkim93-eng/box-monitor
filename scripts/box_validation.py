@@ -323,8 +323,7 @@ def finish(done, curve, all_days, U):
     s = out["summary"]
     print(f"[INFO] 포지션 {s['positions']} · 탈출율 {s['escape_rate']}% · "
           f"건당회전/년 {s['turnover_year']} · 지속 {s['hold_avg']}일 · "
-          f"총 {s['net_total']:+,}원 · 적자연도 {s['loss_years']}/{s['n_years']} "
-          f"({tmod.time()-t0:.0f}s)")
+          f"총 {s['net_total']:+,}원 · 적자연도 {s['loss_years']}/{s['n_years']}")
 
 
 if __name__ == "__main__":
