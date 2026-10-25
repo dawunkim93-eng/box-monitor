@@ -25,7 +25,8 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 OUT = REPO / "data" / "box_validation.json"
-MASTER = Path("/home/lucky/backtest/data/pit/master.pkl")
+PIT = Path("/home/lucky/backtest/data/pit")
+MASTER = PIT / "master.pkl"
 
 UNIT, FEE, RUNGS = 100_000, 0.002, 15
 K = 20                 # 동시 보유 슬롯 (진입 = 순위 상위 20)
@@ -53,6 +54,23 @@ def priority_of(age, pos, atr, drift, ratio):
         return s
 
 
+def tier_gap_of(a):
+    """box_alert.tier_gap 위임 (폴백 — ATR티어 갭)."""
+    try:
+        from box_alert import tier_gap
+        return tier_gap(a)
+    except Exception:
+        if a < 0.01:
+            return 0.010
+        if a < 0.02:
+            return 0.015
+        if a < 0.03:
+            return 0.020
+        if a < 0.05:
+            return 0.030
+        return 0.040
+
+
 def load_universe():
     """종목 배열 + 트리거 후보 (매수존·유동성·박스지속)."""
     master = pd.read_pickle(MASTER)
@@ -76,6 +94,7 @@ def load_universe():
         h = df["High"].values.astype(float)
         l = df["Low"].values.astype(float)
         c = df["Close"].values.astype(float)
+        v = df["Volume"].values.astype(float)
         dn = np.array([int(d.strftime("%Y%m%d")) for d in df.index],
                       dtype=np.int64)
         hi60 = pd.Series(h).rolling(60).max().values
@@ -199,7 +218,7 @@ def main():
                     continue
                 s = U[i]
                 atr = float(s["atr"][j])
-                g = tier_gap(atr) if atr is not None and not np.isnan(atr) else 0.02
+                g = tier_gap_of(atr) if atr is not None and not np.isnan(atr) else 0.02
                 holdings[i] = {"j": j, "entry_day": int(D),
                                "entry": float(s["c"][j]),
                                "score": -nsc,
