@@ -17,6 +17,10 @@
   .wrap>:not(table){max-width:100vw}
   h1{font-size:19px;margin:6px 0 2px} .sub{color:var(--dim);font-size:12px}
   .head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px}
+  .tabs{display:flex;gap:6px;margin:10px 0 4px}
+  .tab{background:var(--card);border:1px solid var(--line);color:var(--txt);
+       border-radius:8px;padding:8px 18px;font-size:14px;cursor:pointer}
+  .tab.on{border-color:var(--blue);color:var(--blue);font-weight:700}
   .stats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:8px;
         padding:6px 10px;font-size:12.5px}
@@ -64,6 +68,11 @@
     </div>
     <div class="sub" id="stamp">로딩 중…</div>
   </div>
+  <div class="tabs">
+    <button id="tb-live" class="tab on" data-t="live">실시간</button>
+    <button id="tb-valid" class="tab" data-t="valid">검증</button>
+  </div>
+  <div id="view-live">
   <div class="stats" id="stats"></div>
   <div id="alertsec"></div>
   <h2 class="sec">전체 목록</h2>
@@ -86,6 +95,25 @@
     </tr></thead>
     <tbody id="rows"><tr><td colspan="11">로딩 중…</td></tr></tbody>
   </table>
+  </div>
+  <div id="view-valid" hidden>
+    <h2 class="sec">📊 Top-20 진입 시뮬레이션</h2>
+    <div class="sub" id="v-info">로딩 중…</div>
+    <div class="stats" id="v-chips"></div>
+    <h2 class="sec">연도별 손익</h2>
+    <table id="v-year-tbl"><thead><tr><th class="nm">연도</th><th>손익</th><th>포지션</th><th>탈출율</th></tr></thead><tbody><tr><td colspan="4">로딩 중…</td></tr></tbody></table>
+    <h2 class="sec">청산 사유 · 지속기간</h2>
+    <div class="sub" id="v-exit">로딩 중…</div>
+    <h2 class="sec">최근 포지션 (30)</h2>
+    <table id="v-pos-tbl"><thead><tr><th class="nm">종목</th><th>진입</th><th>청산</th><th>지속</th><th>점수</th><th>1차탈출</th><th>사이클</th><th>손익</th></tr></thead><tbody><tr><td colspan="8">로딩 중…</td></tr></tbody></table>
+    <h2 class="sec">📈 순위·주가 추적 (매일 상위 20 스냅샷)</h2>
+    <div class="toolbar">
+      <span class="sub">날짜</span>
+      <select id="snap-date" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px"></select>
+    </div>
+    <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th><th>유지</th></tr></thead><tbody><tr><td colspan="7">로딩 중…</td></tr></tbody></table>
+    <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±갭 러그매도 되팔기) · 순위 추적은 2026-10-24부터 축적</div>
+  </div>
   <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
 </div>
 <script>
@@ -174,6 +202,71 @@ async function load(){
   }
 }
 load(); setInterval(load,60000);
+let VALID=null, HIST=null;
+async function jget(p){const r=await fetch(p+"?t="+Date.now()); if(!r.ok) throw new Error(r.status); return r.json();}
+function setTab(t){
+  document.getElementById("view-live").hidden = t!=="live";
+  document.getElementById("view-valid").hidden = t!=="valid";
+  document.getElementById("tb-live").classList.toggle("on",t==="live");
+  document.getElementById("tb-valid").classList.toggle("on",t==="valid");
+  if(t==="valid") initValid();
+}
+document.querySelectorAll("#tb-live,#tb-valid").forEach(b=>
+  b.addEventListener("click",()=>setTab(b.dataset.t)));
+async function initValid(){
+  const info=document.getElementById("v-info");
+  try{
+    if(VALID==null){
+      VALID=await jget("data/box_validation.json");
+      renderValid(VALID);
+    }
+    if(HIST==null){
+      HIST=await jget("data/box_rank_history.json");
+      const sel=document.getElementById("snap-date");
+      sel.innerHTML=HIST.map((d,i)=>`<option value="${i}">${d.date}</option>`).reverse().join("");
+      sel.selectedIndex=0;
+      sel.onchange=()=>renderHist();
+      renderHist();
+    }
+  }catch(e){ info.innerHTML=`<span style="color:var(--red)">검증 데이터 로드 실패: ${e.message}</span>`; }
+}
+function renderValid(V){
+  const S=V.summary;
+  document.getElementById("v-info").textContent=
+    `매수존(위치≤50%) 상위 ${V.params.slots}개 순위대로 진입 · ${V.params.start}~${V.params.end} · 갱신 ${V.updated_at}`;
+  document.getElementById("v-chips").innerHTML=
+    `<div class="chip">1차 탈출율 <b>${S.escape_rate}%</b></div>
+     <div class="chip">1차 손실률 ${S.loss0_rate}%</div>
+     <div class="chip">회전 <b>${S.turnover_year}회/년</b> (슬롯당 ${S.turnover_slot})</div>
+     <div class="chip">지속 <b>${S.hold_avg}일</b> (중앙 ${S.hold_median})</div>
+     <div class="chip">포지션 ${S.positions}건</div>
+     <div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b></div>
+     <div class="chip">사이클/건 ${S.cycles_avg}</div>
+     <div class="chip">최대낙폭 ${fmt(S.mdd_won)}원</div>
+     <div class="chip">적자연도 ${S.loss_years}/${S.n_years}</div>`;
+  document.getElementById("v-year-tbl").tBodies[0].innerHTML=V.yearly.map(y=>
+    `<tr><td class="nm">${y.year}</td><td><span class="${y.net>=0?"up":"dn"}">${y.net>=0?"+":""}${fmt(y.net)}</span></td><td>${y.positions}건</td><td>${y.esc_rate!=null?y.esc_rate+"%":"-"}</td></tr>`).join("");
+  document.getElementById("v-exit").textContent=
+    Object.entries(V.exit_kinds).map(([k,v])=>`${k} ${v}건`).join(" · ");
+  document.getElementById("v-pos-tbl").tBodies[0].innerHTML=V.recent_positions.map(p=>
+    `<tr><td class="nm"><b>${p.name}</b></td><td>${p.entry_day}</td><td>${p.exit_day}</td>
+     <td>${p.days}일</td><td>${p.score}점</td><td>${p.escaped?`<span class="up">✓</span>`:`<span class="dn">✗</span>`}</td>
+     <td>${p.cycles}</td><td class="${p.net>=0?"up":"dn"}">${p.net>=0?"+":""}${fmt(p.net)}</td></tr>`).join("");
+}
+function renderHist(){
+  if(!HIST||!HIST.length)return;
+  const day=HIST[document.getElementById("snap-date").selectedIndex];
+  if(!day)return;
+  document.getElementById("snap-tbl").tBodies[0].innerHTML=day.rows.map(r=>{
+    const rk=r.prev_rank==null?`<span class="sub">신규</span>`
+      :r.rank<r.prev_rank?`<span class="up">▲${r.prev_rank-r.rank}</span>`
+      :r.rank>r.prev_rank?`<span class="dn">▼${r.rank-r.prev_rank}</span>`
+      :`<span class="sub">—</span>`;
+    const ch=r.chg_pct==null?`<span class="sub">-</span>`
+      :`<span class="${r.chg_pct>=0?"up":"dn"}">${r.chg_pct>=0?"+":""}${r.chg_pct}%</span>`;
+    return `<tr><td>${r.rank}</td><td class="nm">${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b></td>
+      <td>${r.score}점</td><td>${fmt(r.price)}</td><td>${rk}</td><td>${ch}</td><td>${r.days}일</td></tr>`;}).join("");
+}
 </script>
 </body>
 </html>
