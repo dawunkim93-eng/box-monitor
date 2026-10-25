@@ -228,6 +228,7 @@ def main():
                                "held": [False] * RUNGS,
                                "j_entry": j, "grid_n": 1, "escape0": False, "loss0": False,
                                "cycles": 0, "net": 0.0}
+                holdings[i]["held"][0] = True
                 free -= 1
     # 만기 데이터 종료 — 잔여 포지션 청산
     for i in list(holdings):
