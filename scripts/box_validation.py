@@ -30,6 +30,7 @@ MASTER = PIT / "master.pkl"
 
 UNIT, FEE, RUNGS = 100_000, 0.002, 15
 K = 20                 # 동시 보유 슬롯 (진입 = 순위 상위 20)
+GAP = 0.025            # 갭 2.5% 고정 (10년 5설정 비교: 1.5%+473만/2%+1,147만/2.5%+1,273만/3%+1,167만/티어+998만)
 AMT_MIN = 1e9
 START = 20160901       # 스캔 시작일
 
@@ -142,12 +143,7 @@ def advance_grid(hst, lo, hi, lo60_d, hi60_d, c_d, atr_d):
     levels, held = hst["levels"], hst["held"]
     stop_px = lo60_d * 0.85
     if lo <= stop_px:
-        for k in range(RUNGS):
-            if held[k]:
-                hst["net"] += (stop_px - levels[k]) / levels[k] * UNIT
-                if k == 0 and hst["grid_n"] == 1:
-                    hst["loss0"] = True
-        return True, stop_px, "손절"
+        return True, stop_px, "손절"      # 잔여 차수 청산은 close_position에서
     for k in range(1, RUNGS):
         if not held[k] and lo <= levels[k]:
             held[k] = True
@@ -163,8 +159,7 @@ def advance_grid(hst, lo, hi, lo60_d, hi60_d, c_d, atr_d):
                if hi60_d > lo60_d else 1.0)
         if pos <= 0.5:      # 재눌림 → 재그리드
             hst["grid_n"] += 1
-            if atr_d is not None and not np.isnan(atr_d):
-                hst["gap"] = tier_gap_of(atr_d)      # 재그리드 시 당일 ATR 재판정 (파일럿 동일)
+            hst["gap"] = GAP
             hst["levels"] = [c_d * (1 - hst["gap"]) ** k for k in range(RUNGS)]
             hst["held"] = [False] * RUNGS
             hst["held"][0] = True
@@ -220,8 +215,7 @@ def main():
                 if i in holdings:
                     continue
                 s = U[i]
-                atr = float(s["atr"][j])
-                g = tier_gap_of(atr) if atr is not None and not np.isnan(atr) else 0.02
+                g = GAP
                 holdings[i] = {"j": j, "entry_day": int(D),
                                "entry": float(s["c"][j]),
                                "score": -nsc,
@@ -245,6 +239,12 @@ def main():
 
 def close_position(done, holdings, curve, i, px, kind, day):
     hst = holdings.pop(i)
+    # 잔여 보유 차수 청산 손익 — 모든 청산 경로(소멸·손절·갭·종료)의 단일 계산 지점
+    for k in range(RUNGS):
+        if hst["held"][k]:
+            hst["net"] += (px - hst["levels"][k]) / hst["levels"][k] * UNIT
+            if k == 0 and hst["grid_n"] == 1:
+                hst["loss0"] = True
     done.append({"code": i, "entry_day": hst["entry_day"], "exit_day": int(day),
                  "entry": hst["entry"], "score": hst["score"],
                  "escape0": hst["escape0"], "loss0": hst["loss0"],
@@ -285,6 +285,7 @@ def finish(done, curve, all_days, U):
     out = {
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "params": {"slots": K, "buy_zone": "위치≤50%", "unit": "10만/차",
+                   "gap": "2.5% 고정",
                    "gap": "ATR티어 1~4%", "start": str(y0), "end": str(y1)},
         "summary": {
             "positions": len(done),
