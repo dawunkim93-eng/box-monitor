@@ -137,7 +137,7 @@ def load_universe():
     return U
 
 
-def advance_grid(hst, lo, hi, lo60_d, hi60_d, c_d):
+def advance_grid(hst, lo, hi, lo60_d, hi60_d, c_d, atr_d):
     """보유 그리드 하루 진행. 반환: (청산여부, 청산가, 청산사유)."""
     levels, held = hst["levels"], hst["held"]
     stop_px = lo60_d * 0.85
@@ -163,6 +163,8 @@ def advance_grid(hst, lo, hi, lo60_d, hi60_d, c_d):
                if hi60_d > lo60_d else 1.0)
         if pos <= 0.5:      # 재눌림 → 재그리드
             hst["grid_n"] += 1
+            if atr_d is not None and not np.isnan(atr_d):
+                hst["gap"] = tier_gap_of(atr_d)      # 재그리드 시 당일 ATR 재판정 (파일럿 동일)
             hst["levels"] = [c_d * (1 - hst["gap"]) ** k for k in range(RUNGS)]
             hst["held"] = [False] * RUNGS
             hst["held"][0] = True
@@ -206,7 +208,8 @@ def main():
                                            float(s["h"][j]),
                                            float(s["lo60"][j]),
                                            float(s["hi60"][j]),
-                                           float(s["c"][j]))
+                                           float(s["c"][j]),
+                                           float(s["atr"][j]))
             if stopQ:
                 close_position(done, holdings, curve, i, px, kind, D)
         free = K - len(holdings)
