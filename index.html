@@ -43,8 +43,7 @@
      background:#1b1f28}
   th.nm,td.nm{text-align:left}
   tr.brk{background:#2a1215}          /* 이탈 */
-  tr.low{background:#101b2c}          /* 하단 근접 */
-  tr.hi{background:#0f221a}           /* 상단부 */
+
   tr.star td{border-top:1px solid #6b5518}
   .posbar{display:inline-block;width:60px;height:8px;background:#22262f;
           border-radius:4px;vertical-align:middle;overflow:hidden}
@@ -160,7 +159,7 @@ function render(){
   $("#stats").innerHTML+=`<div class="chip">🥇 안정 박스(7점+) <b>${golds}</b>종목</div>`;
   $("#rows").innerHTML=rows.map(r=>{
     const isbrk = r.pct_low!=null && r.pct_low<0;
-    const rc = isbrk?"brk":(r.pos!=null&&r.pos<15?"low":(r.pos!=null&&r.pos>85?"hi":""));
+    const rc = isbrk?"brk":"";   // 행 배경 = 이탈(빨강)만 — 위치 구간은 바 색 담당
     const pcol = r.pos==null?"var(--dim)":(r.pos<25?"var(--red)":(r.pos<50?"var(--blue)":(r.pos>=85?"var(--green)":"var(--txt)")));
     const pbar = r.pos==null?"-"
       :`<span class="posbar"><i style="width:${Math.min(100,r.pos).toFixed(0)}%;background:${pcol}"></i></span>`;
