@@ -58,6 +58,7 @@
   .stamp{color:var(--dim);font-size:11.5px;margin-top:10px;text-align:center}
   @media(max-width:640px){ .wrap{padding:8px}
     th,td{padding:5px 4px;font-size:11.8px}
+    tr.exp td{padding:5px 4px}
     th.hidem,td.hidem{display:none} }
 </style>
 </head>
@@ -218,7 +219,7 @@ function insertExp(code){
   if(!r){ EXPANDED=null; return; }
   const exp=document.createElement("tr");
   exp.id="exp-row"; exp.className="exp";
-  exp.innerHTML=`<td colspan="11">📊 <b>${r.score}점</b> = ${breakdown(r)}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></td>`;
+  exp.innerHTML=`<td colspan="11">📊 ${r.score}점 = ${breakdown(r)}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></td>`;
   tr.insertAdjacentElement("afterend", exp);
   loadHist(code);
 }
