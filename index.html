@@ -42,7 +42,9 @@
   th{color:var(--dim);font-weight:600;border-bottom:1px solid var(--line);
      background:#1b1f28}
   th.nm,td.nm{text-align:left}
-  tr.brk{background:#2a1215}          /* 이탈 */
+  tr.brk{background:#2a1215}
+  tr.exp td{background:#1a1e28;padding:8px 10px;text-align:left;font-size:12.5px;color:var(--dim)}
+  tr[data-code]{cursor:pointer}          /* 이탈 */
 
   tr.star td{border-top:1px solid #6b5518}
   .posbar{display:inline-block;width:60px;height:8px;background:#22262f;
@@ -113,11 +115,11 @@
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th><th>유지</th></tr></thead><tbody><tr><td colspan="7">로딩 중…</td></tr></tbody></table>
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
   </div>
-  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=보관 즐겨찾기(브라우저 로컬, 서버 전송 없음) · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
 </div>
 <script>
 const $=s=>document.querySelector(s);
-let DATA=null, SORT="prio",
+let DATA=null, SORT="prio", EXPANDED=null,
     FAVS=new Set(JSON.parse(localStorage.getItem("boxfavs")||"[]"));
 const fmt=n=>n==null?"-":Math.round(n).toLocaleString("ko-KR");
 const pct=n=>n==null?"-":(n>0?"+":"")+n.toFixed(1)+"%";
@@ -169,7 +171,7 @@ function render(){
       `${(r.score>=7?`<span style="color:var(--amber)">🥇</span>`:"")}${r.score}점<span class="sub">·탈출${r.esc_p??""}%</span>`
       +((r.score_m!=null&&r.score>r.score_m)?` <span class="up">▲</span>`
         :((r.score_m!=null&&r.score<r.score_m)?` <span class="dn">▼</span>`:"")));
-    return `<tr${rc?` class="${rc}"`:""}>
+    return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}">
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}</td>
@@ -177,7 +179,7 @@ function render(){
       <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
       <td>${fmt(r.price)}${r.no_trade?`<span class="deep" title="장중 시세 조회 실패 — 정지·미거재 의심"> ⛔</span>`:""}</td>
       <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
-      <td class="hidem">${r.atr!=null?r.atr.toFixed(1):"-"}</td>
+      <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
       <td class="hidem">${fmt(r.lo)}~${fmt(r.hi)}</td>
       <td>${pbar}</td>
       <td>${lowpct}</td>
@@ -185,11 +187,47 @@ function render(){
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
     </tr>`;}).join("");
   document.querySelectorAll(".fav").forEach(el=>
-    el.addEventListener("click",()=>{
+    el.addEventListener("click",e=>{
+      e.stopPropagation();
       const c=el.dataset.c;
       FAVS.has(c)?FAVS.delete(c):FAVS.add(c);
       saveFavs();render();
     }));
+  document.querySelectorAll("#rows tr[data-code]").forEach(tr=>
+    tr.addEventListener("click",()=>toggleBreak(tr.dataset.code)));
+  if(EXPANDED!=null) insertExp(EXPANDED);
+}
+function breakdown(r){
+  const parts=[];
+  const age=r.days!=null?r.days:0;
+  parts.push(`나이+${age>=61?4:(age>=31?3:0)}(${age}일)`);
+  const p=r.pos!=null?r.pos:null;
+  parts.push(`위치+${(p!=null&&p>35&&p<=50)?2:((p!=null&&p>25&&p<=35)?1:0)}(${r.pos!=null?r.pos.toFixed(0):"?"}%)`);
+  const a=r.atr;
+  parts.push(`ATR+${a==null?0:(a>=0.05?2:(a>=0.04?1:0))}(${a!=null?(a*100).toFixed(1):"?"}%)`);
+  parts.push(`기울기+${(r.drift!=null&&r.drift>0)?1:0}(${r.drift!=null?((r.drift>0?"+":"")+(r.drift*100).toFixed(1)+"%"):"?"})`);
+  parts.push(`높이+${(r.ratio!=null&&r.ratio<=1.8)?1:0}(${r.ratio!=null?r.ratio.toFixed(2):"?"})`);
+  return parts.join(" · ");
+}
+function insertExp(code){
+  const tr=document.querySelector(`#rows tr[data-code="${code}"]`);
+  if(!tr){ EXPANDED=null; return; }
+  const r=DATA.rows.find(x=>x.code===code);
+  if(!r){ EXPANDED=null; return; }
+  const exp=document.createElement("tr");
+  exp.id="exp-row"; exp.className="exp";
+  exp.innerHTML=`<td colspan="11">📊 <b>${r.score}점</b> = ${breakdown(r)}</td>`;
+  tr.insertAdjacentElement("afterend", exp);
+}
+function toggleBreak(code){
+  if(EXPANDED===code){ EXPANDED=null;
+    const old=document.getElementById("exp-row");
+    if(old) old.remove();
+    return; }
+  const old=document.getElementById("exp-row");
+  if(old) old.remove();
+  EXPANDED=code;
+  insertExp(code);
 }
 async function load(){
   try{
