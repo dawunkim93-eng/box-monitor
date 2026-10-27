@@ -117,6 +117,7 @@
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
   </div>
   <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
 </div>
 <script>
 const $=s=>document.querySelector(s);
@@ -217,8 +218,26 @@ function insertExp(code){
   if(!r){ EXPANDED=null; return; }
   const exp=document.createElement("tr");
   exp.id="exp-row"; exp.className="exp";
-  exp.innerHTML=`<td colspan="11">📊 <b>${r.score}점</b> = ${breakdown(r)}</td>`;
+  exp.innerHTML=`<td colspan="11">📊 <b>${r.score}점</b> = ${breakdown(r)}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></td>`;
   tr.insertAdjacentElement("afterend", exp);
+  loadHist(code);
+}
+async function loadHist(code){
+  try{
+    if(VALID==null){
+      const r=await fetch("data/box_validation.json?t="+Date.now(),{cache:"no-store"});
+      if(!r.ok) throw new Error(r.status);
+      VALID=await r.json();
+    }
+    const el=document.getElementById(`hist-${code}`);
+    if(!el) return;
+    const h=(VALID.stock_history||{})[code];
+    if(!h||!h.ep) el.innerHTML=`📁 박스 12년: 이력 없음 (첫 진입)`;
+    else el.innerHTML=`📁 박스 12년: ${h.ep}회 진입 · ${h.esc}회 탈출(${Math.round(h.esc/h.ep*100)}%) · 평균 ${h.hold}일 · ${h.net>=0?"+":""}${fmt(h.net)}원/건`;
+  }catch(e){
+    const el=document.getElementById(`hist-${code}`);
+    if(el) el.innerHTML="";
+  }
 }
 function toggleBreak(code){
   if(EXPANDED===code){ EXPANDED=null;
