@@ -279,6 +279,23 @@ def finish(done, curve, all_days, U):
         if p["escape0"]:
             yy[yv]["esc"] += 1
     kinds = Counter(p["kind"] for p in done)
+    # 종목별 박스 이력 (참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거)
+    code_map = {i: s["code"] for i, s in enumerate(U)}
+    sh = defaultdict(lambda: {"ep": 0, "esc": 0, "days": 0, "net": 0.0})
+    for p in done:
+        tc = code_map.get(p["code"], "")
+        if not tc:
+            continue
+        sh[tc]["ep"] += 1
+        if p["escape0"]:
+            sh[tc]["esc"] += 1
+        sh[tc]["days"] += p["days"]
+        sh[tc]["net"] += p["net"]
+    stock_history = {
+        tc: {"ep": d["ep"], "esc": d["esc"],
+             "hold": round(d["days"] / d["ep"], 1) if d["ep"] else None,
+             "net": round(d["net"] / d["ep"]) if d["ep"] else 0}
+        for tc, d in sh.items()}
     name_of = {i: s["name"] for i, s in enumerate(U)}
     recent = sorted(done, key=lambda p: p["exit_day"],
                     reverse=True)[:30]
@@ -311,6 +328,7 @@ def finish(done, curve, all_days, U):
                     "esc_rate": round(v["esc"] / v["n"] * 100, 1) if v["n"] else None}
                    for y, v in sorted(yy.items())],
         "exit_kinds": dict(kinds),
+        "stock_history": stock_history,
         "recent_positions": [
             {"name": name_of.get(p["code"], "?"), "entry_day": str(p["entry_day"]),
              "exit_day": str(p["exit_day"]), "days": p["days"],
