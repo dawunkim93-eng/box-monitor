@@ -89,7 +89,7 @@
     <label style="margin-left:8px;font-size:12.5px;color:var(--dim)">
       <input type="checkbox" id="favonly" style="vertical-align:middle"> ⭐즐겨찾기만
     </label>
-    <button id="btn-hold" title="⭐ 종목 코드를 줄바꿈 목록으로 복사 — holdings.txt에 붙여넣으면 장중 감시 대상">⭐ 보유 목록 복사</button>
+    <button id="btn-hold" title="⭐ 보유 종목 코드 복사 → 텔레그램에 붙여넣기 전송 = 보유 목록 자동 갱신 (2분 내)">⭐ 보유 목록 복사</button>
   </div>
   <table>
     <thead><tr>
@@ -118,7 +118,7 @@
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th><th>유지</th></tr></thead><tbody><tr><td colspan="7">로딩 중…</td></tr></tbody></table>
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
   </div>
-  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 상승기울기+1 + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
 </div>
 <script>
