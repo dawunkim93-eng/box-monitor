@@ -48,8 +48,15 @@ def priority_of(age, pos, atr, drift, ratio):
             s += 2 if 0.35 < pos <= 0.5 else (1 if 0.25 < pos <= 0.35 else 0)
         if atr is not None:
             s += 2 if atr >= 0.05 else (1 if atr >= 0.04 else 0)
-        if drift is not None and drift > 0:
-            s += 1
+        if drift is not None:
+            if drift > 0:
+                s += 1
+            elif drift >= -0.05:
+                s -= 1
+            elif drift >= -0.10:
+                s -= 2
+            else:
+                s -= 3
         if ratio is not None and ratio <= 1.8:
             s += 1
         return s
