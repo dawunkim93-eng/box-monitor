@@ -107,8 +107,9 @@ def load_universe():
                       dtype=np.int64)
         hi60 = pd.Series(h).rolling(60).max().values
         lo60 = pd.Series(l).rolling(60).min().values
-        drift = np.full(n, np.nan)
-        drift[60:] = c[60:] / c[:-60] - 1
+        drift_raw = np.full(n, np.nan)
+        drift_raw[60:] = c[60:] / c[:-60] - 1
+        drift = pd.Series(drift_raw).rolling(5).mean().values   # 5일 스무딩 (box_alert 동기)
         tr = np.maximum(h - l, np.maximum(np.abs(h - np.roll(c, 1)),
                                           np.abs(l - np.roll(c, 1))))
         tr[0] = h[0] - l[0]
