@@ -42,6 +42,7 @@
   th{color:var(--dim);font-weight:600;border-bottom:1px solid var(--line);
      background:#1b1f28}
   th.nm,td.nm{text-align:left}
+  #hold-tbl{width:100%}
   tr.brk{background:#2a1215}
   tr.exp td{background:#1a1e28;padding:8px 10px;text-align:left;color:var(--dim);
             white-space:normal;word-break:break-word}
@@ -78,6 +79,15 @@
   <div id="view-live">
   <div class="stats" id="stats"></div>
   <div id="alertsec"></div>
+  <h2 class="sec" id="hold-sec" hidden>📋 보유 중 (<span id="hold-cnt"></span>)</h2>
+  <table id="hold-tbl" hidden>
+    <thead><tr>
+      <th class="nm">⭐ 종목</th><th>우선</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
+      <th class="hidem">하단~상단</th><th>위치</th><th>하단대비</th>
+      <th class="hidem">유지</th><th class="hidem">갭</th>
+    </tr></thead>
+    <tbody id="hold-rows"></tbody>
+  </table>
   <h2 class="sec">전체 목록</h2>
   <div class="toolbar">
     <span class="sub">정렬</span>
@@ -154,7 +164,6 @@ function render(){
     :`<div class="sub" style="margin:6px 0 10px">오늘 장중 이탈 감지 없음</div>`;
   let rows=(d.rows||[]).slice();
   const favonly=$("#favonly").checked;
-  if(favonly) rows=rows.filter(r=>FAVS.has(r.code));
   const srt={
     prio:(x,y)=>((y.score||0)-(x.score||0))||((y.atr||0)-(x.atr||0)),
     atr:(x,y)=>(y.atr||0)-(x.atr||0),
@@ -162,9 +171,33 @@ function render(){
     pctlow:(x,y)=>(x.pct_low==null?999:x.pct_low)-(y.pct_low==null?999:y.pct_low),
     name:(x,y)=>x.name.localeCompare(y.name,"ko")};
   rows.sort(srt[SORT]||srt.prio);
+  const holdRows=rows.filter(r=>FAVS.has(r.code));
+  const mainRows=favonly?rows.filter(r=>FAVS.has(r.code)):rows;
   const golds=rows.filter(r=>(r.score||0)>=7).length;
   $("#stats").innerHTML+=`<div class="chip">🥇 안정 박스(7점+) <b>${golds}</b>종목</div>`;
-  $("#rows").innerHTML=rows.map(r=>{
+  $("#hold-sec").hidden=!holdRows.length;
+  $("#hold-tbl").hidden=!holdRows.length;
+  if(holdRows.length){
+    document.getElementById("hold-cnt").textContent=holdRows.length;
+    document.getElementById("hold-rows").innerHTML=holdRows.map(r=>rowHTML(r)).join("");
+  }
+  $("#rows").innerHTML=mainRows.map(r=>rowHTML(r)).join("");
+  document.querySelectorAll(".fav").forEach(el=>
+    el.addEventListener("click",e=>{
+      e.stopPropagation();
+      const c=el.dataset.c;
+      FAVS.has(c)?FAVS.delete(c):FAVS.add(c);
+      saveFavs();render();
+    }));
+  document.querySelectorAll("tr[data-code]").forEach(tr=>
+    tr.addEventListener("click",()=>toggleBreak(tr.dataset.code, tr)));
+  if(EXPANDED!=null){
+    const tr=document.querySelector(`#hold-rows tr[data-code="${EXPANDED}"]`)
+          || document.querySelector(`#rows tr[data-code="${EXPANDED}"]`);
+    if(tr) insertExp(EXPANDED, tr);
+  }
+}
+function rowHTML(r){
     const isbrk = r.pct_low!=null && r.pct_low<0;
     const rc = isbrk?"brk":"";   // 행 배경 = 이탈(빨강)만 — 위치 구간은 바 색 담당
     const pcol = r.pos==null?"var(--dim)":(r.pos<25?"var(--red)":(r.pos<50?"var(--blue)":(r.pos>=85?"var(--green)":"var(--txt)")));
@@ -191,17 +224,7 @@ function render(){
       <td>${lowpct}</td>
       <td class="hidem">${r.days!=null?r.days:"-"}일</td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
-    </tr>`;}).join("");
-  document.querySelectorAll(".fav").forEach(el=>
-    el.addEventListener("click",e=>{
-      e.stopPropagation();
-      const c=el.dataset.c;
-      FAVS.has(c)?FAVS.delete(c):FAVS.add(c);
-      saveFavs();render();
-    }));
-  document.querySelectorAll("#rows tr[data-code]").forEach(tr=>
-    tr.addEventListener("click",()=>toggleBreak(tr.dataset.code)));
-  if(EXPANDED!=null) insertExp(EXPANDED);
+    </tr>`;
 }
 function breakdown(r){
   const parts=[];
@@ -216,8 +239,8 @@ function breakdown(r){
   parts.push(`높이+${(r.ratio!=null&&r.ratio<=1.8)?1:0}(${r.ratio!=null?r.ratio.toFixed(2):"?"})`);
   return parts.join(" · ");
 }
-function insertExp(code){
-  const tr=document.querySelector(`#rows tr[data-code="${code}"]`);
+function insertExp(code, trEl){
+  const tr = trEl || document.querySelector(`#hold-rows tr[data-code="${code}"]`) || document.querySelector(`#rows tr[data-code="${code}"]`);
   if(!tr){ EXPANDED=null; return; }
   const r=DATA.rows.find(x=>x.code===code);
   if(!r){ EXPANDED=null; return; }
@@ -244,7 +267,7 @@ async function loadHist(code){
     if(el) el.innerHTML="";
   }
 }
-function toggleBreak(code){
+function toggleBreak(code, trEl){
   if(EXPANDED===code){ EXPANDED=null;
     const old=document.getElementById("exp-row");
     if(old) old.remove();
@@ -252,7 +275,7 @@ function toggleBreak(code){
   const old=document.getElementById("exp-row");
   if(old) old.remove();
   EXPANDED=code;
-  insertExp(code);
+  insertExp(code, trEl);
 }
 async function load(){
   try{
