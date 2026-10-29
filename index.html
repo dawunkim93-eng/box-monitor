@@ -170,6 +170,7 @@ function render(){
     const pcol = r.pos==null?"var(--dim)":(r.pos<25?"var(--red)":(r.pos<50?"var(--blue)":(r.pos>=85?"var(--green)":"var(--txt)")));
     const pbar = r.pos==null?"-"
       :`<span class="posbar"><i style="width:${Math.min(100,r.pos).toFixed(0)}%;background:${pcol}"></i></span>`;
+    const tilt = (r.drift==null) ? "" : `<span class="sub">${r.drift>0.10?" ↗":(r.drift < -0.10?" ↘":" →")}</span>`;
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
     const fav = FAVS.has(r.code);
     const sCell=(r.score==null?"-":
@@ -186,7 +187,7 @@ function render(){
       <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
       <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
       <td class="hidem">${fmt(r.lo)}~${fmt(r.hi)}</td>
-      <td>${pbar}</td>
+      <td>${pbar}${tilt}</td>
       <td>${lowpct}</td>
       <td class="hidem">${r.days!=null?r.days:"-"}일</td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
