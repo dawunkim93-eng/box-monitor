@@ -54,6 +54,7 @@
   tr.star td{border-top:1px solid #6b5518}
   .posbar{display:inline-block;width:60px;height:8px;background:#22262f;
           border-radius:4px;vertical-align:middle;overflow:hidden}
+  .posbar.out{border:1px solid var(--red);background:#2a1215;width:58px;height:6px}
   .posbar i{display:block;height:100%;border-radius:4px}
   .fav{cursor:pointer;font-size:15px;color:#3a3f4a;user-select:none}
   .fav.on{color:var(--amber)}
@@ -136,7 +137,7 @@
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th><th>유지</th></tr></thead><tbody><tr><td colspan="7">로딩 중…</td></tr></tbody></table>
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
   </div>
-  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부 · 형태 태그: <span class="btyp b60">60일</span>=표준 박스(Donchian) · <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 기울기(상승+1·우하향 -1/-2/-3) + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot"><span style="color:var(--red)">●</span>하단대비 +2% 이내 = 청산/손절 구역 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태 태그: <span class="btyp b60">60일</span>=보유 전용(60일 Donchian · 신규 진입 제외) · <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~60일 고가)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 🥇 안정박스: 점수 7점+</div>
 </div>
@@ -208,9 +209,16 @@ function render(){
 function rowHTML(r){
     const isbrk = r.pct_low!=null && r.pct_low<0;
     const rc = isbrk?"brk":"";   // 행 배경 = 이탈(빨강)만 — 위치 구간은 바 색 담당
-    const pcol = r.pos==null?"var(--dim)":(r.pos<25?"var(--red)":(r.pos<50?"var(--blue)":(r.pos>=85?"var(--green)":"var(--txt)")));
+    const kill = r.pct_low!=null && r.pct_low<=2;          // 청산/손절 구역
+    const bk=r.bkind||"std";
+    const blue = (bk==="wbox" && r.pos!=null && r.pos<=50)
+              || (bk==="abox" && r.pct_low!=null && r.pct_low<=5)
+              || (bk==="std" && r.pos!=null && r.pos>=25 && r.pos<50);
+    const pcol = r.pos==null?"var(--dim)":(kill?"var(--red)":(blue?"var(--blue)":(r.pos>=85?"var(--green)":"var(--txt)")));
     const pbar = r.pos==null?"-"
-      :`<span class="posbar"><i style="width:${Math.min(100,r.pos).toFixed(0)}%;background:${pcol}"></i></span>`;
+      :(r.pos<=0
+        ?`<span class="posbar out" title="박스 경계 하향 이탈"></span>`
+        :`<span class="posbar"><i style="width:${Math.min(100,Math.max(0,r.pos)).toFixed(0)}%;background:${pcol}"></i></span>`);
     const tilt = (r.drift==null) ? "" : `<span class="sub">${r.drift>0.10?" ↗":(r.drift < -0.10?" ↘":" →")}</span>`;
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
     const fav = FAVS.has(r.code);
@@ -223,7 +231,7 @@ function rowHTML(r){
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
         ${r.bkind==="wbox"?`<span class="btyp bw" title="주봉 박스 — 13주 종가 밴드 ±30% · 진입=밴드 하위 절반 · 청산=밴드 이탈">주봉</span>`
           :r.bkind==="abox"?`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`
-          :`<span class="btyp b60" title="표준 박스 — 60일 고저 외곽선 (Donchian)">60일</span>`}
+          :`<span class="btyp b60" title="보유 전용 — 60일 표준 박스 (Donchian) · 신규 진입 제외">60일</span>`}
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}</td>
       <td>${sCell}</td>
       <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
