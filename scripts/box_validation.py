@@ -144,19 +144,88 @@ def load_universe():
         trig = (persist & (posf <= 0.5) & (np.nan_to_num(amt20) >= AMT_MIN)
                 & (c >= lo60_prev)          # 이탈일(종가<전일하단)에는 진입 금지
                 & (dn >= START))
-        ti = np.where(trig)[0]
+        kind_map = {int(j): "std" for j in np.where(trig)[0]}
+        # ── W-box (주봉 종가 밴드): 13주 종가가 ±30% 밴드 · 순드리프트 ≤15%
+        #    진입: 주봉박스 하단부(밴드 하위 절반) · 소멸: 종가가 밴드 이탈
+        wk = pd.Series(c, index=df.index).resample("W-FRI").last().dropna()
+        wclose = wk.values.astype(float)
+        wend = np.array([int(d.strftime("%Y%m%d")) for d in wk.index],
+                        dtype=np.int64)
+        nw = len(wclose)
+        wflagw = np.zeros(nw, dtype=bool)
+        wlo_w = np.zeros(nw)
+        whi_w = np.zeros(nw)
+        for k in range(12, nw):
+            seg = wclose[k - 12:k + 1]
+            wlo_w[k], whi_w[k] = seg.min(), seg.max()
+            wflagw[k] = (seg.max() / max(seg.min(), 1e-9) - 1 <= 0.30
+                         and abs(seg[-1] / max(seg[0], 1e-9) - 1) <= 0.15)
+        kk = np.searchsorted(wend, dn) - 1
+        okw = kk >= 12
+        wflag = np.where(okw, wflagw[np.clip(kk, 0, nw - 1)], False)
+        wlo = np.where(okw, wlo_w[np.clip(kk, 0, nw - 1)], 0.0)
+        whi = np.where(okw, whi_w[np.clip(kk, 0, nw - 1)], 0.0)
+        wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
+                        (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
+        liq = np.nan_to_num(amt20) >= AMT_MIN
+        notbreak = np.nan_to_num(lo60_prev, nan=1e18) <= c
+        wdays = np.where(wflag & (wpos <= 0.5) & liq & notbreak
+                         & (dn >= START))[0]
+        for j in wdays:
+            kind_map.setdefault(int(j), "wbox")
+        # ── A-box (상승 저점 추세선): 피벗 저가 3개 연속 상승 + 종가 ≥ 선×0.995
+        #    진입: 추세선 근접(종가 ≤ 선×1.05) · 소멸: 종가 < 선×0.995 또는 구조 붕괴
+        pmin = pd.Series(l).rolling(11, center=True).min().values
+        PidA, PvA, PcA = [], [], []
+        for i in range(5, n - 5):
+            if l[i] == pmin[i] and l[i] < l[i - 1] and l[i] < l[i + 1]:
+                PidA.append(i)
+                PvA.append(float(l[i]))
+                PcA.append(i + 5)
+        PidA = np.array(PidA, dtype=np.int64)
+        PvA = np.array(PvA)
+        PcA = np.array(PcA, dtype=np.int64)
+        abox_ok = np.zeros(n, dtype=bool)
+        abox_rise = np.zeros(n, dtype=bool)
+        tlv = np.full(n, np.nan)
+        if len(PvA) >= 3:
+            kc = np.searchsorted(PcA, np.arange(n), side="right") - 1
+            okk = kc >= 2
+            i1 = PidA[np.clip(kc - 1, 0, None)]
+            i2 = PidA[np.clip(kc, 0, None)]
+            v1 = PvA[np.clip(kc - 1, 0, None)]
+            v2 = PvA[np.clip(kc, 0, None)]
+            v0 = PvA[np.clip(kc - 2, 0, None)]
+            rising = (v2 > v1 * 1.005) & (v1 > v0 * 0.995)
+            slope = (v2 - v1) / np.maximum(i2 - i1, 1)
+            tl_now = v2 + slope * (np.arange(n) - i2)
+            ok = okk & rising & (tl_now > 0) & (c >= tl_now * 0.995)
+            abox_ok = ok & okk
+            abox_rise = okk & rising
+            tlv = np.where(ok, tl_now, np.nan)
+        atrig = (abox_ok & (c <= np.nan_to_num(tlv, nan=0) * 1.05)
+                 & (np.nan_to_num(tlv, nan=0) > 0)
+                 & liq & (dn >= START))
+        for j in np.where(atrig)[0]:
+            kind_map.setdefault(int(j), "abox")
+        ti = np.array(sorted(kind_map), dtype=np.int64)
+        kinds_arr = [kind_map[int(j)] for j in ti]
         if not len(ti):
             continue
-        sc = np.array([priority_of(int(pdays[i]), float(posf[i]),
-                                   float(atr[i]) if not np.isnan(atr[i]) else None,
-                                   float(drift[i]) if not np.isnan(drift[i]) else 0.0,
-                                   float(ratio[i]) if not np.isnan(ratio[i]) else None)
-                       for i in ti], dtype=np.int64)
+        sc = np.array([priority_of(
+                           int(pdays[j]) if kind_map[int(j)] == "std" else 0,
+                           float(posf[j]),
+                           float(atr[j]) if not np.isnan(atr[j]) else None,
+                           float(drift[j]) if not np.isnan(drift[j]) else 0.0,
+                           float(ratio[j]) if not np.isnan(ratio[j]) else None)
+                       for j in ti], dtype=np.int64)
         U.append({"code": code, "name": name, "dn": dn, "h": h, "l": l,
                   "c": c, "atr": atr, "persist": persist, "lo60": lo60,
                   "hi60": hi60, "lo60_prev": lo60_prev, "posf": posf,
                   "drift": drift, "ratio": ratio, "amt20": amt20,
-                  "trig": ti, "sc": sc})
+                  "wflag": wflag, "wlo": wlo, "whi": whi, "wpos": wpos,
+                  "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
+                  "trig": ti, "kinds": kinds_arr, "sc": sc})
     return U
 
 
@@ -179,14 +248,15 @@ def vanish_reason(s, j):
     return "기타"
 
 
-def run(gap, rungs, exit_rule, sameday, U, all_days, ev_days, detail=False):
+def run(gap, rungs, exit_rule, sameday, use_ext, U, all_days, ev_days,
+        detail=False):
     """한 변형 실행. 상세(detail=True)면 사이트 렌더용 전체 블록 반환."""
     holdings = {}
     done, curve = [], []
     cap_daily, max_pos, max_rungs = [], 0, 0
     K_ = K
 
-    def close_position(done, holdings, curve, i, px, kind, day):
+    def close_position(done, holdings, curve, i, px, why, day):
         hst = holdings.pop(i)
         for k in range(rungs):
             if hst["held"][k]:
@@ -197,7 +267,7 @@ def run(gap, rungs, exit_rule, sameday, U, all_days, ev_days, detail=False):
                      "exit_day": int(day), "score": hst["score"],
                      "escape0": hst["escape0"], "loss0": hst["loss0"],
                      "cycles": hst["cycles"], "net": hst["net"],
-                     "days": hst["j"] - hst["j_entry"], "kind": kind})
+                     "days": hst["j"] - hst["j_entry"], "kind": why})
         curve.append((int(day), hst["net"]))
 
     for D in all_days:
@@ -211,32 +281,48 @@ def run(gap, rungs, exit_rule, sameday, U, all_days, ev_days, detail=False):
                 close_position(done, holdings, curve, i,
                                float(s["c"][hst["j"]]), "데이터갭", D)
                 continue
-            lo_prev = float(s["lo60_prev"][j])
+            knd = hst.get("kind", "std")
+            lo_prev = float(np.nan_to_num(s["lo60_prev"][j], nan=0.0))
+            wlo = float(s["wlo"][j])
+            whi = float(s["whi"][j])
             px, lw = float(s["c"][j]), float(s["l"][j])
-            # 1) 청산 규칙 (전일 박스 경계 기준)
-            if exit_rule == "close0" and px < lo_prev:
-                close_position(done, holdings, curve, i, px, "이탈즉시(종가)", D)
-                continue
-            if exit_rule == "close5" and px < lo_prev * 0.95:
-                close_position(done, holdings, curve, i, px, "이탈-5%(종가)", D)
-                continue
-            if exit_rule == "low0" and lw < lo_prev:
-                close_position(done, holdings, curve, i, lo_prev, "이탈즉시(장중)", D)
-                continue
-            if exit_rule == "low5" and lw < lo_prev * 0.95:
-                close_position(done, holdings, curve, i, lo_prev * 0.95,
-                               "이탈-5%(장중)", D)
-                continue
-            # 2) 박스 소멸
-            if not bool(s["persist"][j]):
+            # 1) 청산 규칙 (전일 박스 경계 기준) — std·wbox만 60일 경계 적용
+            if knd in ("std", "wbox"):
+                if exit_rule == "close0" and px < lo_prev:
+                    close_position(done, holdings, curve, i, px,
+                                   "이탈즉시(종가)", D)
+                    continue
+                if exit_rule == "close5" and px < lo_prev * 0.95:
+                    close_position(done, holdings, curve, i, px,
+                                   "이탈-5%(종가)", D)
+                    continue
+                if exit_rule == "low0" and lw < lo_prev:
+                    close_position(done, holdings, curve, i, lo_prev,
+                                   "이탈즉시(장중)", D)
+                    continue
+                if exit_rule == "low5" and lw < lo_prev * 0.95:
+                    close_position(done, holdings, curve, i, lo_prev * 0.95,
+                                   "이탈-5%(장중)", D)
+                    continue
+            # 2A) 박스 소멸 — std: 60일 조건 / wbox: 주봉 밴드 / abox: 추세선·구조
+            if knd == "std" and not bool(s["persist"][j]):
                 rsn = vanish_reason(s, j)
-                kind = ("상방돌파 소멸" if rsn == "상방확장" else "박스소멸")
-                close_position(done, holdings, curve, i, px, kind, D)
+                why = ("상방돌파 소멸" if rsn == "상방확장" else "박스소멸")
+                close_position(done, holdings, curve, i, px, why, D)
+                continue
+            if knd == "wbox" and (not bool(s["wflag"][j])
+                                  or px < wlo or px > whi):
+                close_position(done, holdings, curve, i, px, "주봉박스 소멸", D)
+                continue
+            if knd == "abox" and not bool(s["abox_ok"][j]):
+                why = ("추세선 붕괴" if not bool(s["abox_rise"][j])
+                       else "추세선 이탈")
+                close_position(done, holdings, curve, i, px, why, D)
                 continue
             hst["j"] = j
-            # 3) 하드스톱 백스톱 (-15%)
+            # 3) 하드스톱 백스톱 (-15%) — 전일 60일 하단 기준
             stop_px = lo_prev * 0.85
-            if lw <= stop_px:
+            if lo_prev > 0 and lw <= stop_px:
                 close_position(done, holdings, curve, i, stop_px, "손절-15%", D)
                 continue
             # 4) 그리드 진행 — 저가 채결(매수) → 고가 채결(매도)
@@ -272,20 +358,22 @@ def run(gap, rungs, exit_rule, sameday, U, all_days, ev_days, detail=False):
                     hst["held"][0] = True
             held_cnt = sum(holdings[i]["held"])
             max_rungs = max(max_rungs, held_cnt)
-        cap_daily.append(len(holdings) * UNIT + sum(
+        cap_daily.append(sum(
             sum(h["held"]) for h in holdings.values()) * UNIT)
         max_pos = max(max_pos, len(holdings))
         free = K_ - len(holdings)
         if free > 0:
-            for d, nsc, i, j in ev_days.get(int(D), []):
+            for d, nsc, i, j, knd in ev_days.get(int(D), []):
                 if free <= 0:
                     break
                 if i in holdings:
                     continue
+                if (not use_ext) and knd != "std":
+                    continue
                 s = U[i]
                 holdings[i] = {"j": j, "j_entry": j, "entry_day": int(D),
                                "entry": float(s["c"][j]), "score": -nsc,
-                               "gap": gap,
+                               "gap": gap, "kind": knd,
                                "levels": [float(s["c"][j]) * (1 - gap) ** k
                                           for k in range(rungs)],
                                "held": [False] * rungs,
@@ -403,10 +491,13 @@ def main():
                     default="close0")
     ap.add_argument("--gap", type=float, default=GAP)
     ap.add_argument("--rungs", type=int, default=0)
+    ap.add_argument("--no-ext", action="store_true",
+                    help="현행 60일 박스만 사용 (W-box·A-box 병합 풀 제외)")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
     args = ap.parse_args()
+    use_ext = not args.no_ext
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))
 
     t0 = tmod.time()
@@ -415,8 +506,8 @@ def main():
     all_days = np.sort(np.unique(np.concatenate([s["dn"] for s in U])))
     ev = []
     for i, s in enumerate(U):
-        for j, sc in zip(s["trig"], s["sc"]):
-            ev.append((int(s["dn"][j]), -int(sc), i, int(j)))
+        for j, knd, sc in zip(s["trig"], s["kinds"], s["sc"]):
+            ev.append((int(s["dn"][j]), -int(sc), i, int(j), knd))
     ev.sort()
     ev_days = defaultdict(list)
     for e in ev:
@@ -427,7 +518,7 @@ def main():
         for gp in SWEEP_GAPS:
             rg = max(4, round(COVER / gp))
             for mode in ("close", "none", "all"):
-                r = run(gp, rg, args.exit, mode, U, all_days, ev_days)
+                r = run(gp, rg, args.exit, mode, use_ext, U, all_days, ev_days)
                 sm = r["summary"]
                 rows.append({"gap_pct": gp * 100, "sameday": mode,
                              "rungs": rg, **sm,
@@ -449,13 +540,13 @@ def main():
         print(f"[INFO] 스윕 완료 → {SWEEP.name}")
         return
 
-    r = run(args.gap, rungs, args.exit, args.sameday, U, all_days, ev_days,
-            detail=True)
+    r = run(args.gap, rungs, args.exit, args.sameday, use_ext, U, all_days,
+            ev_days, detail=True)
     sens = {}
     for m in ("all", "close", "none"):
         if m == args.sameday:
             continue
-        r2 = run(args.gap, rungs, args.exit, m, U, all_days, ev_days)
+        r2 = run(args.gap, rungs, args.exit, m, use_ext, U, all_days, ev_days)
         sens[m] = {"net_total": r2["summary"]["net_total"],
                    "mdd_won": r2["summary"]["mdd_won"],
                    "escape_rate": r2["summary"]["escape_rate"],
@@ -463,9 +554,13 @@ def main():
     s = r["summary"]
     out = {
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "params": {"slots": K, "buy_zone": "위치≤50%",
+        "params": {"slots": K,
+                   "buy_zone": "위치≤50% (W: 주봉밴드 하위 절반 · A: 추세선 근접)"
+                               if use_ext else "위치≤50%",
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
+                   "pool": ("현행60일+W-box(주봉밴드)+A-box(상승저점)" if use_ext
+                            else "현행60일"),
                    "start": str(s["start_year"]),
                    "end": str(s["end_year"])},
         "assumptions": {
@@ -473,6 +568,11 @@ def main():
             "exit": args.exit, "exit_ko": EXIT_KO[args.exit],
             "gap_pct": args.gap * 100, "rungs": rungs,
             "unit": UNIT, "fee_roundtrip": FEE,
+            "ext_pool": use_ext,
+            "ext_ko": ("병합 풀: 현행(60일 Donchian) + W-box(13주 종가 밴드 ±30%·드리프트≤15%·"
+                       "밴드 하위 절반 진입·밴드 이탈 청산) + A-box(피벗 저가 3개 연속 상승·"
+                       "추세선 근접 진입·선 이탈/붕괴 청산)" if use_ext
+                       else "현행 60일 박스만"),
             "entry": "신호일 종가 (이탈일 진입 금지)",
             "stop": "전일 박스 하단 -15% 백스톱",
             "escape_def": "탈출율 = 첫 차수(진입)가 +갭 가격에 매도된 비율"},
