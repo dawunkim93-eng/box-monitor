@@ -248,9 +248,10 @@ def vanish_reason(s, j):
     return "기타"
 
 
-def run(gap, rungs, exit_rule, sameday, use_ext, U, all_days, ev_days,
+def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
         detail=False):
-    """한 변형 실행. 상세(detail=True)면 사이트 렌더용 전체 블록 반환."""
+    """한 변형 실행. near=하단 경계 N% 위 접근 시 조기 청산(%) · with_std=60일 표준 풀 포함.
+    상세(detail=True)면 사이트 렌더용 전체 블록 반환."""
     holdings = {}
     done, curve = [], []
     cap_daily, max_pos, max_rungs = [], 0, 0
@@ -285,39 +286,30 @@ def run(gap, rungs, exit_rule, sameday, use_ext, U, all_days, ev_days,
             lo_prev = float(np.nan_to_num(s["lo60_prev"][j], nan=0.0))
             wlo = float(s["wlo"][j])
             whi = float(s["whi"][j])
+            tlv = (float(s["tlv"][j]) if not np.isnan(s["tlv"][j]) else 0.0)
             px, lw = float(s["c"][j]), float(s["l"][j])
-            # 1) 청산 규칙 (전일 박스 경계 기준) — std·wbox만 60일 경계 적용
-            if knd in ("std", "wbox"):
-                if exit_rule == "close0" and px < lo_prev:
-                    close_position(done, holdings, curve, i, px,
-                                   "이탈즉시(종가)", D)
-                    continue
-                if exit_rule == "close5" and px < lo_prev * 0.95:
-                    close_position(done, holdings, curve, i, px,
-                                   "이탈-5%(종가)", D)
-                    continue
-                if exit_rule == "low0" and lw < lo_prev:
-                    close_position(done, holdings, curve, i, lo_prev,
-                                   "이탈즉시(장중)", D)
-                    continue
-                if exit_rule == "low5" and lw < lo_prev * 0.95:
-                    close_position(done, holdings, curve, i, lo_prev * 0.95,
-                                   "이탈-5%(장중)", D)
-                    continue
-            # 2A) 박스 소멸 — std: 60일 조건 / wbox: 주봉 밴드 / abox: 추세선·구조
+            # 1) 하단 near% 위 근접 청산 — std=전일 60일 하단 · wbox=밴드 하단 · abox=추세선
+            if knd == "std":
+                B_ = lo_prev if lo_prev > 0 else None
+            elif knd == "wbox":
+                B_ = wlo if wlo > 0 else None
+            else:
+                B_ = tlv if tlv > 0 else None
+            if B_ is not None and px < B_ * (1 + near / 100):
+                close_position(done, holdings, curve, i, px, "하단근접 청산", D)
+                continue
+            # 2) 소멸 — std: 60일 조건 / wbox: 밴드 유지·상방 / abox: 구조 붕괴
             if knd == "std" and not bool(s["persist"][j]):
                 rsn = vanish_reason(s, j)
                 why = ("상방돌파 소멸" if rsn == "상방확장" else "박스소멸")
                 close_position(done, holdings, curve, i, px, why, D)
                 continue
-            if knd == "wbox" and (not bool(s["wflag"][j])
-                                  or px < wlo or px > whi):
+            if knd == "wbox" and ((not bool(s["wflag"][j]))
+                                  or (whi > 0 and px > whi)):
                 close_position(done, holdings, curve, i, px, "주봉박스 소멸", D)
                 continue
-            if knd == "abox" and not bool(s["abox_ok"][j]):
-                why = ("추세선 붕괴" if not bool(s["abox_rise"][j])
-                       else "추세선 이탈")
-                close_position(done, holdings, curve, i, px, why, D)
+            if knd == "abox" and not bool(s["abox_rise"][j]):
+                close_position(done, holdings, curve, i, px, "추세선 붕괴", D)
                 continue
             hst["j"] = j
             # 3) 하드스톱 백스톱 (-15%) — 전일 60일 하단 기준
@@ -368,8 +360,8 @@ def run(gap, rungs, exit_rule, sameday, use_ext, U, all_days, ev_days,
                     break
                 if i in holdings:
                     continue
-                if (not use_ext) and knd != "std":
-                    continue
+                if knd == "std" and not with_std:
+                    continue          # 기본: W/A만 (60일 표준은 비교용)
                 s = U[i]
                 holdings[i] = {"j": j, "j_entry": j, "entry_day": int(D),
                                "entry": float(s["c"][j]), "score": -nsc,
@@ -485,19 +477,19 @@ def run(gap, rungs, exit_rule, sameday, use_ext, U, all_days, ev_days,
 
 
 def main():
-    ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션")
+    ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all"], default="close")
-    ap.add_argument("--exit", choices=["close0", "close5", "low0", "low5", "box"],
-                    default="close0")
     ap.add_argument("--gap", type=float, default=GAP)
     ap.add_argument("--rungs", type=int, default=0)
-    ap.add_argument("--no-ext", action="store_true",
-                    help="현행 60일 박스만 사용 (W-box·A-box 병합 풀 제외)")
+    ap.add_argument("--near", type=float, default=2.0,
+                    help="하단 경계 N%% 위 접근 시 조기 청산 (%%) · 0=이탈 완료 시만")
+    ap.add_argument("--with-std", action="store_true",
+                    help="60일 표준 풀도 포함 (비교용 — 기본은 W/A만)")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
     args = ap.parse_args()
-    use_ext = not args.no_ext
+    with_std = args.with_std
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))
 
     t0 = tmod.time()
@@ -518,7 +510,8 @@ def main():
         for gp in SWEEP_GAPS:
             rg = max(4, round(COVER / gp))
             for mode in ("close", "none", "all"):
-                r = run(gp, rg, args.exit, mode, use_ext, U, all_days, ev_days)
+                r = run(gp, rg, args.near, mode, with_std,
+                        U, all_days, ev_days)
                 sm = r["summary"]
                 rows.append({"gap_pct": gp * 100, "sameday": mode,
                              "rungs": rg, **sm,
@@ -540,13 +533,13 @@ def main():
         print(f"[INFO] 스윕 완료 → {SWEEP.name}")
         return
 
-    r = run(args.gap, rungs, args.exit, args.sameday, use_ext, U, all_days,
+    r = run(args.gap, rungs, args.near, args.sameday, with_std, U, all_days,
             ev_days, detail=True)
     sens = {}
     for m in ("all", "close", "none"):
         if m == args.sameday:
             continue
-        r2 = run(args.gap, rungs, args.exit, m, use_ext, U, all_days, ev_days)
+        r2 = run(args.gap, rungs, args.near, m, with_std, U, all_days, ev_days)
         sens[m] = {"net_total": r2["summary"]["net_total"],
                    "mdd_won": r2["summary"]["mdd_won"],
                    "escape_rate": r2["summary"]["escape_rate"],
@@ -555,24 +548,28 @@ def main():
     out = {
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "params": {"slots": K,
-                   "buy_zone": "위치≤50% (W: 주봉밴드 하위 절반 · A: 추세선 근접)"
-                               if use_ext else "위치≤50%",
+                   "buy_zone": ("주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5% · "
+                                "60일: 위치≤50%(보유 전용)") if with_std
+                              else "주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5%",
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
-                   "pool": ("현행60일+W-box(주봉밴드)+A-box(상승저점)" if use_ext
-                            else "현행60일"),
+                   "pool": ("주봉박스+상승저점+60일(보유 전용)" if with_std
+                            else "주봉박스+상승저점 (60일 제외)"),
                    "start": str(s["start_year"]),
                    "end": str(s["end_year"])},
         "assumptions": {
             "sameday": args.sameday, "sameday_ko": SAMEDAY_KO[args.sameday],
-            "exit": args.exit, "exit_ko": EXIT_KO[args.exit],
+            "near": args.near,
+            "near_ko": (f"청산 = 전일 종가가 각 타입 경계(60일하단/밴드하단/추세선)의 "
+                        f"{args.near:g}% 위에 접근하면 조기 청산" if args.near > 0
+                        else "청산 = 전일 종가가 경계 하향 이탈(버퍼 없음)"),
             "gap_pct": args.gap * 100, "rungs": rungs,
             "unit": UNIT, "fee_roundtrip": FEE,
-            "ext_pool": use_ext,
-            "ext_ko": ("병합 풀: 현행(60일 Donchian) + W-box(13주 종가 밴드 ±30%·드리프트≤15%·"
-                       "밴드 하위 절반 진입·밴드 이탈 청산) + A-box(피벗 저가 3개 연속 상승·"
-                       "추세선 근접 진입·선 이탈/붕괴 청산)" if use_ext
-                       else "현행 60일 박스만"),
+            "with_std": with_std,
+            "pool_ko": ("W/A 풀 + 60일 표준(비교)" if with_std
+                        else "60일 표준 박스 제외 — 주봉박스(13주 종가 밴드 ±30%·드리프트≤15%·"
+                             "밴드 하위 절반 진입·밴드 이탈 소멸) + 상승저점(피벗 저가 3개 "
+                             "연속 상승·추세선 근접 진입·선 이탈/붕괴 소멸)"),
             "entry": "신호일 종가 (이탈일 진입 금지)",
             "stop": "전일 박스 하단 -15% 백스톱",
             "escape_def": "탈출율 = 첫 차수(진입)가 +갭 가격에 매도된 비율"},
