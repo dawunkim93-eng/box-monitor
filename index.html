@@ -57,6 +57,11 @@
   .posbar i{display:block;height:100%;border-radius:4px}
   .fav{cursor:pointer;font-size:15px;color:#3a3f4a;user-select:none}
   .fav.on{color:var(--amber)}
+  .btyp{display:inline-block;margin-left:4px;padding:0 4px;border-radius:4px;
+        font-size:10px;vertical-align:middle;line-height:1.55;cursor:default}
+  .b60{color:var(--dim);border:1px solid var(--line)}
+  .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
+  .ba{color:var(--green);border:1px solid rgba(34,197,94,.45)}
   .tag{color:var(--green);font-weight:700}
   .up{color:var(--green)} .dn{color:var(--red)}
   .stamp{color:var(--dim);font-size:11.5px;margin-top:10px;text-align:center}
@@ -131,7 +136,7 @@
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th><th>유지</th></tr></thead><tbody><tr><td colspan="7">로딩 중…</td></tr></tbody></table>
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
   </div>
-  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부 · 🗓=주봉박스(13주 종가 밴드) · ↗=상승저점(피벗 저가 연속 상승·추세선 위)<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 기울기(상승+1·우하향 -1/-2/-3) + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부 · 형태 태그: <span class="btyp b60">60일</span>=표준 박스(Donchian) · <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 기울기(상승+1·우하향 -1/-2/-3) + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 🥇 안정박스: 점수 7점+</div>
 </div>
@@ -216,8 +221,9 @@ function rowHTML(r){
     return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}">
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
-        ${r.bkind==="wbox"?`<span class="sub" style="cursor:default" title="주봉 박스 — 13주 종가 밴드 안">🗓</span>`:""}
-        ${r.bkind==="abox"?`<span class="sub" style="cursor:default" title="상승 저점 박스 — 피벗 저가 연속 상승 · 추세선 위">↗</span>`:""}
+        ${r.bkind==="wbox"?`<span class="btyp bw" title="주봉 박스 — 13주 종가 밴드 ±30% · 진입=밴드 하위 절반 · 청산=밴드 이탈">주봉</span>`
+          :r.bkind==="abox"?`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`
+          :`<span class="btyp b60" title="표준 박스 — 60일 고저 외곽선 (Donchian)">60일</span>`}
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}</td>
       <td>${sCell}</td>
       <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
@@ -226,7 +232,7 @@ function rowHTML(r){
       <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
       <td class="hidem">${fmt(r.lo)}~${fmt(r.hi)}</td>
       <td>${pbar}${tilt}</td>
-      <td>${lowpct}</td>
+      <td><span title="${r.bname||"60일하단"} 기준">${lowpct}</span>${(r.bname&&r.bname!=="60일하단")?`<span class="sub" style="font-size:10px">·${r.bname}</span>`:""}</td>
       <td class="hidem">${r.days!=null?r.days:"-"}일</td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
     </tr>`;
@@ -251,7 +257,10 @@ function insertExp(code, trEl){
   if(!r){ EXPANDED=null; return; }
   const exp=document.createElement("tr");
   exp.id="exp-row"; exp.className="exp";
-  exp.innerHTML=`<td colspan="11">📊 ${r.score}점 = ${breakdown(r)}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></td>`;
+  const bkName=(b)=>(b==="wbox"?"주봉박스 — 13주 종가 밴드 ±30% · 진입=밴드 하위 절반 · 청산=밴드 이탈"
+              :b==="abox"?"상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접(≤5%) · 청산=선 이탈/붕괴"
+              :"표준 박스 — 60일 고저 외곽선 · 진입=매수존·이탈일 제외 · 청산=60일 하단 이탈/박스 소멸");
+  exp.innerHTML=`<td colspan="11">형태: ${bkName(r.bkind)}<br>📊 ${r.score}점 = ${breakdown(r)}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></td>`;
   tr.insertAdjacentElement("afterend", exp);
   loadHist(code);
 }
