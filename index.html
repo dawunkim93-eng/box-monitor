@@ -57,6 +57,7 @@
   .posbar i{display:block;height:100%;border-radius:4px}
   .fav{cursor:pointer;font-size:15px;color:#3a3f4a;user-select:none}
   .fav.on{color:var(--amber)}
+  .mm{color:var(--dim);font-size:11px;cursor:default}
   .tag{color:var(--green);font-weight:700}
   .up{color:var(--green)} .dn{color:var(--red)}
   .stamp{color:var(--dim);font-size:11.5px;margin-top:10px;text-align:center}
@@ -129,9 +130,9 @@
       <select id="snap-date" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px"></select>
     </div>
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th><th>유지</th></tr></thead><tbody><tr><td colspan="7">로딩 중…</td></tr></tbody></table>
-    <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
+    <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±7%·5차 러그매도 되팔기) · 시간중단 15영업일 · 200일선 상회 진입 · 실전 타이밍(신호일 종가 알림 → 다음 영업일 시가 체결) · 순위 추적은 2026-10-24부터 축적</div>
   </div>
-  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부<br>우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 기울기(상승+1·우하향 -1/-2/-3) + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 10년 과거 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot"><span style="color:var(--red)">■</span>&lt;25% 진입주의 · <span style="color:var(--blue)">■</span>25~50% 매수존 · ■ 중립 50~85% · <span style="color:var(--green)">■</span>85%+ 상단부 · 📉=200일선 아래(진입 후보 제외) · ⏰=보유 영업일(시간중단 15영업일→청산)<br>청산 규칙(12년 검증 확정): 종가확정 이탈·시간중단 15영업일·박스 소멸·-15% 백스톱 — 모두 다음 영업일 시가 체결 · 우선순위 = 박스나이(≥31일+3·≥61일+4) + 위치(35~50%+2·25~35%+1·하단 근접은 0) + ATR(≥5%+2·≥4%+1) + 기울기(상승+1·우하향 -1/-2/-3) + 높이≤1.8+1 — 탈출율은 동일 점수 그룹의 13년 확정 구성 실측 · <b>위치 항목은 실시간 현재가 기준</b>이며 아침 알림과 순위가 다를 수 있음 (아침 점수 = 전일 종가 기준) · 점수는 참고용(진입 필터 아님)<br>60초마다 자동 새로고침 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 🥇 안정박스: 점수 7점+</div>
 </div>
@@ -216,7 +217,9 @@ function rowHTML(r){
     return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}">
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
-        ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}</td>
+        ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}
+        ${r.ma200===false?`<span class="mm" title="200일선 아래 — 진입 후보 제외">📉</span>`:""}
+        ${r.hdays!=null?`<span class="${r.hdays>=15?"deep":"warn"}" title="보유 영업일수 — 시간중단 15영업일(15일) 도달 시 청산">⏰${Math.max(0,15-r.hdays)}D</span>`:""}</td>
       <td>${sCell}</td>
       <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
       <td>${fmt(r.price)}${r.no_trade?`<span class="deep" title="장중 시세 조회 실패 — 정지·미거재 의심"> ⛔</span>`:""}</td>
@@ -332,8 +335,9 @@ async function initValid(){
 }
 function renderValid(V){
   const S=V.summary;
-  document.getElementById("v-info").textContent=
-    `매수존(위치≤50%) 상위 ${V.params.slots}개 순위대로 진입 · ${V.params.start}~${V.params.end} · 갱신 ${V.updated_at}`;
+  document.getElementById("v-info").innerHTML=
+    `매수존(위치≤50%) 상위 ${V.params.slots}개 순위대로 진입 · ${V.params.start}~${V.params.end} · 갱신 ${V.updated_at}`
+    +(V.assumptions?`<br><span class="sub">가정: ${V.assumptions.sameday_ko||""}${V.assumptions.sameday?` (${V.assumptions.sameday})`:""} · 청산=${V.assumptions.exit_ko||""} · ${V.assumptions.ts_ko||""} · ${V.assumptions.ma200_ko||""} · 진입=${V.assumptions.entry||""}</span>`:"");
   document.getElementById("v-chips").innerHTML=
     `<div class="chip">1차 탈출율 <b>${S.escape_rate}%</b></div>
      <div class="chip">1차 손실률 ${S.loss0_rate}%</div>
@@ -342,8 +346,11 @@ function renderValid(V){
      <div class="chip">포지션 ${S.positions}건</div>
      <div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b></div>
      <div class="chip">사이클/건 ${S.cycles_avg}</div>
-     <div class="chip">최대낙폭 ${fmt(S.mdd_won)}원</div>
-     <div class="chip">적자연도 ${S.loss_years}/${S.n_years}</div>`;
+      <div class="chip">최대낙폭 ${fmt(S.mdd_won)}원</div>
+      <div class="chip">적자연도 ${S.loss_years}/${S.n_years}</div>
+      ${(V.capital||null)?`<div class="chip">평균투입 <b>${fmt(V.capital.avg)}원</b></div>
+      <div class="chip">투입수익 <b class="${V.capital.ret_capital_pct>=0?"up":"dn"}">${V.capital.ret_capital_pct>=0?"+":""}${V.capital.ret_capital_pct}%/년</b></div>
+      <div class="chip">예약자본 ${fmt(V.capital.reserve)}원 → <b class="${V.capital.ret_reserve_pct>=0?"up":"dn"}">${V.capital.ret_reserve_pct>=0?"+":""}${V.capital.ret_reserve_pct}%/년</b></div>`:""}`;
   document.getElementById("v-year-tbl").tBodies[0].innerHTML=V.yearly.map(y=>
     `<tr><td class="nm">${y.year}</td><td><span class="${y.net>=0?"up":"dn"}">${y.net>=0?"+":""}${fmt(y.net)}</span></td><td>${y.positions}건</td><td>${y.esc_rate!=null?y.esc_rate+"%":"-"}</td></tr>`).join("");
   document.getElementById("v-exit").textContent=
