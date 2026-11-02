@@ -160,8 +160,15 @@ def load_universe():
             wlo_w[k], whi_w[k] = seg.min(), seg.max()
             wflagw[k] = (seg.max() / max(seg.min(), 1e-9) - 1 <= 0.30
                          and abs(seg[-1] / max(seg[0], 1e-9) - 1) <= 0.15)
+        # 주봉 기간 — 밴드 조건 연속 유지 주 수
+        wrun = np.zeros(nw, dtype=np.int64)
+        run_w = 0
+        for k in range(nw):
+            run_w = run_w + 1 if wflagw[k] else 0
+            wrun[k] = run_w
         kk = np.searchsorted(wend, dn) - 1
         okw = kk >= 12
+        wdur = np.where(okw, wrun[np.clip(kk, 0, nw - 1)], 0).astype(np.int64)
         wflag = np.where(okw, wflagw[np.clip(kk, 0, nw - 1)], False)
         wlo = np.where(okw, wlo_w[np.clip(kk, 0, nw - 1)], 0.0)
         whi = np.where(okw, whi_w[np.clip(kk, 0, nw - 1)], 0.0)
@@ -185,6 +192,17 @@ def load_universe():
         PidA = np.array(PidA, dtype=np.int64)
         PvA = np.array(PvA)
         PcA = np.array(PcA, dtype=np.int64)
+        # 상승 기간 — 연속 상승 저점 사슬(정의 B) 경과일
+        adur = np.zeros(n, dtype=np.int64)
+        if len(PvA) >= 1:
+            cstart = np.zeros(len(PvA), dtype=np.int64)
+            for k in range(1, len(PvA)):
+                cstart[k] = (cstart[k - 1]
+                             if PvA[k] > PvA[k - 1] * 1.005 else k)
+            kc_all = np.searchsorted(PcA, np.arange(n), side="right") - 1
+            okc = kc_all >= 0
+            st_idx = PidA[cstart[np.clip(kc_all, 0, len(PvA) - 1)]]
+            adur = np.where(okc, np.arange(n) - st_idx, 0).astype(np.int64)
         abox_ok = np.zeros(n, dtype=bool)
         abox_rise = np.zeros(n, dtype=bool)
         tlv = np.full(n, np.nan)
@@ -224,6 +242,7 @@ def load_universe():
                   "hi60": hi60, "lo60_prev": lo60_prev, "posf": posf,
                   "drift": drift, "ratio": ratio, "amt20": amt20,
                   "wflag": wflag, "wlo": wlo, "whi": whi, "wpos": wpos,
+                  "wdur": wdur, "adur": adur,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
                   "trig": ti, "kinds": kinds_arr, "sc": sc})
     return U
@@ -268,7 +287,9 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                      "exit_day": int(day), "score": hst["score"],
                      "escape0": hst["escape0"], "loss0": hst["loss0"],
                      "cycles": hst["cycles"], "net": hst["net"],
-                     "days": hst["j"] - hst["j_entry"], "kind": why})
+                     "days": hst["j"] - hst["j_entry"], "kind": why,
+                     "ekind": hst.get("kind", "std"),
+                     "dur": hst.get("dur", 0)})
         curve.append((int(day), hst["net"]))
 
     for D in all_days:
@@ -366,6 +387,9 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                 holdings[i] = {"j": j, "j_entry": j, "entry_day": int(D),
                                "entry": float(s["c"][j]), "score": -nsc,
                                "gap": gap, "kind": knd,
+                               "dur": (int(s["wdur"][j]) if knd == "wbox"
+                                       else int(s["adur"][j]) if knd == "abox"
+                                       else 0),
                                "levels": [float(s["c"][j]) * (1 - gap) ** k
                                           for k in range(rungs)],
                                "held": [False] * rungs,
@@ -437,6 +461,34 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
              "esc_rate": round(sum(1 for p in v if p["escape0"]) / len(v) * 100, 1) if v else None,
              "avg_net": round(sum(p["net"] for p in v) / len(v)) if v else None}
         for kk, v in bk.items()}
+
+    def dstat(ps):
+        return {"n": len(ps),
+                "esc_rate": round(sum(1 for p in ps if p["escape0"]) / len(ps) * 100, 1) if ps else None,
+                "avg_net": round(sum(p["net"] for p in ps) / len(ps)) if ps else None,
+                "loss0_rate": round(sum(1 for p in ps if p["loss0"]) / len(ps) * 100, 1) if ps else None}
+
+    dur_escape = {}
+    for kd, edges, labels in (
+            ("wbox", [-1, 4, 8, 16, 26, 10 ** 9],
+             ["≤4주", "5~8주", "9~16주", "17~26주", "27주+"]),
+            ("abox", [-1, 10, 30, 60, 120, 10 ** 9],
+             ["≤10일", "11~30일", "31~60일", "61~120일", "121일+"])):
+        ps = [p for p in done if p.get("ekind") == kd]
+        dur_escape[kd] = {
+            labels[b]: dstat([p for p in ps if edges[b] < p["dur"] <= edges[b + 1]])
+            for b in range(len(labels))}
+
+    dur_score_x = {}
+    for kd in ("wbox", "abox"):
+        ps = [p for p in done if 5 <= p["score"] <= 6 and p.get("ekind") == kd]
+        if not ps:
+            continue
+        ds = sorted(p["dur"] for p in ps)
+        med = ds[len(ds) // 2]
+        dur_score_x[kd] = {"median": med,
+                           "short": dstat([p for p in ps if p["dur"] <= med]),
+                           "long": dstat([p for p in ps if p["dur"] > med])}
     code_map = {i: s["code"] for i, s in enumerate(U)}
     sh = defaultdict(lambda: {"ep": 0, "esc": 0, "days": 0, "net": 0.0})
     for p in done:
@@ -461,6 +513,8 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                    for y, v in sorted(yy.items())],
         "exit_kinds": dict(kinds),
         "score_escape": score_escape,
+        "dur_escape": dur_escape,
+        "dur_score_x": dur_score_x,
         "capital": {"avg": round(av_cap), "peak": round(pk_cap),
                     "p95": round(p95_cap),
                     "ret_capital_pct": round(summary["net_total"]
@@ -575,6 +629,7 @@ def main():
             "escape_def": "탈출율 = 첫 차수(진입)가 +갭 가격에 매도된 비율"},
         "sensitivity": {m: {"sameday_ko": SAMEDAY_KO[m], **v} for m, v in sens.items()},
         **{kk: r[kk] for kk in ("summary", "yearly", "exit_kinds", "score_escape",
+                                "dur_escape", "dur_score_x",
                                 "capital", "recent_positions", "stock_history")},
     }
     print(f"[INFO] 포지션 {s['positions']:,} ({s['start_year']}~{s['end_year']}"
@@ -583,6 +638,16 @@ def main():
           f"({s['mdd_vs_capital_pct']}%) · 적자연도 {s['loss_years']}/{s['n_years']} · "
           f"평균자본 {r['capital']['avg']:,}원 · 자본수익률 {r['capital']['ret_capital_pct']:+.1f}%/년",
           flush=True)
+    print("[기간 버킷]", flush=True)
+    for kd, blk in r.get("dur_escape", {}).items():
+        print(f"  [{kd}]", flush=True)
+        for lab, st in blk.items():
+            print(f"    {lab:<8} n={st['n']:>5} · 탈출 {st['esc_rate']}% · "
+                  f"건당 {st['avg_net']}원 · 손실0 {st['loss0_rate']}%", flush=True)
+    print("[5~6점 구간 내 기간 효과]", flush=True)
+    for kd, st in r.get("dur_score_x", {}).items():
+        print(f"  [{kd}] 중앙 {st['median']} · 짧음 {st['short']} · 김 {st['long']}",
+              flush=True)
     dest_out = Path(args.out) if args.out else OUT
     dest_out.parent.mkdir(parents=True, exist_ok=True)
     dest_out.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
