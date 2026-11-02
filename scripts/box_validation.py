@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """박스권 Top-20(매수존) 순위 진입 시뮬레이션 — 검증 탭 데이터 (box-monitor 전용)
 ============================================================================
-매일: LIVE 박스(60일 높이 1.25~2.2 · 추세≤20% · ATR≥3% · 20일 연속 · 거래대금
-10억+) 중 **매수존(위치≤50%)**만 후보 → priority_score 랭킹 → **상위 20 슬롯** 진입.
+매일: LIVE 박스(주봉 13주 종가 밴드 ±30% / 상승저점 피벗 3연속 상승 · 거래대금
+10억+) 중 **매수존(밴드 하위 절반 · 추세선 근접 ≤5%)**만 후보 → priority_score 랭킹 → **상위 20 슬롯** 진입.
 포지션: 그리드 사다리 (진입 종가 앵커·갭 고정·러그매도 되팔기·재그리드 허용
 · 박스 소멸·데이터갭 시 청산) — 슬롯 해제 후 다음 날 최고 순위 진입.
 
@@ -52,40 +52,16 @@ GAP = 0.025            # 기본 갭 (결정 전까지 유지)
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.375          # 사다리 커버 깊이 → rungs = max(4, round(COVER/gap)) ≈ 하단 28~30%
+MAX_TRIPS = 5          # 당일 다중 왕복 상한 (sameday=multi — 같은 차수 재왕복 최대 횟수)
+COMP_DUMP = None       # --dump 지정 시 포지션별 진입 지표 기록 (점수 재설계 분석용)
 SWEEP_GAPS = [0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
 
 SAMEDAY_KO = {"all": "낙관(저가→고가 가정)", "close": "현실(종가≥목표가 때만)",
-              "none": "보수(당일 신규차수 매도 금지)"}
+              "none": "보수(당일 신규차수 매도 금지)",
+              "multi": "분봉 다중 왕복(당일 범위 기반 재왕복)"}
 EXIT_KO = {"close0": "종가 확정 즉시 청산", "close5": "종가 -5% 버퍼",
            "low0": "장중 하단 터치 청산", "low5": "장중 -5% 청산",
            "box": "박스 소멸 시만 (구 규칙)"}
-
-
-def priority_of(age, pos, atr, drift, ratio):
-    """box_alert.priority_score 위임 (없으면 자체 구현 — 스펙 동기 2026-10-23)."""
-    try:
-        from box_alert import priority_score
-        return priority_score(age, pos, atr, drift, ratio)
-    except Exception:
-        s = 0
-        if age is not None:
-            s += 4 if age >= 61 else (3 if age >= 31 else 0)
-        if pos is not None:
-            s += 2 if 0.35 < pos <= 0.5 else (1 if 0.25 < pos <= 0.35 else 0)
-        if atr is not None:
-            s += 2 if atr >= 0.05 else (1 if atr >= 0.04 else 0)
-        if drift is not None:
-            if drift > 0:
-                s += 1
-            elif drift >= -0.05:
-                s -= 1
-            elif drift >= -0.10:
-                s -= 2
-            else:
-                s -= 3
-        if ratio is not None and ratio <= 1.8:
-            s += 1
-        return s
 
 
 def load_universe():
@@ -114,37 +90,13 @@ def load_universe():
         v = df["Volume"].values.astype(float)
         dn = np.array([int(d.strftime("%Y%m%d")) for d in df.index],
                       dtype=np.int64)
-        hi60 = pd.Series(h).rolling(60).max().values
-        lo60 = pd.Series(l).rolling(60).min().values
-        drift_raw = np.full(n, np.nan)
-        drift_raw[60:] = c[60:] / c[:-60] - 1
-        drift = pd.Series(drift_raw).rolling(5).mean().values   # 5일 스무딩 (box_alert 동기)
+        kind_map = {}
         tr = np.maximum(h - l, np.maximum(np.abs(h - np.roll(c, 1)),
                                           np.abs(l - np.roll(c, 1))))
         tr[0] = h[0] - l[0]
         atr = (pd.Series(tr).ewm(alpha=1 / 14, min_periods=14).mean().values
                / np.maximum(c, 1))
         amt20 = pd.Series(c * v).rolling(20).mean().values
-        ratio = hi60 / np.maximum(lo60, 1e-9)
-        box = ((ratio >= 1.25) & (ratio <= 2.2)
-               & (np.abs(np.nan_to_num(drift)) <= 0.20)
-               & (np.nan_to_num(atr) >= 0.030))
-        persist = box & (pd.Series(box.astype(float))
-                         .rolling(20).min().values == 1.0)
-        pdays = np.zeros(n, dtype=np.int64)
-        run = 0
-        for i in range(n):
-            run = run + 1 if persist[i] else 0
-            pdays[i] = run
-        posf = np.where(hi60 > lo60, (c - lo60)
-                        / np.maximum(hi60 - lo60, 1e-9), 1.0)
-        # 전일 하단 (이탈 판정·진입 금지 체크용)
-        lo60_prev = np.full(n, np.nan)
-        lo60_prev[1:] = lo60[:-1]
-        trig = (persist & (posf <= 0.5) & (np.nan_to_num(amt20) >= AMT_MIN)
-                & (c >= lo60_prev)          # 이탈일(종가<전일하단)에는 진입 금지
-                & (dn >= START))
-        kind_map = {int(j): "std" for j in np.where(trig)[0]}
         # ── W-box (주봉 종가 밴드): 13주 종가가 ±30% 밴드 · 순드리프트 ≤15%
         #    진입: 주봉박스 하단부(밴드 하위 절반) · 소멸: 종가가 밴드 이탈
         wk = pd.Series(c, index=df.index).resample("W-FRI").last().dropna()
@@ -155,11 +107,14 @@ def load_universe():
         wflagw = np.zeros(nw, dtype=bool)
         wlo_w = np.zeros(nw)
         whi_w = np.zeros(nw)
+        wdriftw = np.zeros(nw)      # 13주 순드리프트
+        wwidthw = np.zeros(nw)      # 밴드 폭 (최고/최저 - 1)
         for k in range(12, nw):
             seg = wclose[k - 12:k + 1]
             wlo_w[k], whi_w[k] = seg.min(), seg.max()
-            wflagw[k] = (seg.max() / max(seg.min(), 1e-9) - 1 <= 0.30
-                         and abs(seg[-1] / max(seg[0], 1e-9) - 1) <= 0.15)
+            wdriftw[k] = seg[-1] / max(seg[0], 1e-9) - 1
+            wwidthw[k] = seg.max() / max(seg.min(), 1e-9) - 1
+            wflagw[k] = (wwidthw[k] <= 0.30 and abs(wdriftw[k]) <= 0.15)
         # 주봉 기간 — 밴드 조건 연속 유지 주 수
         wrun = np.zeros(nw, dtype=np.int64)
         run_w = 0
@@ -172,12 +127,12 @@ def load_universe():
         wflag = np.where(okw, wflagw[np.clip(kk, 0, nw - 1)], False)
         wlo = np.where(okw, wlo_w[np.clip(kk, 0, nw - 1)], 0.0)
         whi = np.where(okw, whi_w[np.clip(kk, 0, nw - 1)], 0.0)
+        wdrift = np.where(okw, wdriftw[np.clip(kk, 0, nw - 1)], 0.0)
+        wwidth = np.where(okw, wwidthw[np.clip(kk, 0, nw - 1)], 0.0)
         wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
                         (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
         liq = np.nan_to_num(amt20) >= AMT_MIN
-        notbreak = np.nan_to_num(lo60_prev, nan=1e18) <= c
-        wdays = np.where(wflag & (wpos <= 0.5) & liq & notbreak
-                         & (dn >= START))[0]
+        wdays = np.where(wflag & (wpos <= 0.5) & liq & (dn >= START))[0]
         for j in wdays:
             kind_map.setdefault(int(j), "wbox")
         # ── A-box (상승 저점 추세선): 피벗 저가 3개 연속 상승 + 종가 ≥ 선×0.995
@@ -206,6 +161,8 @@ def load_universe():
         abox_ok = np.zeros(n, dtype=bool)
         abox_rise = np.zeros(n, dtype=bool)
         tlv = np.full(n, np.nan)
+        aslope = np.full(n, np.nan)     # 추세선 기울기 (주당 %)
+        adist = np.full(n, np.nan)      # 추세선 대비 거리 (px/tl - 1)
         if len(PvA) >= 3:
             kc = np.searchsorted(PcA, np.arange(n), side="right") - 1
             okk = kc >= 2
@@ -221,6 +178,18 @@ def load_universe():
             abox_ok = ok & okk
             abox_rise = okk & rising
             tlv = np.where(ok, tl_now, np.nan)
+            aslope = np.where(ok, slope / np.maximum(c, 1e-9) * 100 * 5, np.nan)
+            adist = np.where(ok, c / np.maximum(tl_now, 1e-9) - 1, np.nan)
+        # 상승 스윙 높이 — 사슬 시작 저점 대비 현재 고가 (구조 고점 배율)
+        aheight = np.zeros(n)
+        if len(PvA) >= 1:
+            for seg_start in np.unique(st_idx[okc]):
+                idx = np.where(okc & (st_idx == seg_start))[0]
+                if not len(idx):
+                    continue
+                a, b = int(idx[0]), int(idx[-1]) + 1
+                base = max(float(l[seg_start]), 1e-9)
+                aheight[a:b] = np.maximum.accumulate(h[a:b]) / base - 1
         atrig = (abox_ok & (c <= np.nan_to_num(tlv, nan=0) * 1.05)
                  & (np.nan_to_num(tlv, nan=0) > 0)
                  & liq & (dn >= START))
@@ -230,46 +199,77 @@ def load_universe():
         kinds_arr = [kind_map[int(j)] for j in ti]
         if not len(ti):
             continue
-        sc = np.array([priority_of(
-                           int(pdays[j]) if kind_map[int(j)] == "std" else 0,
-                           float(posf[j]),
-                           float(atr[j]) if not np.isnan(atr[j]) else None,
-                           float(drift[j]) if not np.isnan(drift[j]) else 0.0,
-                           float(ratio[j]) if not np.isnan(ratio[j]) else None)
-                       for j in ti], dtype=np.int64)
+        def _comp(j, knd):
+            if knd == "wbox":
+                return (float(wpos[j]),
+                        float(atr[j]) if not np.isnan(atr[j]) else None,
+                        float(wdrift[j]), float(wwidth[j]))
+            if knd == "abox":
+                return (float(adist[j]) if not np.isnan(adist[j]) else None,
+                        float(atr[j]) if not np.isnan(atr[j]) else None,
+                        float(aslope[j]) if not np.isnan(aslope[j]) else None,
+                        float(aheight[j]))
+            return (None, None, None, None)
+        sc = np.array([score_new(knd, *_comp(j, knd))
+                       for j, knd in zip(ti, kinds_arr)], dtype=np.int64)
         U.append({"code": code, "name": name, "dn": dn, "h": h, "l": l,
-                  "c": c, "atr": atr, "persist": persist, "lo60": lo60,
-                  "hi60": hi60, "lo60_prev": lo60_prev, "posf": posf,
-                  "drift": drift, "ratio": ratio, "amt20": amt20,
+                  "c": c, "atr": atr, "amt20": amt20,
                   "wflag": wflag, "wlo": wlo, "whi": whi, "wpos": wpos,
-                  "wdur": wdur, "adur": adur,
+                  "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
+                  "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
                   "trig": ti, "kinds": kinds_arr, "sc": sc})
     return U
 
 
-def vanish_reason(s, j):
-    """박스 소멸 당일 조건값으로 사유 분류."""
-    rt = s["ratio"][j] if not np.isnan(s["ratio"][j]) else None
-    dr = s["drift"][j] if not np.isnan(s["drift"][j]) else None
-    at = s["atr"][j] if not np.isnan(s["atr"][j]) else None
-    am = s["amt20"][j] if not np.isnan(s["amt20"][j]) else None
-    if rt is not None and rt > 2.2:
-        return "상방확장"
-    if rt is not None and rt < 1.25:
-        return "범위축소"
-    if dr is not None and abs(dr) > 0.20:
-        return "추세발생"
-    if at is not None and at < 0.030:
-        return "변동성축소"
-    if am is not None and am < AMT_MIN:
-        return "유동성미달"
-    return "기타"
+SCHEME = "S2b"  # 점수안: S2b 추세우선+W감점 (최종) · S1 균형 · S2 추세 · S3 ATR우선
 
 
-def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
+def score_new(kind, pos, atr, trend, height):
+    """W/A 점수 개편안 (2026-11-02 13년 실측 버킷 기준 · 만점 6).
+    W: 위치(<20% 0 · ~35% 1 · ~50% 2) / 추세(<0 0 · ~5% 1 · 5%+ 2)
+       / ATR(4~7% 1, 역U) / 높이(밴드폭 22%+ 1)
+    A: 거리(≤2% 0 · ~3.5% 1 · ~5% 2) / ATR(<5% 0 · ~6% 1 · 6%+ 2)
+       / 기울기(<2.2%/주 0 · ~3 1 · 3%+ 2)
+    """
+    if kind == "wbox":
+        p = 0 if pos is None or pos < 0.20 else (1 if pos < 0.35 else 2)
+        t = 0 if trend is None or trend < 0 else (1 if trend < 0.05 else 2)
+        if SCHEME in ("S2", "S2b"):
+            a = 1 if (atr is not None and 0.04 <= atr < 0.07) else 0
+            h = 1 if (height is not None and height >= 0.22) else 0
+            s = p + t + a + h
+            if SCHEME == "S2b" and trend is not None and trend < -0.05:
+                s -= 1
+            return s
+        if SCHEME == "S3":       # ATR우선
+            a = 0 if atr is None or atr < 0.04 else (1 if atr < 0.05 else (2 if atr < 0.07 else 3))
+            t = 0 if trend is None or trend < 0.05 else 1
+            return p + a + t
+        # S1 균형
+        a = 0 if atr is None or atr < 0.04 else (2 if atr < 0.07 else 1)
+        t = 1 if (trend is not None and trend >= 0.05) else 0
+        h = 1 if (height is not None and height >= 0.22) else 0
+        return p + a + t + h
+    if kind == "abox":
+        p = 0 if pos is None or pos <= 0.02 else (1 if pos < 0.035 else 2)
+        if SCHEME == "S3":
+            a = 0 if atr is None or atr < 0.05 else (1 if atr < 0.06 else (2 if atr < 0.07 else 3))
+            t = 0 if trend is None or trend < 2.2 else 1
+            return p + a + t
+        a = 0 if atr is None or atr < 0.05 else (1 if atr < 0.06 else 2)
+        if SCHEME in ("S2", "S2b"):
+            t = 0 if trend is None or trend < 2.2 else (1 if trend < 3.0 else 2)
+            return p + t + a
+        # S1 균형
+        t = 1 if (trend is not None and trend >= 2.2) else 0
+        return p + a + t
+    return 0
+
+
+def run(gap, rungs, near, sameday, U, all_days, ev_days,
         detail=False):
-    """한 변형 실행. near=하단 경계 N% 위 접근 시 조기 청산(%) · with_std=60일 표준 풀 포함.
+    """한 변형 실행. near=하단 경계 N% 위 접근 시 조기 청산(%).
     상세(detail=True)면 사이트 렌더용 전체 블록 반환."""
     holdings = {}
     done, curve = [], []
@@ -290,6 +290,15 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                      "days": hst["j"] - hst["j_entry"], "kind": why,
                      "ekind": hst.get("kind", "std"),
                      "dur": hst.get("dur", 0)})
+        if COMP_DUMP is not None:
+            COMP_DUMP.append({
+                "entry_day": hst["entry_day"], "kind": hst.get("kind", "std"),
+                "pos": hst.get("cpos"), "atr": hst.get("catr"),
+                "trend": hst.get("ctrend"), "height": hst.get("cheight"),
+                "score": hst["score"], "escape0": hst["escape0"],
+                "loss0": hst["loss0"], "net": round(hst["net"]),
+                "days": hst["j"] - hst["j_entry"], "cycles": hst["cycles"],
+                "exit": why})
         curve.append((int(day), hst["net"]))
 
     for D in all_days:
@@ -303,28 +312,18 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                 close_position(done, holdings, curve, i,
                                float(s["c"][hst["j"]]), "데이터갭", D)
                 continue
-            knd = hst.get("kind", "std")
-            lo_prev = float(np.nan_to_num(s["lo60_prev"][j], nan=0.0))
+            knd = hst.get("kind")
             wlo = float(s["wlo"][j])
             whi = float(s["whi"][j])
             tlv = (float(s["tlv"][j]) if not np.isnan(s["tlv"][j]) else 0.0)
             px, lw = float(s["c"][j]), float(s["l"][j])
-            # 1) 하단 near% 위 근접 청산 — std=전일 60일 하단 · wbox=밴드 하단 · abox=추세선
-            if knd == "std":
-                B_ = lo_prev if lo_prev > 0 else None
-            elif knd == "wbox":
-                B_ = wlo if wlo > 0 else None
-            else:
-                B_ = tlv if tlv > 0 else None
+            # 1) 하단 near% 위 근접 청산 — wbox=밴드 하단 · abox=추세선
+            B_ = (wlo if knd == "wbox" else tlv)
+            B_ = B_ if B_ > 0 else None
             if B_ is not None and px < B_ * (1 + near / 100):
                 close_position(done, holdings, curve, i, px, "하단근접 청산", D)
                 continue
-            # 2) 소멸 — std: 60일 조건 / wbox: 밴드 유지·상방 / abox: 구조 붕괴
-            if knd == "std" and not bool(s["persist"][j]):
-                rsn = vanish_reason(s, j)
-                why = ("상방돌파 소멸" if rsn == "상방확장" else "박스소멸")
-                close_position(done, holdings, curve, i, px, why, D)
-                continue
+            # 2) 소멸 — wbox: 밴드 유지·상방 / abox: 구조 붕괴
             if knd == "wbox" and ((not bool(s["wflag"][j]))
                                   or (whi > 0 and px > whi)):
                 close_position(done, holdings, curve, i, px, "주봉박스 소멸", D)
@@ -333,9 +332,9 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                 close_position(done, holdings, curve, i, px, "추세선 붕괴", D)
                 continue
             hst["j"] = j
-            # 3) 하드스톱 백스톱 (-15%) — 전일 60일 하단 기준
-            stop_px = lo_prev * 0.85
-            if lo_prev > 0 and lw <= stop_px:
+            # 3) 하드스톱 백스톱 (-15%) — 타입 경계 기준
+            stop_px = (B_ * 0.85) if B_ is not None else None
+            if stop_px is not None and lw <= stop_px:
                 close_position(done, holdings, curve, i, stop_px, "손절-15%", D)
                 continue
             # 4) 그리드 진행 — 저가 채결(매수) → 고가 채결(매도)
@@ -351,7 +350,7 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                 tgt = levels[k] * (1 + gap)
                 if float(s["h"][j]) < tgt:
                     continue
-                if (k in bought) and sameday != "all":
+                if (k in bought) and sameday not in ("all", "multi"):
                     if sameday == "none":
                         continue
                     if sameday == "close" and px < tgt:
@@ -361,10 +360,22 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                 hst["cycles"] += 1
                 if k == 0 and hst["grid_n"] == 1:
                     hst["escape0"] = True
-            if not any(held):      # 재눌림 → 재그리드
-                pos = ((px - float(s["lo60"][j]))
-                       / max(float(s["hi60"][j]) - float(s["lo60"][j]), 1e-9))
-                if pos <= 0.5:
+                # 같은 날 같은 차수 재왕복 — 당일 범위에서 2×갭 이동당 1회 추가
+                # (저가 매수→고가 매도→재매수→재매도 경로 가정 · 분봉 다중 체결 근사)
+                if sameday == "multi":
+                    rng_d = float(s["h"][j]) - float(s["l"][j])
+                    extra = int(rng_d // (2 * levels[k] * gap))
+                    extra = min(max(extra, 0), MAX_TRIPS)
+                    if extra:
+                        hst["net"] += extra * (gap * UNIT - FEE * UNIT)
+                        hst["cycles"] += extra
+            if not any(held):      # 재눌림 → 재그리드 (타입별 매수존 복귀)
+                if knd == "wbox":
+                    in_zone = (float(s["wpos"][j]) <= 0.5)
+                else:
+                    ad_ = float(s["adist"][j])
+                    in_zone = (not np.isnan(ad_)) and ad_ <= 0.05
+                if in_zone:
                     hst["grid_n"] += 1
                     hst["levels"] = [px * (1 - gap) ** k for k in range(rungs)]
                     hst["held"] = [False] * rungs
@@ -381,8 +392,6 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                     break
                 if i in holdings:
                     continue
-                if knd == "std" and not with_std:
-                    continue          # 기본: W/A만 (60일 표준은 비교용)
                 s = U[i]
                 holdings[i] = {"j": j, "j_entry": j, "entry_day": int(D),
                                "entry": float(s["c"][j]), "score": -nsc,
@@ -390,6 +399,22 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
                                "dur": (int(s["wdur"][j]) if knd == "wbox"
                                        else int(s["adur"][j]) if knd == "abox"
                                        else 0),
+                               "cpos": (float(s["wpos"][j]) if knd == "wbox"
+                                        else (float(s["adist"][j])
+                                              if knd == "abox"
+                                              and not np.isnan(s["adist"][j])
+                                              else None)),
+                               "catr": (float(s["atr"][j])
+                                        if not np.isnan(s["atr"][j]) else None),
+                               "ctrend": (float(s["wdrift"][j]) if knd == "wbox"
+                                          else (float(s["aslope"][j])
+                                                if knd == "abox"
+                                                and not np.isnan(s["aslope"][j])
+                                                else None)),
+                               "cheight": (float(s["wwidth"][j])
+                                           if knd == "wbox"
+                                           else (float(s["aheight"][j])
+                                                 if knd == "abox" else None)),
                                "levels": [float(s["c"][j]) * (1 - gap) ** k
                                           for k in range(rungs)],
                                "held": [False] * rungs,
@@ -532,18 +557,27 @@ def run(gap, rungs, near, sameday, with_std, U, all_days, ev_days,
 
 def main():
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
-    ap.add_argument("--sameday", choices=["close", "none", "all"], default="close")
+    ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
+                    default="multi",
+                    help="당일 체결 가정 (기본 multi=분봉 다중 왕복 근사)")
     ap.add_argument("--gap", type=float, default=GAP)
     ap.add_argument("--rungs", type=int, default=0)
     ap.add_argument("--near", type=float, default=2.0,
                     help="하단 경계 N%% 위 접근 시 조기 청산 (%%) · 0=이탈 완료 시만")
-    ap.add_argument("--with-std", action="store_true",
-                    help="60일 표준 풀도 포함 (비교용 — 기본은 W/A만)")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
+    ap.add_argument("--scheme", choices=["S1", "S2", "S2b", "S3"],
+                    default="S2b", help="점수안 (S2b 최종)")
+    ap.add_argument("--dump", type=str, default="",
+                    help="포지션별 진입 지표 JSON 저장 (점수 재설계 분석용)")
+    ap.add_argument("--max-trips", type=int, default=1,
+                    help="sameday=multi 시 차수당 당일 추가 왕복 상한 (기본 1)")
     args = ap.parse_args()
-    with_std = args.with_std
+    global MAX_TRIPS, COMP_DUMP, SCHEME
+    SCHEME = args.scheme
+    MAX_TRIPS = max(0, args.max_trips)
+    COMP_DUMP = [] if args.dump else None
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))
 
     t0 = tmod.time()
@@ -564,7 +598,7 @@ def main():
         for gp in SWEEP_GAPS:
             rg = max(4, round(COVER / gp))
             for mode in ("close", "none", "all"):
-                r = run(gp, rg, args.near, mode, with_std,
+                r = run(gp, rg, args.near, mode,
                         U, all_days, ev_days)
                 sm = r["summary"]
                 rows.append({"gap_pct": gp * 100, "sameday": mode,
@@ -587,13 +621,15 @@ def main():
         print(f"[INFO] 스윕 완료 → {SWEEP.name}")
         return
 
-    r = run(args.gap, rungs, args.near, args.sameday, with_std, U, all_days,
+    r = run(args.gap, rungs, args.near, args.sameday, U, all_days,
             ev_days, detail=True)
+    dump_main, COMP_DUMP_prev = COMP_DUMP, COMP_DUMP
+    COMP_DUMP = None      # 민감도 재실행분은 덤프 제외
     sens = {}
     for m in ("all", "close", "none"):
         if m == args.sameday:
             continue
-        r2 = run(args.gap, rungs, args.near, m, with_std, U, all_days, ev_days)
+        r2 = run(args.gap, rungs, args.near, m, U, all_days, ev_days)
         sens[m] = {"net_total": r2["summary"]["net_total"],
                    "mdd_won": r2["summary"]["mdd_won"],
                    "escape_rate": r2["summary"]["escape_rate"],
@@ -602,28 +638,23 @@ def main():
     out = {
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "params": {"slots": K,
-                   "buy_zone": ("주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5% · "
-                                "60일: 위치≤50%(보유 전용)") if with_std
-                              else "주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5%",
+                   "buy_zone": "주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5%",
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
-                   "pool": ("주봉박스+상승저점+60일(보유 전용)" if with_std
-                            else "주봉박스+상승저점 (60일 제외)"),
+                   "pool": "주봉박스+상승저점",
                    "start": str(s["start_year"]),
                    "end": str(s["end_year"])},
         "assumptions": {
             "sameday": args.sameday, "sameday_ko": SAMEDAY_KO[args.sameday],
             "near": args.near,
-            "near_ko": (f"청산 = 전일 종가가 각 타입 경계(60일하단/밴드하단/추세선)의 "
+            "near_ko": (f"청산 = 전일 종가가 각 타입 경계(밴드하단/추세선)의 "
                         f"{args.near:g}% 위에 접근하면 조기 청산" if args.near > 0
                         else "청산 = 전일 종가가 경계 하향 이탈(버퍼 없음)"),
             "gap_pct": args.gap * 100, "rungs": rungs,
             "unit": UNIT, "fee_roundtrip": FEE,
-            "with_std": with_std,
-            "pool_ko": ("W/A 풀 + 60일 표준(비교)" if with_std
-                        else "60일 표준 박스 제외 — 주봉박스(13주 종가 밴드 ±30%·드리프트≤15%·"
-                             "밴드 하위 절반 진입·밴드 이탈 소멸) + 상승저점(피벗 저가 3개 "
-                             "연속 상승·추세선 근접 진입·선 이탈/붕괴 소멸)"),
+            "pool_ko": ("주봉박스(13주 종가 밴드 ±30%·드리프트≤15%·밴드 하위 절반 진입·"
+                        "밴드 이탈 소멸) + 상승저점(피벗 저가 3개 연속 상승·추세선 근접 "
+                        "진입·선 이탈/붕괴 소멸)"),
             "entry": "신호일 종가 (이탈일 진입 금지)",
             "stop": "전일 박스 하단 -15% 백스톱",
             "escape_def": "탈출율 = 첫 차수(진입)가 +갭 가격에 매도된 비율"},
@@ -648,6 +679,10 @@ def main():
     for kd, st in r.get("dur_score_x", {}).items():
         print(f"  [{kd}] 중앙 {st['median']} · 짧음 {st['short']} · 김 {st['long']}",
               flush=True)
+    if args.dump and dump_main:
+        Path(args.dump).write_text(json.dumps(dump_main, ensure_ascii=False),
+                                   encoding="utf-8")
+        print(f"[INFO] 지표 덤프 {args.dump} ({len(dump_main):,}건)", flush=True)
     dest_out = Path(args.out) if args.out else OUT
     dest_out.parent.mkdir(parents=True, exist_ok=True)
     dest_out.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")

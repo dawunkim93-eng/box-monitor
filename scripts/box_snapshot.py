@@ -66,18 +66,25 @@ def main():
     names = load_names()
     rows = []
     for c, rec in live.items():
-        lo, hi, px = rec.get("lo"), rec.get("hi"), rec.get("px")
-        pos = ((px - lo) / (hi - lo)
-               if (lo is not None and hi and hi > lo) else None)
-        sc = priority_score(rec.get("days"), pos, rec.get("atr"),
-                            rec.get("drift"), rec.get("ratio"))
+        px, kind = rec.get("px"), rec.get("kind")
+        if kind == "wbox":
+            lo, hi = rec.get("wlo"), rec.get("whi")
+            pos = ((px - lo) / (hi - lo)
+                   if (px is not None and lo is not None and hi and hi > lo)
+                   else None)
+            trend, height = rec.get("wdrift"), rec.get("wwidth")
+        else:
+            tl = rec.get("tl")
+            pos = (px / tl - 1) if (px is not None and tl) else rec.get("adist")
+            trend, height = rec.get("aslope"), None
+        sc = priority_score(kind, pos, rec.get("atr"), trend, height)
         rows.append({"code": c, "name": names.get(c, c), "score": sc,
-                     "esc_p": esc_p(sc),
+                     "esc_p": esc_p(sc, kind),
                      "price": round(px, 2) if px is not None else None,
-                     "pos": round(pos * 100, 1) if pos is not None else None,
+                     "pos": (round(pos * 100, 1) if pos is not None and kind == "wbox"
+                             else (round(pos * 100, 2) if pos is not None else None)),
                      "atr": (round(rec["atr"] * 100, 1)
                              if rec.get("atr") else None),
-                     "days": rec.get("days"),
                      "strong": bool(rec.get("strong")),
                      "risk": bool(rec.get("risk"))})
     rows.sort(key=lambda r: (-r["score"], -(r.get("atr") or 0)))
