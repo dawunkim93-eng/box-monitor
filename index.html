@@ -158,7 +158,7 @@ $("#favonly").addEventListener("change",render);
 function render(){
   if(!DATA)return;
   const d=DATA;
-  $("#stamp").textContent=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")}`;
+  $("#stamp").textContent=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")} · 빌드 ${d.ver||"-"}`;
   $("#stats").innerHTML=
     `<div class="chip">박스 유지 <b>${d.live_count}</b>종목</div>
      <div class="chip">재무강화 <b>${d.strong_count}</b>종목</div>
@@ -303,7 +303,17 @@ async function load(){
   try{
     const r=await fetch("data/box_live.json?t="+Date.now(),{cache:"no-store"});
     if(!r.ok) throw new Error("HTTP "+r.status);
-    DATA=await r.json(); render();
+    DATA=await r.json();
+    if(DATA.ver){
+      const seen=localStorage.getItem("boxver");
+      if(seen && seen!==DATA.ver){
+        localStorage.setItem("boxver",DATA.ver);
+        location.replace(location.pathname+"?b="+DATA.ver);
+        return;
+      }
+      localStorage.setItem("boxver",DATA.ver);
+    }
+    render();
   }catch(e){
     $("#stamp").innerHTML=`<span style="color:var(--red)">조회 실패: ${e.message}</span>`;
   }
