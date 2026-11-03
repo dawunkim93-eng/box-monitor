@@ -53,6 +53,9 @@ AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.375          # 사다리 커버 깊이 → rungs = max(4, round(COVER/gap)) ≈ 하단 28~30%
 MAX_TRIPS = 5          # 당일 다중 왕복 상한 (sameday=multi — 같은 차수 재왕복 최대 횟수)
+ENTRY_MODE = "close"   # 진입 시점: close(신호일 종가) · next_open(다음날 시가) · next_close(다음날 종가)
+ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
+CANDLE_MODE = "all"    # all | bear(음봉 신호만) | bear_tail(음봉+아래꼬리1%+)
 COMP_DUMP = None       # --dump 지정 시 포지션별 진입 지표 기록 (점수 재설계 분석용)
 SWEEP_GAPS = [0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
 
@@ -84,9 +87,15 @@ def load_universe():
         if (df["Close"].pct_change().abs() > 0.60).any():
             continue
         n = len(df)
+        o = df["Open"].values.astype(float)
         h = df["High"].values.astype(float)
         l = df["Low"].values.astype(float)
         c = df["Close"].values.astype(float)
+        bull = c > o
+        body = np.where(o > 0, (c - o) / np.maximum(o, 1e-9), 0.0)
+        lower_sh = np.where(l > 0,
+                            (np.minimum(o, c) - l) / np.maximum(l, 1e-9) * 100,
+                            0.0)
         v = df["Volume"].values.astype(float)
         dn = np.array([int(d.strftime("%Y%m%d")) for d in df.index],
                       dtype=np.int64)
@@ -212,8 +221,9 @@ def load_universe():
             return (None, None, None, None)
         sc = np.array([score_new(knd, *_comp(j, knd))
                        for j, knd in zip(ti, kinds_arr)], dtype=np.int64)
-        U.append({"code": code, "name": name, "dn": dn, "h": h, "l": l,
+        U.append({"code": code, "name": name, "dn": dn, "o": o, "h": h, "l": l,
                   "c": c, "atr": atr, "amt20": amt20,
+                  "bull": bull, "body": body, "lower_sh": lower_sh,
                   "wflag": wflag, "wlo": wlo, "whi": whi, "wpos": wpos,
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
@@ -289,7 +299,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                      "cycles": hst["cycles"], "net": hst["net"],
                      "days": hst["j"] - hst["j_entry"], "kind": why,
                      "ekind": hst.get("kind", "std"),
-                     "dur": hst.get("dur", 0)})
+                     "dur": hst.get("dur", 0),
+                     "cbull": hst.get("cbull"),
+                     "cbody": hst.get("cbody"),
+                     "clower": hst.get("clower")})
         if COMP_DUMP is not None:
             COMP_DUMP.append({
                 "entry_day": hst["entry_day"], "kind": hst.get("kind", "std"),
@@ -298,7 +311,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 "score": hst["score"], "escape0": hst["escape0"],
                 "loss0": hst["loss0"], "net": round(hst["net"]),
                 "days": hst["j"] - hst["j_entry"], "cycles": hst["cycles"],
-                "exit": why})
+                "exit": why, "cbull": hst.get("cbull"),
+                "cbody": hst.get("cbody"), "clower": hst.get("clower")})
         curve.append((int(day), hst["net"]))
 
     for D in all_days:
@@ -311,6 +325,11 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             if j >= len(dn) or dn[j] != D:
                 close_position(done, holdings, curve, i,
                                float(s["c"][hst["j"]]), "데이터갭", D)
+                continue
+            if j < hst["j_entry"]:
+                continue
+            if j == hst["j_entry"] and ENTRY_MODE == "next_close":
+                hst["j"] = j         # 종가 진입일 — 당일 체결 없음
                 continue
             knd = hst.get("kind")
             wlo = float(s["wlo"][j])
@@ -393,29 +412,63 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 if i in holdings:
                     continue
                 s = U[i]
-                holdings[i] = {"j": j, "j_entry": j, "entry_day": int(D),
-                               "entry": float(s["c"][j]), "score": -nsc,
+                dn_s = s["dn"]
+                je = j if ENTRY_MODE == "close" else j + 1
+                if je >= len(dn_s):
+                    continue
+                px_e = (float(s["c"][je])
+                        if ENTRY_MODE in ("close", "next_close")
+                        else float(s["o"][je]))
+                if not (px_e > 0):
+                    continue
+                if CANDLE_MODE != "all":        # 신호일 캔들 필터
+                    if not (float(s["c"][j]) < float(s["o"][j])):
+                        continue
+                    if CANDLE_MODE == "bear_tail" \
+                            and float(s["lower_sh"][j]) < 1.0:
+                        continue
+                if ENTRY_ZONE:          # 진입 시점 매수존 재확인 (추격 금지)
+                    if knd == "wbox":
+                        w0, w1 = float(s["wlo"][je]), float(s["whi"][je])
+                        if not (w1 > w0 > 0):
+                            continue
+                        if not ((px_e - w0) / (w1 - w0) <= 0.5
+                                and px_e >= w0 * (1 + near / 100)):
+                            continue
+                    else:
+                        t0 = float(s["tlv"][je])
+                        if not (t0 > 0):
+                            continue
+                        dz = px_e / t0 - 1
+                        if not (near / 100 <= dz <= 0.05):
+                            continue
+                holdings[i] = {"j": je, "j_entry": je,
+                               "entry_day": int(dn_s[je]),
+                               "entry": px_e, "score": -nsc,
                                "gap": gap, "kind": knd,
-                               "dur": (int(s["wdur"][j]) if knd == "wbox"
-                                       else int(s["adur"][j]) if knd == "abox"
+                               "dur": (int(s["wdur"][je]) if knd == "wbox"
+                                       else int(s["adur"][je]) if knd == "abox"
                                        else 0),
-                               "cpos": (float(s["wpos"][j]) if knd == "wbox"
-                                        else (float(s["adist"][j])
+                               "cpos": (float(s["wpos"][je]) if knd == "wbox"
+                                        else (float(s["adist"][je])
                                               if knd == "abox"
-                                              and not np.isnan(s["adist"][j])
+                                              and not np.isnan(s["adist"][je])
                                               else None)),
-                               "catr": (float(s["atr"][j])
-                                        if not np.isnan(s["atr"][j]) else None),
-                               "ctrend": (float(s["wdrift"][j]) if knd == "wbox"
-                                          else (float(s["aslope"][j])
+                               "catr": (float(s["atr"][je])
+                                        if not np.isnan(s["atr"][je]) else None),
+                               "ctrend": (float(s["wdrift"][je]) if knd == "wbox"
+                                          else (float(s["aslope"][je])
                                                 if knd == "abox"
-                                                and not np.isnan(s["aslope"][j])
+                                                and not np.isnan(s["aslope"][je])
                                                 else None)),
-                               "cheight": (float(s["wwidth"][j])
+                               "cheight": (float(s["wwidth"][je])
                                            if knd == "wbox"
-                                           else (float(s["aheight"][j])
+                                           else (float(s["aheight"][je])
                                                  if knd == "abox" else None)),
-                               "levels": [float(s["c"][j]) * (1 - gap) ** k
+                               "cbull": bool(s["bull"][j]),
+                               "cbody": float(s["body"][j]),
+                               "clower": float(s["lower_sh"][j]),
+                               "levels": [px_e * (1 - gap) ** k
                                           for k in range(rungs)],
                                "held": [False] * rungs,
                                "grid_n": 1, "escape0": False, "loss0": False,
@@ -504,6 +557,26 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             labels[b]: dstat([p for p in ps if edges[b] < p["dur"] <= edges[b + 1]])
             for b in range(len(labels))}
 
+    candle_escape = {}
+    for kd in ("wbox", "abox", "all"):
+        ps = done if kd == "all" else [p for p in done if p.get("ekind") == kd]
+        blk = {}
+        for lab, flag in (("양봉", True), ("음봉", False)):
+            blk[lab] = dstat([p for p in ps if p.get("cbull") is flag])
+        nb = [p for p in ps if p.get("cbull") is False]
+        blk["음봉·아래꼬리1%+"] = dstat([p for p in nb
+                                        if (p.get("clower") or 0) >= 1.0])
+        blk["음봉·아래꼬리<1%"] = dstat([p for p in nb
+                                       if (p.get("clower") or 0) < 1.0])
+        candle_escape[kd] = blk
+
+    candle_yearly = {}
+    for yr in sorted({p["entry_day"] // 10000 for p in done}):
+        ps = [p for p in done if p["entry_day"] // 10000 == yr]
+        candle_yearly[str(yr)] = {
+            lab: dstat([p for p in ps if p.get("cbull") is flag])
+            for lab, flag in (("양봉", True), ("음봉", False))}
+
     dur_score_x = {}
     for kd in ("wbox", "abox"):
         ps = [p for p in done if 5 <= p["score"] <= 6 and p.get("ekind") == kd]
@@ -540,6 +613,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
         "score_escape": score_escape,
         "dur_escape": dur_escape,
         "dur_score_x": dur_score_x,
+        "candle_escape": candle_escape,
+        "candle_yearly": candle_yearly,
         "capital": {"avg": round(av_cap), "peak": round(pk_cap),
                     "p95": round(p95_cap),
                     "ret_capital_pct": round(summary["net_total"]
@@ -569,13 +644,26 @@ def main():
     ap.add_argument("--out", type=str, default="")
     ap.add_argument("--scheme", choices=["S1", "S2", "S2b", "S3"],
                     default="S2b", help="점수안 (S2b 최종)")
+    ap.add_argument("--entry", choices=["close", "next_open", "next_close"],
+                    default="next_open",
+                    help="진입 시점 (close=신호일 종가 · next_open=다음날 시가 · "
+                         "next_close=다음날 종가)")
+    ap.add_argument("--candle", choices=["all", "bear", "bear_tail"],
+                    default="bear_tail",
+                    help="신호일 캔들 필터 (bear=음봉만 · bear_tail=음봉+아래꼬리1%+)")
+    ap.add_argument("--entry-zone", action=argparse.BooleanOptionalAction,
+                    default=True,
+                    help="진입 시점에도 매수존 조건 재확인 (기본 on · --no-entry-zone으로 해제)")
     ap.add_argument("--dump", type=str, default="",
                     help="포지션별 진입 지표 JSON 저장 (점수 재설계 분석용)")
     ap.add_argument("--max-trips", type=int, default=1,
                     help="sameday=multi 시 차수당 당일 추가 왕복 상한 (기본 1)")
     args = ap.parse_args()
-    global MAX_TRIPS, COMP_DUMP, SCHEME
+    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE
     SCHEME = args.scheme
+    ENTRY_MODE = args.entry
+    ENTRY_ZONE = args.entry_zone
+    CANDLE_MODE = args.candle
     MAX_TRIPS = max(0, args.max_trips)
     COMP_DUMP = [] if args.dump else None
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))
@@ -655,12 +743,13 @@ def main():
             "pool_ko": ("주봉박스(13주 종가 밴드 ±30%·드리프트≤15%·밴드 하위 절반 진입·"
                         "밴드 이탈 소멸) + 상승저점(피벗 저가 3개 연속 상승·추세선 근접 "
                         "진입·선 이탈/붕괴 소멸)"),
-            "entry": "신호일 종가 (이탈일 진입 금지)",
+            "entry": f"{args.entry} (진입 시점; 신호일 캔들 필터={args.candle})",
             "stop": "전일 박스 하단 -15% 백스톱",
             "escape_def": "탈출율 = 첫 차수(진입)가 +갭 가격에 매도된 비율"},
         "sensitivity": {m: {"sameday_ko": SAMEDAY_KO[m], **v} for m, v in sens.items()},
         **{kk: r[kk] for kk in ("summary", "yearly", "exit_kinds", "score_escape",
-                                "dur_escape", "dur_score_x",
+                                "dur_escape", "dur_score_x", "candle_escape",
+                                "candle_yearly",
                                 "capital", "recent_positions", "stock_history")},
     }
     print(f"[INFO] 포지션 {s['positions']:,} ({s['start_year']}~{s['end_year']}"
@@ -675,6 +764,17 @@ def main():
         for lab, st in blk.items():
             print(f"    {lab:<8} n={st['n']:>5} · 탈출 {st['esc_rate']}% · "
                   f"건당 {st['avg_net']}원 · 손실0 {st['loss0_rate']}%", flush=True)
+    print("[전일 캔들]", flush=True)
+    for kd, blk in r.get("candle_escape", {}).items():
+        print(f"  [{kd}]", flush=True)
+        for lab, st in blk.items():
+            print(f"    {lab:<14} n={st['n']:>5} · 탈출 {st['esc_rate']}% · "
+                  f"건당 {st['avg_net']}원 · 손실0 {st['loss0_rate']}%", flush=True)
+    print("[전일 캔들 연도별]", flush=True)
+    for yy, row in r.get("candle_yearly", {}).items():
+        b, e = row["양봉"], row["음봉"]
+        print(f"  {yy}: 양봉 n={b['n']:>4} 탈출{b['esc_rate']}%/{b['avg_net']}원 · "
+              f"음봉 n={e['n']:>4} 탈출{e['esc_rate']}%/{e['avg_net']}원", flush=True)
     print("[5~6점 구간 내 기간 효과]", flush=True)
     for kd, st in r.get("dur_score_x", {}).items():
         print(f"  [{kd}] 중앙 {st['median']} · 짧음 {st['short']} · 김 {st['long']}",
