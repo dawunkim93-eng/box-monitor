@@ -265,13 +265,16 @@ function render(){
           ?`${fmt(h.wlo)}~${fmt(h.whi)} <span class="sub">밴드</span>`
           :(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-"));
       const pl=h.pct_low!=null?`<span class="${h.pct_low<=2?"deep":""}">${pct(h.pct_low)}</span>`:"-";
+      const lv=(h.live_state!=null)
+        ? ` <span class="${(h.live_state==="유지"||h.live_state==="회복")?"up":"deep"}">`
+          + `· 현재: ${h.live_state}`
+          + (((h.live_state==="이탈"||h.live_state==="이탈 지속")&&h.pct_low!=null)?` (${pct(h.pct_low)})`:"")
+          + `</span>`
+        : "";
       const fv=FAVS.has(h.code);
       return `<tr><td><span class="fav${fv?" on":""}" data-c="${h.code}">${fv?"★":"☆"}</span></td>`
         +`<td class="nm"><b>${h.name}</b><br><span class="sub">${h.detail||""}</span></td>`
-        +`<td class="${cls}">${h.status}`
-        + (h.recovered?` <span class="up">· 현재 회복</span>`:"")
-        + (h.live_break?` <span class="deep">· 현재 이탈 (${pct(h.pct_low)})</span>`:"")
-        +`</td>`
+        +`<td class="${cls}"><span class="sub">전일:</span> ${h.status}${lv}</td>`
         +`<td>${px}</td><td>${band}</td>`
         +`<td class="hidem">${pl}</td></tr>`;
     }).join("");
