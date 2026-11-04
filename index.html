@@ -108,7 +108,7 @@
   <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)</h2>
   <table id="hold-tbl" hidden>
     <thead><tr>
-      <th>⭐</th><th class="nm">종목</th><th>상태</th><th class="nm">상세</th><th>현재가</th><th>위치</th>
+      <th>⭐</th><th class="nm">종목</th><th>상태</th><th>현재가</th><th>밴드</th><th class="hidem">하단대비</th>
     </tr></thead>
     <tbody id="hold-rows"></tbody>
   </table>
@@ -256,13 +256,18 @@ function render(){
       const r=byCode[h.code];
       const cls=h.status==="박스 유지"?"hold-ok":(h.status==="존 밖"?"hold-zone"
         :((h.status||"").includes("이탈")||(h.status||"").includes("붕괴")?"hold-brk":"hold-etc"));
-      const px=r?`${fmt(r.price)} <span class="sub">${pct(r.chg_pct)}</span>`
-               :(h.px!=null?fmt(h.px):"-");
-      const pos=r?(r.pos==null?"-":r.pos.toFixed(0)+"%"):"-";
+      const px=(h.px!=null)
+        ?(`${fmt(h.px)}`+(h.chg_pct!=null?` <span class="${cn(h.chg_pct)}">${pct(h.chg_pct)}</span>`:""))
+        :(r?`${fmt(r.price)} <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>`:"-");
+      const band=(h.wlo!=null&&h.whi!=null)
+        ?`${fmt(h.wlo)}~${fmt(h.whi)} <span class="sub">밴드</span>`
+        :(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-");
+      const pl=h.pct_low!=null?`<span class="${h.pct_low<=2?"deep":""}">${pct(h.pct_low)}</span>`:"-";
       const fv=FAVS.has(h.code);
       return `<tr><td><span class="fav${fv?" on":""}" data-c="${h.code}">${fv?"★":"☆"}</span></td>`
-        +`<td class="nm"><b>${h.name}</b></td><td class="${cls}">${h.status}</td>`
-        +`<td class="nm sub">${h.detail||""}</td><td>${px}</td><td>${pos}</td></tr>`;
+        +`<td class="nm"><b>${h.name}</b><br><span class="sub">${h.detail||""}</span></td>`
+        +`<td class="${cls}">${h.status}</td><td>${px}</td><td>${band}</td>`
+        +`<td class="hidem">${pl}</td></tr>`;
     }).join("");
   }
   $("#rows").innerHTML=mainRows.map(r=>rowHTML(r)).join("");
