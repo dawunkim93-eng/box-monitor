@@ -253,8 +253,6 @@ function render(){
     document.getElementById("hold-cnt").textContent=holdList.length;
     document.getElementById("hold-rows").innerHTML=holdList.map(h=>{
       const r=byCode[h.code];
-      const cls=h.status==="박스 유지"?"hold-ok":(h.status==="존 밖"?"hold-zone"
-        :((h.status||"").includes("이탈")||(h.status||"").includes("붕괴")?"hold-brk":"hold-etc"));
       const px=(h.px!=null)
         ?(`${fmt(h.px)}`+(h.chg_pct!=null?` <span class="${cn(h.chg_pct)}">${pct(h.chg_pct)}</span>`:""))
         :(r?`${fmt(r.price)} <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>`:"-");
@@ -264,17 +262,19 @@ function render(){
           ?`${fmt(h.wlo)}~${fmt(h.whi)} <span class="sub">밴드</span>`
           :(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-"));
       const pl=h.pct_low!=null?`<span class="${h.pct_low<=2?"deep":""}">${pct(h.pct_low)}</span>`:"-";
-      const lvc=(h.live_state==null)?""
-        :((h.live_state==="유지"||h.live_state==="회복")?"up":"deep");
-      const lvt=(h.live_state==null)?"-"
-        :(h.live_state
-          + (((h.live_state==="이탈"||h.live_state==="이탈 지속")
-              &&h.pct_low!=null)?` ${pct(h.pct_low)}`:""));
+      const dtip=(h.detail?`${h.status} — ${h.detail}`:(h.status||""));
+      const ntip=(h.live_state==null)?""
+        :(h.live_state+(h.pct_low!=null?` (${pct(h.pct_low)})`:""));
+      const dstat=(h.status||"").includes("데이터")?"-":(h.valid?"유지":"이탈");
+      const dcls=(dstat==="유지")?"hold-ok":(dstat==="이탈"?"hold-brk":"hold-etc");
+      const nstat=(h.live_state==null)?"-"
+        :((h.live_state==="이탈"||h.live_state==="이탈 지속")?"이탈":"유지");
+      const ncls=(nstat==="유지")?"up":(nstat==="이탈"?"deep":"");
       const fv=FAVS.has(h.code);
       return `<tr><td><span class="fav${fv?" on":""}" data-c="${h.code}">${fv?"★":"☆"}</span></td>`
         +`<td class="nm"><b>${h.name}</b><br><span class="sub">${h.detail||""}</span></td>`
-        +`<td class="nm ${cls}">${h.status}</td>`
-        +`<td class="nm ${lvc}">${lvt}</td>`
+        +`<td class="nm ${dcls}" title="${dtip}">${dstat}</td>`
+        +`<td class="nm ${ncls}" title="${ntip}">${nstat}</td>`
         +`<td>${px}</td><td>${band}</td>`
         +`<td class="hidem">${pl}</td></tr>`;
     }).join("");
