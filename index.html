@@ -107,7 +107,7 @@
   <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)</h2>
   <table id="hold-tbl" hidden>
     <thead><tr>
-      <th>⭐</th><th class="nm">종목</th><th>상태</th><th>현재가</th><th>밴드</th><th class="hidem">하단대비</th>
+      <th>⭐</th><th class="nm">종목</th><th class="nm">전일</th><th class="nm">현재</th><th>현재가</th><th>밴드</th><th class="hidem">하단대비</th>
     </tr></thead>
     <tbody id="hold-rows"></tbody>
   </table>
@@ -264,16 +264,17 @@ function render(){
           ?`${fmt(h.wlo)}~${fmt(h.whi)} <span class="sub">밴드</span>`
           :(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-"));
       const pl=h.pct_low!=null?`<span class="${h.pct_low<=2?"deep":""}">${pct(h.pct_low)}</span>`:"-";
-      const lv=(h.live_state!=null)
-        ? ` <span class="${(h.live_state==="유지"||h.live_state==="회복")?"up":"deep"}">`
-          + `· 현재: ${h.live_state}`
-          + (((h.live_state==="이탈"||h.live_state==="이탈 지속")&&h.pct_low!=null)?` (${pct(h.pct_low)})`:"")
-          + `</span>`
-        : "";
+      const lvc=(h.live_state==null)?""
+        :((h.live_state==="유지"||h.live_state==="회복")?"up":"deep");
+      const lvt=(h.live_state==null)?"-"
+        :(h.live_state
+          + (((h.live_state==="이탈"||h.live_state==="이탈 지속")
+              &&h.pct_low!=null)?` ${pct(h.pct_low)}`:""));
       const fv=FAVS.has(h.code);
       return `<tr><td><span class="fav${fv?" on":""}" data-c="${h.code}">${fv?"★":"☆"}</span></td>`
         +`<td class="nm"><b>${h.name}</b><br><span class="sub">${h.detail||""}</span></td>`
-        +`<td class="${cls}"><span class="sub">전일:</span> ${h.status}${lv}</td>`
+        +`<td class="nm ${cls}">${h.status}</td>`
+        +`<td class="nm ${lvc}">${lvt}</td>`
         +`<td>${px}</td><td>${band}</td>`
         +`<td class="hidem">${pl}</td></tr>`;
     }).join("");
