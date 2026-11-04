@@ -98,7 +98,7 @@
     <button id="btn-hold" class="tblbtn" title="⭐ 보유 종목 코드 복사 → 텔레그램에 붙여넣기 전송 = 보유 목록 자동 갱신 (2분 내)">⭐ 보유 목록 복사</button></h2>
   <table id="fav-tbl" hidden>
     <thead><tr>
-      <th class="nm">⭐ 종목</th><th>우선</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
+      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
       <th>위치</th><th>하단대비</th><th class="hidem">갭</th>
     </tr></thead>
     <tbody id="fav-rows"></tbody>
@@ -129,11 +129,11 @@
   </div>
   <table>
     <thead><tr>
-      <th class="nm">⭐ 종목</th><th>우선</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
+      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
       <th>위치</th><th>하단대비</th>
       <th class="hidem">갭</th>
     </tr></thead>
-    <tbody id="rows"><tr><td colspan="9">로딩 중…</td></tr></tbody>
+    <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
   </table>
   </div>
   <div id="view-valid" hidden>
@@ -305,7 +305,7 @@ function favPH(h){
     +`<span class="sub" style="margin-left:4px">· ${h.status}</span></td>`
     +`<td class="sub">–</td><td class="sub">–</td><td class="sub">–</td><td class="sub">–</td>`
     +`<td class="hidem sub">–</td><td class="sub">–</td><td class="sub">–</td>`
-    +`<td class="hidem sub">–</td></tr>`;
+    +`<td class="sub">–</td><td class="hidem sub">–</td></tr>`;
 }
 function rowHTML(r){
     const isbrk = r.pct_low!=null && r.pct_low<0;
@@ -322,9 +322,10 @@ function rowHTML(r){
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
     const fav = FAVS.has(r.code);
     const sCell=(r.score==null?"-":
-      `${r.score}점<span class="sub">·탈출${r.esc_p??""}%</span>`
+      `${r.score}점`
       +((r.score_m!=null&&r.score>r.score_m)?` <span class="up">▲</span>`
         :((r.score_m!=null&&r.score<r.score_m)?` <span class="dn">▼</span>`:"")));
+    const escCell=(r.esc_p==null?"-":`${r.esc_p}%`);
     return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}">
       <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
@@ -334,6 +335,7 @@ function rowHTML(r){
         ${r.held?`<span class="wait" title="보유 종목 (진입 후보 제외)">📋 보유</span>`
           :(r.cand?"":`<span class="wait" title="매수존 밖 — 지켜보기">⏳ 대기</span>`)}</td>
       <td>${sCell}</td>
+      <td>${escCell}</td>
       <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
       <td>${fmt(r.price)}${r.no_trade?`<span class="deep" title="장중 시세 조회 실패 — 정지·미거재 의심"> ⛔</span>`:""}</td>
       <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
@@ -380,7 +382,7 @@ function insertExp(code, trEl){
     : `선 +2~5% (현재 ${pl}%)`;
   const cond=`${zone} · 전일 ${candle} (음봉+꼬리1%+ 필요)`;
   const st=r.held?"📋 보유":(r.cand?"✅ 진입 가능":"⏳ 대기");
-  exp.innerHTML=`<td colspan="9"><div class="exptxt">형태: ${bkName(r.bkind)}<br>📊 ${r.score}점 = ${breakdown(r)}<br>${st} · 진입 조건: ${cond}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></div></td>`;
+  exp.innerHTML=`<td colspan="10"><div class="exptxt">형태: ${bkName(r.bkind)}<br>📊 ${r.score}점 = ${breakdown(r)}<br>${st} · 진입 조건: ${cond}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></div></td>`;
   tr.insertAdjacentElement("afterend", exp);
   refreshStamp();
   loadHist(code);
