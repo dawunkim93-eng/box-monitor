@@ -57,6 +57,7 @@ ENTRY_MODE = "close"   # 진입 시점: close(신호일 종가) · next_open(다
 ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
 CANDLE_MODE = "all"    # all | bear(음봉 신호만) | bear_tail(음봉+아래꼬리1%+)
 WBREAK = "close"       # 주봉박스 소멸 판정: close | confirm2(2연속) | buffer1(1% 버퍼)
+APOS = "far"           # A박스 위치 점수 방향: far(현행, 선에서 먼 쪽 가점) | near(가까운 쪽 가점)
 COMP_DUMP = None       # --dump 지정 시 포지션별 진입 지표 기록 (점수 재설계 분석용)
 SWEEP_GAPS = [0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
 
@@ -273,7 +274,11 @@ def score_new(kind, pos, atr, trend, height):
         h = 1 if (height is not None and height >= 0.22) else 0
         return p + a + t + h
     if kind == "abox":
-        p = 0 if pos is None or pos <= 0.02 else (1 if pos < 0.035 else 2)
+        if APOS == "near":
+            p = (2 if (pos is not None and pos <= 0.02)
+                 else (1 if (pos is not None and pos < 0.035) else 0))
+        else:
+            p = 0 if pos is None or pos <= 0.02 else (1 if pos < 0.035 else 2)
         if SCHEME == "S3":
             a = 0 if atr is None or atr < 0.05 else (1 if atr < 0.06 else (2 if atr < 0.07 else 3))
             t = 0 if trend is None or trend < 2.2 else 1
@@ -428,12 +433,27 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     continue
                 s = U[i]
                 dn_s = s["dn"]
-                je = j if ENTRY_MODE == "close" else j + 1
-                if je >= len(dn_s):
-                    continue
-                px_e = (float(s["c"][je])
-                        if ENTRY_MODE in ("close", "next_close")
-                        else float(s["o"][je]))
+                if ENTRY_MODE in ("limit_signal", "limit_line"):
+                    je = j + 1
+                    if je >= len(dn_s):
+                        continue
+                    if ENTRY_MODE == "limit_signal":
+                        lim = float(s["c"][j])          # 신호일 종가 지정가
+                    else:
+                        lim = (float(s["wlo"][je]) * 1.03
+                               if knd == "wbox" else float(s["tlv"][je]) * 1.03)
+                    if not (lim > 0):
+                        continue
+                    if float(s["l"][je]) > lim:         # 미체결 → 스킵
+                        continue
+                    px_e = min(float(s["o"][je]), lim)  # 갭다운 시 시가 체결
+                else:
+                    je = j if ENTRY_MODE == "close" else j + 1
+                    if je >= len(dn_s):
+                        continue
+                    px_e = (float(s["c"][je])
+                            if ENTRY_MODE in ("close", "next_close")
+                            else float(s["o"][je]))
                 if not (px_e > 0):
                     continue
                 if CANDLE_MODE != "all":        # 신호일 캔들 필터
@@ -659,10 +679,14 @@ def main():
     ap.add_argument("--out", type=str, default="")
     ap.add_argument("--scheme", choices=["S1", "S2", "S2b", "S3"],
                     default="S2b", help="점수안 (S2b 최종)")
-    ap.add_argument("--entry", choices=["close", "next_open", "next_close"],
+    ap.add_argument("--entry",
+                    choices=["close", "next_open", "next_close",
+                             "limit_signal", "limit_line"],
                     default="next_open",
-                    help="진입 시점 (close=신호일 종가 · next_open=다음날 시가 · "
-                         "next_close=다음날 종가)")
+                    help="진입 시점 (close/next_open/next_close · "
+                         "limit_signal=신호종가 지정가 · limit_line=경계+3% 지정가)")
+    ap.add_argument("--apos", choices=["far", "near"], default="far",
+                    help="A박스 위치 점수 방향 (far=먼 쪽 가점(현행) · near=가까운 쪽 가점)")
     ap.add_argument("--wbreak", choices=["close", "confirm2", "buffer1"],
                     default="close",
                     help="주봉박스 소멸 판정 (close=일봉 즉시 · confirm2=2연속 · buffer1=1% 버퍼)")
@@ -677,12 +701,13 @@ def main():
     ap.add_argument("--max-trips", type=int, default=1,
                     help="sameday=multi 시 차수당 당일 추가 왕복 상한 (기본 1)")
     args = ap.parse_args()
-    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK
+    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS
     SCHEME = args.scheme
     ENTRY_MODE = args.entry
     ENTRY_ZONE = args.entry_zone
     CANDLE_MODE = args.candle
     WBREAK = args.wbreak
+    APOS = args.apos
     MAX_TRIPS = max(0, args.max_trips)
     COMP_DUMP = [] if args.dump else None
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))
