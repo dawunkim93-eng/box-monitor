@@ -95,11 +95,20 @@
   <div id="view-live">
   <div class="stats" id="stats"></div>
   <div id="alertsec"></div>
-  <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)
+  <h2 class="sec" id="fav-sec" hidden>⭐ 보유 편집 (<span id="fav-cnt"></span>)
     <button id="btn-hold" class="tblbtn" title="⭐ 보유 종목 코드 복사 → 텔레그램에 붙여넣기 전송 = 보유 목록 자동 갱신 (2분 내)">⭐ 보유 목록 복사</button></h2>
+  <table id="fav-tbl" hidden>
+    <thead><tr>
+      <th class="nm">⭐ 종목</th><th>우선</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
+      <th>위치</th><th>하단대비</th><th class="hidem">갭</th>
+    </tr></thead>
+    <tbody id="fav-rows"></tbody>
+  </table>
+  <div class="sub" id="fav-mismatch" hidden style="margin:4px 0 8px;color:var(--amber)"></div>
+  <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)</h2>
   <table id="hold-tbl" hidden>
     <thead><tr>
-      <th class="nm">종목</th><th>상태</th><th class="nm">상세</th><th>현재가</th><th>위치</th>
+      <th>⭐</th><th class="nm">종목</th><th>상태</th><th class="nm">상세</th><th>현재가</th><th>위치</th>
     </tr></thead>
     <tbody id="hold-rows"></tbody>
   </table>
@@ -146,7 +155,7 @@
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th></tr></thead><tbody><tr><td colspan="6">로딩 중…</td></tr></tbody></table>
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
   </div>
-  <div class="stamp" id="foot"><span style="color:var(--red)">●</span>하단대비 +2% 이내 = 청산/손절 구역 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div class="stamp" id="foot"><span style="color:var(--red)">●</span>하단대비 +2% 이내 = 청산/손절 구역 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ⭐ 보유편집=즐겨찾기(로컬)→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 6점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
 </div>
@@ -206,6 +215,21 @@ function render(){
                    .filter(r=>candonly?!!r.cand:true);
   const holdList=Object.entries(d.holdings||{}).map(([code,h])=>({code,...h}));
   const byCode={}; rows.forEach(r=>{byCode[r.code]=r;});
+  const favRows=rows.filter(r=>FAVS.has(r.code));
+  $("#fav-sec").hidden=!FAVS.size;
+  $("#fav-tbl").hidden=!favRows.length;
+  document.getElementById("fav-cnt").textContent=FAVS.size?FAVS.size:"";
+  if(favRows.length){
+    document.getElementById("fav-rows").innerHTML=favRows.map(r=>rowHTML(r)).join("");
+  }
+  const holdCodes=new Set(holdList.map(h=>h.code));
+  const sameSet=(FAVS.size===holdCodes.size)
+    && [...FAVS].every(c=>holdCodes.has(c));
+  const mm=$("#fav-mismatch");
+  if((FAVS.size||holdList.length) && !sameSet){
+    mm.hidden=false;
+    mm.textContent=`⚠️ 즐겨찾기 ${FAVS.size}종 ≠ 보유파일 ${holdList.length}종 — [⭐ 보유 목록 복사] → 텔레그램 전송으로 동기화`;
+  }else{ mm.hidden=true; }
   $("#hold-sec").hidden=!holdList.length;
   $("#hold-tbl").hidden=!holdList.length;
   if(holdList.length){
@@ -217,7 +241,9 @@ function render(){
       const px=r?`${fmt(r.price)} <span class="sub">${pct(r.chg_pct)}</span>`
                :(h.px!=null?fmt(h.px):"-");
       const pos=r?(r.pos==null?"-":r.pos.toFixed(0)+"%"):"-";
-      return `<tr><td class="nm"><b>${h.name}</b></td><td class="${cls}">${h.status}</td>`
+      const fv=FAVS.has(h.code);
+      return `<tr><td><span class="fav${fv?" on":""}" data-c="${h.code}">${fv?"★":"☆"}</span></td>`
+        +`<td class="nm"><b>${h.name}</b></td><td class="${cls}">${h.status}</td>`
         +`<td class="nm sub">${h.detail||""}</td><td>${px}</td><td>${pos}</td></tr>`;
     }).join("");
   }
