@@ -56,6 +56,7 @@ MAX_TRIPS = 5          # 당일 다중 왕복 상한 (sameday=multi — 같은 �
 ENTRY_MODE = "close"   # 진입 시점: close(신호일 종가) · next_open(다음날 시가) · next_close(다음날 종가)
 ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
 CANDLE_MODE = "all"    # all | bear(음봉 신호만) | bear_tail(음봉+아래꼬리1%+)
+WBREAK = "close"       # 주봉박스 소멸 판정: close | confirm2(2연속) | buffer1(1% 버퍼)
 COMP_DUMP = None       # --dump 지정 시 포지션별 진입 지표 기록 (점수 재설계 분석용)
 SWEEP_GAPS = [0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
 
@@ -140,6 +141,16 @@ def load_universe():
         wwidth = np.where(okw, wwidthw[np.clip(kk, 0, nw - 1)], 0.0)
         wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
                         (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
+        okb = okw & (wwidth <= 0.30) & (np.abs(wdrift) <= 0.15)
+        if WBREAK == "close":
+            wvalid = wflag
+        elif WBREAK == "confirm2":
+            out_ = okw & ((c < wlo) | (c > whi))
+            prev_out = np.concatenate([[False], out_[:-1]])
+            wvalid = okb & ~(out_ & prev_out)
+        else:                      # buffer1
+            inb = okw & (c >= wlo * 0.99) & (c <= whi * 1.01)
+            wvalid = okb & inb
         liq = np.nan_to_num(amt20) >= AMT_MIN
         wdays = np.where(wflag & (wpos <= 0.5) & liq & (dn >= START))[0]
         for j in wdays:
@@ -224,7 +235,7 @@ def load_universe():
         U.append({"code": code, "name": name, "dn": dn, "o": o, "h": h, "l": l,
                   "c": c, "atr": atr, "amt20": amt20,
                   "bull": bull, "body": body, "lower_sh": lower_sh,
-                  "wflag": wflag, "wlo": wlo, "whi": whi, "wpos": wpos,
+                  "wflag": wflag, "wvalid": wvalid, "wlo": wlo, "whi": whi, "wpos": wpos,
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
@@ -343,10 +354,14 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 close_position(done, holdings, curve, i, px, "하단근접 청산", D)
                 continue
             # 2) 소멸 — wbox: 밴드 유지·상방 / abox: 구조 붕괴
-            if knd == "wbox" and ((not bool(s["wflag"][j]))
-                                  or (whi > 0 and px > whi)):
-                close_position(done, holdings, curve, i, px, "주봉박스 소멸", D)
-                continue
+            if knd == "wbox":
+                if WBREAK == "close":
+                    gone = (not bool(s["wflag"][j])) or (whi > 0 and px > whi)
+                else:
+                    gone = not bool(s["wvalid"][j])
+                if gone:
+                    close_position(done, holdings, curve, i, px, "주봉박스 소멸", D)
+                    continue
             if knd == "abox" and not bool(s["abox_rise"][j]):
                 close_position(done, holdings, curve, i, px, "추세선 붕괴", D)
                 continue
@@ -648,6 +663,9 @@ def main():
                     default="next_open",
                     help="진입 시점 (close=신호일 종가 · next_open=다음날 시가 · "
                          "next_close=다음날 종가)")
+    ap.add_argument("--wbreak", choices=["close", "confirm2", "buffer1"],
+                    default="close",
+                    help="주봉박스 소멸 판정 (close=일봉 즉시 · confirm2=2연속 · buffer1=1% 버퍼)")
     ap.add_argument("--candle", choices=["all", "bear", "bear_tail"],
                     default="bear_tail",
                     help="신호일 캔들 필터 (bear=음봉만 · bear_tail=음봉+아래꼬리1%+)")
@@ -659,11 +677,12 @@ def main():
     ap.add_argument("--max-trips", type=int, default=1,
                     help="sameday=multi 시 차수당 당일 추가 왕복 상한 (기본 1)")
     args = ap.parse_args()
-    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE
+    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK
     SCHEME = args.scheme
     ENTRY_MODE = args.entry
     ENTRY_ZONE = args.entry_zone
     CANDLE_MODE = args.candle
+    WBREAK = args.wbreak
     MAX_TRIPS = max(0, args.max_trips)
     COMP_DUMP = [] if args.dump else None
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))

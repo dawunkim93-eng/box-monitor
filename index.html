@@ -266,7 +266,8 @@ function render(){
       const fv=FAVS.has(h.code);
       return `<tr><td><span class="fav${fv?" on":""}" data-c="${h.code}">${fv?"★":"☆"}</span></td>`
         +`<td class="nm"><b>${h.name}</b><br><span class="sub">${h.detail||""}</span></td>`
-        +`<td class="${cls}">${h.status}</td><td>${px}</td><td>${band}</td>`
+        +`<td class="${cls}">${h.status}${h.recovered?` <span class="up">· 현재 회복</span>`:""}</td>`
+        +`<td>${px}</td><td>${band}</td>`
         +`<td class="hidem">${pl}</td></tr>`;
     }).join("");
   }
