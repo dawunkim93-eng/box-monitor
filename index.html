@@ -102,6 +102,12 @@
   .mcard.brk{border-left:4px solid var(--red);background:#1d1114}
   .mtop{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
   .mname{font-weight:700}
+  .mscore{margin-left:auto;font-size:14px;font-weight:800;padding:1px 8px;
+          border-radius:999px;border:1px solid;white-space:nowrap;line-height:1.45}
+  .mscore .up,.mscore .dn{font-size:11px;margin-left:2px}
+  .mscore.t5{color:var(--amber);border-color:rgba(245,158,11,.6);background:rgba(245,158,11,.12)}
+  .mscore.t3{color:var(--blue);border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.10)}
+  .mscore.t0{color:var(--dim);border-color:var(--line);background:#1b1f28}
   .mrow{display:flex;align-items:center;gap:4px 9px;flex-wrap:wrap;margin-top:3px}
   .mrow .sub{font-size:11px}
   .mcard .posbar{width:48px}
@@ -662,9 +668,11 @@ function mobileRowHTML(r){
   const risk = r.risk?'<span class="deep" title="부채&gt;150%+영업적자">⚠재무</span>':"";
   const status = r.held?'<span class="wait">📋 보유</span>'
     :(r.cand?'<span class="btyp bcand">✅ 진입</span>':'<span class="wait">⏳ 대기</span>');
-  const score = (r.score==null)?"-":
-    `${r.score}점`+((r.score_m!=null&&r.score>r.score_m)?' <span class="up">▲</span>'
-      :((r.score_m!=null&&r.score<r.score_m)?' <span class="dn">▼</span>':""));
+  const scoreTxt = (r.score==null)?"-":
+    `${r.score}점`+((r.score_m!=null&&r.score>r.score_m)?'<span class="up">▲</span>'
+      :((r.score_m!=null&&r.score<r.score_m)?'<span class="dn">▼</span>':""));
+  const scoreTier = (r.score==null)?"t0":(r.score>=5?"t5":(r.score>=3?"t3":"t0"));
+  const scoreBadge = `<span class="mscore ${scoreTier}" title="점수 ${r.score==null?"-":r.score}점 (6점 만점)">${scoreTxt}</span>`;
   const esc = (r.esc_p==null)?"탈출 -":`탈출 ${r.esc_p}%`;
   const mor = (r.score_m==null)?"아침 -":`아침 ${r.score_m}점`;
   const atr = (r.atr==null)?"ATR -":`ATR ${(r.atr*100).toFixed(1)}%`;
@@ -676,8 +684,8 @@ function mobileRowHTML(r){
   const scoreLine = (r.score==null)?"점수 없음":`📊 ${r.score}점 = ${breakdown(r)}`;
   return `<div class="mcard${rc}">
     <div class="mtop"><input type="checkbox" class="heldchk" data-c="${r.code}" ${chk?"checked":""} aria-label="보유 체크">
-      ${strong}<b class="mname">${r.name}</b>${tag}${risk}${status}</div>
-    <div class="mrow">${score} · ${esc} · ${mor}</div>
+      ${strong}<b class="mname">${r.name}</b>${tag}${risk}${status}${scoreBadge}</div>
+    <div class="mrow">${esc} · ${mor}</div>
     <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
     <div class="mrow">하단 ${pl} · ${atr} · ${gap}</div>
     <details class="mdet" data-c="${r.code}">
