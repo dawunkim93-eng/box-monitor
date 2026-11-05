@@ -180,7 +180,10 @@
     <table id="v-year-tbl"><thead><tr><th class="nm">연도</th><th>손익</th><th>포지션</th><th>탈출율</th></tr></thead><tbody><tr><td colspan="4">로딩 중…</td></tr></tbody></table>
     <h2 class="sec">청산 사유 · 지속기간</h2>
     <div class="sub" id="v-exit">로딩 중…</div>
-    <h2 class="sec">최근 포지션 (30)</h2>
+    <h2 class="sec">📌 실제 보유 이력 (holdings)</h2>
+    <div class="sub" id="hh-note">보유 변경 기록을 불러오는 중…</div>
+    <table id="hh-tbl"><thead><tr><th class="nm">종목</th><th>추가</th><th>제거</th><th>보유</th><th>상태</th><th class="hidem">참고 수익률</th></tr></thead><tbody><tr><td colspan="6">로딩 중…</td></tr></tbody></table>
+    <h2 class="sec">🧪 시뮬 최근 포지션 (30)</h2>
     <table id="v-pos-tbl"><thead><tr><th class="nm">종목</th><th class="mhide">진입</th><th class="mhide">청산</th><th>지속</th><th>점수</th><th>1차탈출</th><th class="mhide">사이클</th><th>손익</th></tr></thead><tbody><tr><td colspan="8">로딩 중…</td></tr></tbody></table>
     <h2 class="sec">📈 순위·주가 추적 (매일 상위 20 스냅샷)</h2>
     <div class="toolbar">
@@ -521,6 +524,7 @@ function render(){
     if(tr) insertExp(EXPANDED, tr);
     else EXPANDED=null;
   }
+  renderHoldingsHistory();
   updateScrollHints();
 }
 function favPH(h){
@@ -803,6 +807,35 @@ function renderValid(V){
      <td>${p.days}일</td><td>${p.score}점</td><td>${p.escaped?`<span class="up">✓</span>`:`<span class="dn">✗</span>`}</td>
      <td class="mhide">${p.cycles}</td><td class="${p.net>=0?"up":"dn"}">${p.net>=0?"+":""}${fmt(p.net)}</td></tr>`).join("");
   updateScrollHints();
+}
+function durTxt(d){
+  if(d==null) return "-";
+  if(d<1) return Math.max(1,Math.round(d*24))+"시간";
+  return (d>=10?Math.round(d):d.toFixed(1))+"일";
+}
+function renderHoldingsHistory(){
+  const tb=document.getElementById("hh-tbl").tBodies[0];
+  if(!tb) return;
+  const H=(DATA&&DATA.holdings_history)||[];
+  const note=document.getElementById("hh-note");
+  if(note){
+    note.textContent=(DATA&&DATA.holdings_history_since)
+      ?`기록 시작 ${DATA.holdings_history_since} · 텔레그램 보유 변경 시점 기준 · 과거 이력은 기록 시작 전까지 없음`
+      :"보유 변경 기록이 아직 없습니다";
+  }
+  if(!H.length){
+    tb.innerHTML='<tr><td colspan="6">실제 보유 변경 이력 없음 — 기록 시작 이후 변경 없음</td></tr>';
+    return;
+  }
+  tb.innerHTML=H.map(h=>{
+    const st=h.status==="보유 중"?'<span class="up">보유 중</span>':'<span class="sub">청산</span>';
+    const rr=(h.ref_ret==null)?"-"
+      :`<span class="${h.ref_ret>=0?"up":"dn"}">${h.ref_ret>=0?"+":""}${h.ref_ret.toFixed(1)}%</span> <span class="sub">참고</span>`;
+    return `<tr><td class="nm"><b>${h.name}</b></td>`
+      +`<td>${h.add||"-"}</td><td>${h.remove||"-"}</td>`
+      +`<td>${durTxt(h.days)}</td><td>${st}</td>`
+      +`<td class="hidem">${rr}</td></tr>`;
+  }).join("");
 }
 function renderHist(){
   if(!HIST||!HIST.length)return;
