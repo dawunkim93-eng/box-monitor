@@ -64,8 +64,12 @@
           border-radius:4px;vertical-align:middle;overflow:hidden}
   .posbar.out{border:1px solid var(--red);background:#2a1215;width:58px;height:6px}
   .posbar i{display:block;height:100%;border-radius:4px}
-  .fav{cursor:pointer;font-size:15px;color:#3a3f4a;user-select:none}
+  .fav{cursor:pointer;font-size:15px;color:#8b93a3;user-select:none;background:none;
+        border:0;padding:0;width:30px;height:30px;display:inline-flex;align-items:center;
+        justify-content:center;border-radius:6px;vertical-align:middle;font-family:inherit}
   .fav.on{color:var(--amber)}
+  .fav:focus-visible,tr[data-code]:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+  @media(max-width:640px){ .fav{width:36px;height:36px} }
   .btyp{display:inline-block;margin-left:4px;padding:0 4px;border-radius:4px;
         font-size:10px;vertical-align:middle;line-height:1.55;cursor:default}
   .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
@@ -89,11 +93,11 @@
       <h1>📦 박스권 모니터</h1>
       <div class="sub">주봉박스=13주 종가 밴드 ±30% · 상승저점=피벗 저가 연속 상승+추세선 위 · 거래대금 10억+ · 관찰 전용</div>
     </div>
-    <div class="sub" id="stamp">로딩 중…</div>
+    <div class="sub" id="stamp" aria-live="polite">로딩 중…</div>
   </div>
-  <div class="tabs">
-    <button id="tb-live" class="tab on" data-t="live">실시간</button>
-    <button id="tb-valid" class="tab" data-t="valid">검증</button>
+  <div class="tabs" role="tablist">
+    <button id="tb-live" class="tab on" data-t="live" role="tab" aria-selected="true">실시간</button>
+    <button id="tb-valid" class="tab" data-t="valid" role="tab" aria-selected="false">검증</button>
   </div>
   <div id="view-live">
   <div class="stats" id="stats"></div>
@@ -124,8 +128,8 @@
     <button data-s="pos">위치 낮은 순</button>
     <button data-s="pctlow">하단 대비 낮은 순</button>
     <button data-s="name">이름</button>
-    <input id="q" placeholder="종목/코드 검색" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12.5px;width:150px">
-    <select id="kindfilter" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:12.5px">
+    <input id="q" aria-label="종목명 또는 코드 검색" placeholder="종목/코드 검색" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12.5px;width:150px">
+    <select id="kindfilter" aria-label="박스 형태 필터" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:12.5px">
       <option value="all">전체 형태</option><option value="wbox">주봉</option><option value="abox">상승</option>
     </select>
     <span class="sub" id="row-count"></span>
@@ -157,7 +161,7 @@
     <table id="v-pos-tbl"><thead><tr><th class="nm">종목</th><th>진입</th><th>청산</th><th>지속</th><th>점수</th><th>1차탈출</th><th>사이클</th><th>손익</th></tr></thead><tbody><tr><td colspan="8">로딩 중…</td></tr></tbody></table>
     <h2 class="sec">📈 순위·주가 추적 (매일 상위 20 스냅샷)</h2>
     <div class="toolbar">
-      <span class="sub">날짜</span>
+      <label class="sub" for="snap-date">날짜</label>
       <select id="snap-date" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px"></select>
     </div>
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th></tr></thead><tbody><tr><td colspan="6">로딩 중…</td></tr></tbody></table>
@@ -177,21 +181,54 @@ document.querySelectorAll("table").forEach(t=>{
   w.className="tablewrap";
   t.parentNode.insertBefore(w,t);
   w.appendChild(t);
+  t.querySelectorAll("th").forEach(th=>th.setAttribute("scope","col"));
 });
-let DATA=null, SORT="prio", EXPANDED=null,
-    FAVS=new Set(JSON.parse(localStorage.getItem("boxfavs")||"[]"));
+let DATA=null, SORT="prio", EXPANDED=null, FAVS=new Set();
+try{
+  const _fv=JSON.parse(localStorage.getItem("boxfavs")||"[]");
+  if(Array.isArray(_fv)) FAVS=new Set(_fv.filter(x=>typeof x==="string"));
+}catch(e){ FAVS=new Set(); }
 let FAVNAMES={};
 try{FAVNAMES=JSON.parse(localStorage.getItem("boxfavnames")||"{}")||{}}catch(e){FAVNAMES={};}
 const fmt=n=>n==null?"-":Math.round(n).toLocaleString("ko-KR");
 const pct=n=>n==null?"-":(n>0?"+":"")+n.toFixed(1)+"%";
 const cn=n=>n==null?"":(n>0?"up":n<0?"dn":"");
 function saveFavs(){
-  localStorage.setItem("boxfavs",JSON.stringify([...FAVS]));
-  localStorage.setItem("boxfavnames",JSON.stringify(FAVNAMES));
+  try{
+    localStorage.setItem("boxfavs",JSON.stringify([...FAVS]));
+    localStorage.setItem("boxfavnames",JSON.stringify(FAVNAMES));
+  }catch(e){}
 }
+document.addEventListener("click",e=>{
+  const fav=e.target.closest(".fav");
+  if(fav){
+    e.preventDefault(); e.stopPropagation();
+    const c=fav.dataset.c;
+    const r=(DATA&&DATA.rows)?DATA.rows.find(x=>x.code===c):null;
+    if(FAVS.has(c)){ FAVS.delete(c); }
+    else{
+      FAVS.add(c);
+      FAVNAMES[c]=(r&&r.name)||(DATA&&DATA.holdings&&DATA.holdings[c]&&DATA.holdings[c].name)
+        ||FAVNAMES[c]||c;
+    }
+    saveFavs();render();
+    return;
+  }
+  const tr=e.target.closest("tr[data-code]");
+  if(tr) toggleBreak(tr.dataset.code,tr);
+});
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ")&&e.target.matches("tr[data-code]")){
+    e.preventDefault(); toggleBreak(e.target.dataset.code,e.target);
+  }
+});
 document.querySelectorAll(".toolbar button").forEach(b=>{
+  b.setAttribute("aria-pressed",b.classList.contains("on")?"true":"false");
   b.addEventListener("click",()=>{SORT=b.dataset.s;
-    document.querySelectorAll(".toolbar button").forEach(x=>x.classList.toggle("on",x===b));
+    document.querySelectorAll(".toolbar button").forEach(x=>{
+      x.classList.toggle("on",x===b);
+      x.setAttribute("aria-pressed",x===b?"true":"false");
+    });
     render();});
 });
 $("#favonly").addEventListener("change",render);
@@ -217,8 +254,10 @@ function restoreUIState(){
     SORT=v.sort||SORT;
     $("#q").value=v.q||""; $("#kindfilter").value=v.kind||"all";
     $("#favonly").checked=!!v.favonly; $("#candonly").checked=!!v.candonly;
-    document.querySelectorAll(".toolbar button").forEach(x=>
-      x.classList.toggle("on",x.dataset.s===SORT));
+    document.querySelectorAll(".toolbar button").forEach(x=>{
+      x.classList.toggle("on",x.dataset.s===SORT);
+      x.setAttribute("aria-pressed",x.dataset.s===SORT?"true":"false");
+    });
     EXPANDED=v.expanded||null;
     if(v.tab) setTab(v.tab);
   }catch(e){}
@@ -323,7 +362,7 @@ function render(){
         :((h.live_state==="이탈"||h.live_state==="이탈 지속")?"이탈":"유지");
       const ncls=(nstat==="유지")?"up":(nstat==="이탈"?"deep":"");
       const fv=FAVS.has(h.code);
-      return `<tr><td><span class="fav${fv?" on":""}" data-c="${h.code}">${fv?"★":"☆"}</span></td>`
+      return `<tr><td><button type="button" class="fav${fv?" on":""}" data-c="${h.code}" aria-pressed="${fv}" aria-label="${fv?"즐겨찾기 해제":"즐겨찾기 추가"}">${fv?"★":"☆"}</button></td>`
         +`<td class="nm"><b>${h.name}</b><br><span class="sub">${h.detail||""}</span></td>`
         +`<td class="nm ${dcls}" title="${dtip}">${dstat}</td>`
         +`<td class="nm ${ncls}" title="${ntip}">${nstat}</td>`
@@ -335,20 +374,6 @@ function render(){
   $("#rows").innerHTML=mainRows.length
     ? mainRows.map(r=>rowHTML(r)).join("")
     : `<tr><td colspan="10">조건에 맞는 종목 없음 — <button class="tblbtn" onclick="clearFilters()">필터 해제</button></td></tr>`;
-  document.querySelectorAll(".fav").forEach(el=>
-    el.addEventListener("click",e=>{
-      e.stopPropagation();
-      const c=el.dataset.c;
-      if(FAVS.has(c)){ FAVS.delete(c); }
-      else{
-        FAVS.add(c);
-        FAVNAMES[c]=(byCode[c]&&byCode[c].name)
-          ||(d.holdings&&d.holdings[c]&&d.holdings[c].name)||FAVNAMES[c]||c;
-      }
-      saveFavs();render();
-    }));
-  document.querySelectorAll("tr[data-code]").forEach(tr=>
-    tr.addEventListener("click",()=>toggleBreak(tr.dataset.code, tr)));
   if(EXPANDED!=null){
     const tr=document.querySelector(`#fav-rows tr[data-code="${EXPANDED}"]`)
           || document.querySelector(`#hold-rows tr[data-code="${EXPANDED}"]`)
@@ -358,7 +383,7 @@ function render(){
   }
 }
 function favPH(h){
-  return `<tr><td class="nm"><span class="fav on" data-c="${h.code}">★</span> <b>${h.name}</b>`
+  return `<tr><td class="nm"><button type="button" class="fav on" data-c="${h.code}" aria-pressed="true" aria-label="즐겨찾기 해제">★</button> <b>${h.name}</b>`
     +`<span class="sub" style="margin-left:4px">· ${h.status}</span></td>`
     +`<td class="sub">–</td><td class="sub">–</td>`
     +`<td class="mhide sub">–</td><td class="sub">–</td>`
@@ -385,8 +410,8 @@ function rowHTML(r){
       +((r.score_m!=null&&r.score>r.score_m)?` <span class="up">▲</span>`
         :((r.score_m!=null&&r.score<r.score_m)?` <span class="dn">▼</span>`:"")));
     const escCell=(r.esc_p==null?"-":`${r.esc_p}%`);
-    return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}">
-      <td class="nm"><span class="fav${fav?" on":""}" data-c="${r.code}">${fav?"★":"☆"}</span>
+    return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}" tabindex="0" role="button" aria-expanded="${EXPANDED===r.code?"true":"false"}" aria-label="${r.name} 상세 보기">
+      <td class="nm"><button type="button" class="fav${fav?" on":""}" data-c="${r.code}" aria-pressed="${fav}" aria-label="${fav?"즐겨찾기 해제":"즐겨찾기 추가"}">${fav?"★":"☆"}</button>
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
         ${r.bkind==="wbox"?`<span class="btyp bw" title="주봉 박스 — 13주 종가 밴드 ±30% · 진입=밴드 하위 절반 · 청산=밴드 이탈">주봉</span>`
           :`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`}
@@ -443,6 +468,7 @@ function insertExp(code, trEl){
   const cond=`${zone} · 전일 ${candle} (음봉+꼬리1%+ 필요)`;
   const st=r.held?"📋 보유":(r.cand?"✅ 진입 가능":"⏳ 대기");
   exp.innerHTML=`<td colspan="10"><div class="exptxt">형태: ${bkName(r.bkind)}<br>📊 ${r.score}점 = ${breakdown(r)}<br>${st} · 진입 조건: ${cond}<br><span id="hist-${code}" class="sub">📁 이력 로딩…</span></div></td>`;
+  tr.setAttribute("aria-expanded","true");
   tr.insertAdjacentElement("afterend", exp);
   refreshStamp();
   loadHist(code);
@@ -470,6 +496,10 @@ function toggleBreak(code, trEl){
   if(EXPANDED===code){ EXPANDED=null;
     const old=document.getElementById("exp-row");
     if(old) old.remove();
+    const cur=document.querySelector(`#fav-rows tr[data-code="${code}"]`)
+      || document.querySelector(`#hold-rows tr[data-code="${code}"]`)
+      || document.querySelector(`#rows tr[data-code="${code}"]`);
+    if(cur) cur.setAttribute("aria-expanded","false");
     refreshStamp();
     return; }
   const old=document.getElementById("exp-row");
@@ -478,19 +508,21 @@ function toggleBreak(code, trEl){
   insertExp(code, trEl);
 }
 async function load(){
+  if(document.hidden) return;
   try{
     const r=await fetch("data/box_live.json?t="+Date.now(),{cache:"no-store"});
     if(!r.ok) throw new Error("HTTP "+r.status);
     DATA=await r.json();
     if(DATA.ver){
-      const seen=localStorage.getItem("boxver");
+      let seen=null;
+      try{ seen=localStorage.getItem("boxver"); }catch(e){}
       if(seen && seen!==DATA.ver){
-        localStorage.setItem("boxver",DATA.ver);
+        try{ localStorage.setItem("boxver",DATA.ver); }catch(e){}
         saveUIState();
         location.replace(location.pathname+"?b="+DATA.ver);
         return;
       }
-      localStorage.setItem("boxver",DATA.ver);
+      try{ localStorage.setItem("boxver",DATA.ver); }catch(e){}
     }
     render();
     if(UI_RESTORE){
@@ -507,6 +539,7 @@ async function load(){
   }
 }
 window.addEventListener("beforeunload",saveUIState);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); });
 restoreUIState();
 load(); setInterval(load,60000);
 document.getElementById("btn-hold").addEventListener("click",async()=>{
@@ -528,6 +561,8 @@ function setTab(t){
   document.getElementById("view-valid").hidden = t!=="valid";
   document.getElementById("tb-live").classList.toggle("on",t==="live");
   document.getElementById("tb-valid").classList.toggle("on",t==="valid");
+  document.getElementById("tb-live").setAttribute("aria-selected",t==="live"?"true":"false");
+  document.getElementById("tb-valid").setAttribute("aria-selected",t==="valid"?"true":"false");
   if(t==="valid") initValid();
 }
 document.querySelectorAll("#tb-live,#tb-valid").forEach(b=>
