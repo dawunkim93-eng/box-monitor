@@ -83,7 +83,16 @@
     tr.exp td{padding:5px 4px;font-size:11.8px}
     .exptxt{font-size:11.8px}
     th.hidem,td.hidem{display:none}
-    th.mhide,td.mhide{display:none} }
+    th.mhide,td.mhide{display:none}
+    #main-tbl th:first-child,#main-tbl td:first-child,
+    #fav-tbl th:first-child,#fav-tbl td:first-child{
+      position:sticky;left:0;z-index:2;background:var(--card);
+      box-shadow:1px 0 0 var(--line)}
+    #main-tbl th:first-child,#fav-tbl th:first-child{background:#1b1f28}
+    #main-tbl tr.brk td:first-child,#fav-tbl tr.brk td:first-child{background:#2a1215}
+  }
+  .tablehint{display:none;color:var(--dim);font-size:11px;text-align:right;margin:3px 2px 7px}
+  @media(max-width:640px){ .tablehint:not([hidden]){display:block} }
 </style>
 </head>
 <body>
@@ -140,7 +149,7 @@
       <input type="checkbox" id="candonly" style="vertical-align:middle"> ✅진입 가능만
     </label>
   </div>
-  <table>
+  <table id="main-tbl">
     <thead><tr>
       <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
       <th>위치</th><th>하단대비</th>
@@ -158,7 +167,7 @@
     <h2 class="sec">청산 사유 · 지속기간</h2>
     <div class="sub" id="v-exit">로딩 중…</div>
     <h2 class="sec">최근 포지션 (30)</h2>
-    <table id="v-pos-tbl"><thead><tr><th class="nm">종목</th><th>진입</th><th>청산</th><th>지속</th><th>점수</th><th>1차탈출</th><th>사이클</th><th>손익</th></tr></thead><tbody><tr><td colspan="8">로딩 중…</td></tr></tbody></table>
+    <table id="v-pos-tbl"><thead><tr><th class="nm">종목</th><th class="mhide">진입</th><th class="mhide">청산</th><th>지속</th><th>점수</th><th>1차탈출</th><th class="mhide">사이클</th><th>손익</th></tr></thead><tbody><tr><td colspan="8">로딩 중…</td></tr></tbody></table>
     <h2 class="sec">📈 순위·주가 추적 (매일 상위 20 스냅샷)</h2>
     <div class="toolbar">
       <label class="sub" for="snap-date">날짜</label>
@@ -182,7 +191,21 @@ document.querySelectorAll("table").forEach(t=>{
   t.parentNode.insertBefore(w,t);
   w.appendChild(t);
   t.querySelectorAll("th").forEach(th=>th.setAttribute("scope","col"));
+  const hint=document.createElement("div");
+  hint.className="tablehint";
+  hint.textContent="좌우로 밀어 더 보기 ↔";
+  hint.hidden=true;
+  w.insertAdjacentElement("afterend",hint);
 });
+function updateScrollHints(){
+  document.querySelectorAll(".tablewrap").forEach(w=>{
+    const hint=w.nextElementSibling;
+    if(hint&&hint.classList.contains("tablehint")){
+      hint.hidden=!(w.scrollWidth>w.clientWidth+2);
+    }
+  });
+}
+window.addEventListener("resize",updateScrollHints);
 let DATA=null, SORT="prio", EXPANDED=null, FAVS=new Set();
 try{
   const _fv=JSON.parse(localStorage.getItem("boxfavs")||"[]");
@@ -381,6 +404,7 @@ function render(){
     if(tr) insertExp(EXPANDED, tr);
     else EXPANDED=null;
   }
+  updateScrollHints();
 }
 function favPH(h){
   return `<tr><td class="nm"><button type="button" class="fav on" data-c="${h.code}" aria-pressed="true" aria-label="즐겨찾기 해제">★</button> <b>${h.name}</b>`
@@ -617,9 +641,10 @@ function renderValid(V){
   document.getElementById("v-exit").textContent=
     Object.entries(V.exit_kinds).map(([k,v])=>`${k} ${v}건`).join(" · ");
   document.getElementById("v-pos-tbl").tBodies[0].innerHTML=V.recent_positions.map(p=>
-    `<tr><td class="nm"><b>${p.name}</b></td><td>${p.entry_day}</td><td>${p.exit_day}</td>
+    `<tr><td class="nm"><b>${p.name}</b></td><td class="mhide">${p.entry_day}</td><td class="mhide">${p.exit_day}</td>
      <td>${p.days}일</td><td>${p.score}점</td><td>${p.escaped?`<span class="up">✓</span>`:`<span class="dn">✗</span>`}</td>
-     <td>${p.cycles}</td><td class="${p.net>=0?"up":"dn"}">${p.net>=0?"+":""}${fmt(p.net)}</td></tr>`).join("");
+     <td class="mhide">${p.cycles}</td><td class="${p.net>=0?"up":"dn"}">${p.net>=0?"+":""}${fmt(p.net)}</td></tr>`).join("");
+  updateScrollHints();
 }
 function renderHist(){
   if(!HIST||!HIST.length)return;
@@ -634,6 +659,7 @@ function renderHist(){
       :`<span class="${r.chg_pct>=0?"up":"dn"}">${r.chg_pct>=0?"+":""}${r.chg_pct}%</span>`;
     return `<tr><td>${r.rank}</td><td class="nm">${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b></td>
       <td>${r.score}점</td><td>${fmt(r.price)}</td><td>${rk}</td><td>${ch}</td></tr>`;}).join("");
+  updateScrollHints();
 }
 </script>
 </body>
