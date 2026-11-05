@@ -51,6 +51,7 @@
   .tblbtn{background:var(--card);border:1px solid var(--line);color:var(--txt);
           border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;margin-left:10px;
           vertical-align:middle}
+  .tblbtn:disabled{opacity:.45;cursor:not-allowed}
   tr.brk{background:#2a1215}
   tr.exp td{background:#1a1e28;padding:8px 10px;text-align:left;font-size:12.8px;
             color:var(--dim);white-space:normal;word-break:break-word}
@@ -67,12 +68,11 @@
           border-radius:4px;vertical-align:middle;overflow:hidden}
   .posbar.out{border:1px solid var(--red);background:#2a1215;width:58px;height:6px}
   .posbar i{display:block;height:100%;border-radius:4px}
-  .fav{cursor:pointer;font-size:15px;color:#8b93a3;user-select:none;background:none;
-        border:0;padding:0;width:30px;height:30px;display:inline-flex;align-items:center;
-        justify-content:center;border-radius:6px;vertical-align:middle;font-family:inherit}
-  .fav.on{color:var(--amber)}
-  .fav:focus-visible,tr[data-code]:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
-  @media(max-width:640px){ .fav{width:36px;height:36px} }
+  .heldchk{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;
+           vertical-align:middle;margin-right:4px}
+  .heldchk:focus-visible,tr[data-code]:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+  .hold-pending{color:var(--amber);font-weight:700}
+  @media(max-width:640px){ .heldchk{width:22px;height:22px} }
   .btyp{display:inline-block;margin-left:4px;padding:0 4px;border-radius:4px;
         font-size:10px;vertical-align:middle;line-height:1.55;cursor:default}
   .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
@@ -87,13 +87,12 @@
     .exptxt{font-size:11.8px}
     th.hidem,td.hidem{display:none}
     th.mhide,td.mhide{display:none}
-    #main-tbl th:first-child,#main-tbl td:first-child,
-    #fav-tbl th:first-child,#fav-tbl td:first-child{
+    #main-tbl th:first-child,#main-tbl td:first-child{
       position:sticky;left:0;z-index:2;background:var(--card);
       box-shadow:1px 0 0 var(--line)}
-    #main-tbl th:first-child,#fav-tbl th:first-child{background:#1b1f28}
+    #main-tbl th:first-child{background:#1b1f28}
     #main-tbl thead th:first-child{z-index:4}
-    #main-tbl tr.brk td:first-child,#fav-tbl tr.brk td:first-child{background:#2a1215}
+    #main-tbl tr.brk td:first-child{background:#2a1215}
   }
   .tablehint{display:none;color:var(--dim);font-size:11px;text-align:right;margin:3px 2px 7px}
   @media(max-width:640px){ .tablehint:not([hidden]){display:block} }
@@ -137,23 +136,15 @@
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
   <div class="stats" id="stats"></div>
   <div id="alertsec"></div>
-  <h2 class="sec" id="fav-sec" hidden>⭐ 보유 편집 (<span id="fav-cnt"></span>)
-    <button id="btn-hold" class="tblbtn" title="⭐ 보유 종목 코드 복사 → 텔레그램에 붙여넣기 전송 = 보유 목록 자동 갱신 (2분 내)">⭐ 보유 목록 복사</button></h2>
-  <table id="fav-tbl" hidden>
-    <thead><tr>
-      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
-      <th>위치</th><th>하단대비</th><th class="hidem">갭</th>
-    </tr></thead>
-    <tbody id="fav-rows"></tbody>
-  </table>
-  <div class="sub" id="fav-mismatch" hidden style="margin:4px 0 8px;color:var(--amber)"></div>
-  <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)</h2>
+  <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)
+    <button id="btn-hold" class="tblbtn" type="button" title="체크한 보유 종목 코드 복사 → 텔레그램 전송 = 보유 목록 자동 갱신 (2분 내)" disabled>☑ 보유 목록 복사</button></h2>
   <table id="hold-tbl" hidden>
     <thead><tr>
-      <th>⭐</th><th class="nm">종목</th><th class="nm">전일</th><th class="nm">현재</th><th>현재가</th><th>밴드</th><th class="hidem">하단대비</th>
+      <th>☑</th><th class="nm">종목</th><th class="nm">전일</th><th class="nm">현재</th><th>현재가</th><th>밴드</th><th class="hidem">하단대비</th>
     </tr></thead>
     <tbody id="hold-rows"></tbody>
   </table>
+  <div class="sub" id="hold-mismatch" hidden style="margin:4px 0 8px;color:var(--amber)"></div>
   <h2 class="sec">전체 목록</h2>
   <div class="toolbar">
     <span class="sub">정렬</span>
@@ -169,15 +160,12 @@
     </select>
     <span class="sub" id="row-count"></span>
     <label style="margin-left:8px;font-size:12.5px;color:var(--dim)">
-      <input type="checkbox" id="favonly" style="vertical-align:middle"> ⭐즐겨찾기만
-    </label>
-    <label style="margin-left:8px;font-size:12.5px;color:var(--dim)">
       <input type="checkbox" id="candonly" style="vertical-align:middle"> ✅진입 가능만
     </label>
   </div>
   <table id="main-tbl">
     <thead><tr>
-      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
+      <th class="nm">☑ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
       <th>위치</th><th>하단대비</th>
       <th class="hidem">갭</th>
     </tr></thead>
@@ -329,7 +317,7 @@
   </div>
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산/손절 구역 · +2% 이상 = 매수존 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ⭐ 보유편집=즐겨찾기 전체(박스 밖 포함)→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산/손절 구역 · +2% 이상 = 매수존 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 6점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -357,39 +345,54 @@ function updateScrollHints(){
   });
 }
 window.addEventListener("resize",updateScrollHints);
-let DATA=null, SORT="prio", EXPANDED=null, FAVS=new Set();
+let DATA=null, SORT="prio", EXPANDED=null;
+let HELD=new Set(), HELDNAMES={}, HELD_NEEDS_UNION=false;
 try{
-  const _fv=JSON.parse(localStorage.getItem("boxfavs")||"[]");
-  if(Array.isArray(_fv)) FAVS=new Set(_fv.filter(x=>typeof x==="string"));
-}catch(e){ FAVS=new Set(); }
-let FAVNAMES={};
-try{FAVNAMES=JSON.parse(localStorage.getItem("boxfavnames")||"{}")||{}}catch(e){FAVNAMES={};}
+  const _hr=localStorage.getItem("boxheld");
+  if(_hr!==null){
+    const _ha=JSON.parse(_hr);
+    if(Array.isArray(_ha)) HELD=new Set(_ha.filter(x=>typeof x==="string"));
+    try{
+      const _hn=JSON.parse(localStorage.getItem("boxheldnames")||"{}");
+      if(_hn&&typeof _hn==="object"&&!Array.isArray(_hn)) HELDNAMES=_hn;
+    }catch(e){}
+  }else{
+    HELD_NEEDS_UNION=true;       // 최초 1회: 기존 즐겨찾기 + 현재 보유파일 합집합
+    try{
+      const _of=JSON.parse(localStorage.getItem("boxfavs")||"[]");
+      if(Array.isArray(_of)) HELD=new Set(_of.filter(x=>typeof x==="string"));
+      const _on=JSON.parse(localStorage.getItem("boxfavnames")||"{}");
+      if(_on&&typeof _on==="object"&&!Array.isArray(_on)) HELDNAMES=_on;
+    }catch(e){}
+  }
+}catch(e){ HELD=new Set(); HELDNAMES={}; HELD_NEEDS_UNION=true; }
 const fmt=n=>n==null?"-":Math.round(n).toLocaleString("ko-KR");
 const pct=n=>n==null?"-":(n>0?"+":"")+n.toFixed(1)+"%";
 const cn=n=>n==null?"":(n>0?"up":n<0?"dn":"");
-function saveFavs(){
+function saveHeld(){
   try{
-    localStorage.setItem("boxfavs",JSON.stringify([...FAVS]));
-    localStorage.setItem("boxfavnames",JSON.stringify(FAVNAMES));
+    localStorage.setItem("boxheld",JSON.stringify([...HELD]));
+    localStorage.setItem("boxheldnames",JSON.stringify(HELDNAMES));
   }catch(e){}
 }
 document.addEventListener("click",e=>{
-  const fav=e.target.closest(".fav");
-  if(fav){
-    e.preventDefault(); e.stopPropagation();
-    const c=fav.dataset.c;
-    const r=(DATA&&DATA.rows)?DATA.rows.find(x=>x.code===c):null;
-    if(FAVS.has(c)){ FAVS.delete(c); }
-    else{
-      FAVS.add(c);
-      FAVNAMES[c]=(r&&r.name)||(DATA&&DATA.holdings&&DATA.holdings[c]&&DATA.holdings[c].name)
-        ||FAVNAMES[c]||c;
-    }
-    saveFavs();render();
-    return;
-  }
+  if(e.target.closest("input.heldchk")) return;   // 체크 클릭은 행 펼침과 분리
   const tr=e.target.closest("tr[data-code]");
   if(tr) toggleBreak(tr.dataset.code,tr);
+});
+document.addEventListener("change",e=>{
+  const chk=e.target.closest("input.heldchk");
+  if(!chk) return;
+  const c=chk.dataset.c;
+  if(chk.checked){
+    HELD.add(c);
+    const r=(DATA&&DATA.rows)?DATA.rows.find(x=>x.code===c):null;
+    HELDNAMES[c]=(r&&r.name)||(DATA&&DATA.holdings&&DATA.holdings[c]
+      &&DATA.holdings[c].name)||HELDNAMES[c]||c;
+  }else{
+    HELD.delete(c);
+  }
+  saveHeld(); render();
 });
 document.addEventListener("keydown",e=>{
   if((e.key==="Enter"||e.key===" ")&&e.target.matches("tr[data-code]")){
@@ -405,7 +408,6 @@ document.querySelectorAll(".toolbar button").forEach(b=>{
     });
     render();});
 });
-$("#favonly").addEventListener("change",render);
 $("#candonly").addEventListener("change",render);
 $("#q").addEventListener("input",render);
 $("#kindfilter").addEventListener("change",render);
@@ -441,7 +443,7 @@ function saveUIState(){
   try{
     sessionStorage.setItem("boxui",JSON.stringify({
       sort:SORT,q:$("#q").value,kind:$("#kindfilter").value,
-      favonly:$("#favonly").checked,candonly:$("#candonly").checked,
+      candonly:$("#candonly").checked,
       tab:CURRENT_TAB,
       expanded:EXPANDED,scrollY:window.scrollY}));
   }catch(e){}
@@ -453,7 +455,7 @@ function restoreUIState(){
     UI_RESTORE=v;
     SORT=v.sort||SORT;
     $("#q").value=v.q||""; $("#kindfilter").value=v.kind||"all";
-    $("#favonly").checked=!!v.favonly; $("#candonly").checked=!!v.candonly;
+    $("#candonly").checked=!!v.candonly;
     document.querySelectorAll(".toolbar button").forEach(x=>{
       x.classList.toggle("on",x.dataset.s===SORT);
       x.setAttribute("aria-pressed",x.dataset.s===SORT?"true":"false");
@@ -465,21 +467,28 @@ function restoreUIState(){
 function refreshStamp(){
   $("#stamp").textContent=STAMP_BASE;
 }
-function loadHoldingsToFavs(){
+function loadHoldingsToHeld(){
   if(!DATA) return;
   const H=DATA.holdings||{};
-  FAVS=new Set(Object.keys(H));
-  Object.entries(H).forEach(([c,h])=>{ if(h&&h.name) FAVNAMES[c]=h.name; });
-  saveFavs(); render();
+  HELD=new Set(Object.keys(H));
+  Object.entries(H).forEach(([c,h])=>{ if(h&&h.name) HELDNAMES[c]=h.name; });
+  saveHeld(); render();
 }
 function clearFilters(){
   $("#q").value=""; $("#kindfilter").value="all";
-  $("#favonly").checked=false; $("#candonly").checked=false;
+  $("#candonly").checked=false;
   render();
 }
 function render(){
   if(!DATA)return;
   const d=DATA;
+  if(HELD_NEEDS_UNION){
+    const H=d.holdings||{};
+    Object.keys(H).forEach(c=>{ HELD.add(c); if(H[c]&&H[c].name) HELDNAMES[c]=H[c].name; });
+    HELD_NEEDS_UNION=false;
+    saveHeld();
+    try{ localStorage.removeItem("boxfavs"); localStorage.removeItem("boxfavnames"); }catch(e){}
+  }
   const oldExp=document.getElementById("exp-row");
   if(oldExp) oldExp.remove();
   STAMP_BASE=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")} · 빌드 ${d.ver||"-"}`;
@@ -501,7 +510,7 @@ function render(){
       <span class="warn">${x.time||""} 감지</span></div>`).join("")
     :`<div class="sub" style="margin:6px 0 10px">오늘 장중 이탈 감지 없음</div>`;
   let rows=(d.rows||[]).slice();
-  const favonly=$("#favonly").checked, candonly=$("#candonly").checked;
+  const candonly=$("#candonly").checked;
   const srt={
     prio:(x,y)=>((y.cand?1:0)-(x.cand?1:0))||((y.score||0)-(x.score||0))||((y.atr||0)-(x.atr||0)),
     score:(x,y)=>((y.score||0)-(x.score||0))||((y.atr||0)-(x.atr||0)),
@@ -511,97 +520,97 @@ function render(){
     name:(x,y)=>x.name.localeCompare(y.name,"ko")};
   rows.sort(srt[SORT]||srt.prio);
   const q=$("#q").value.trim().toLowerCase(), kf=$("#kindfilter").value;
-  const mainRows=(favonly?rows.filter(r=>FAVS.has(r.code)):rows)
-                   .filter(r=>candonly?!!r.cand:true)
+  const mainRows=rows.filter(r=>candonly?!!r.cand:true)
                    .filter(r=>kf==="all"||r.bkind===kf)
                    .filter(r=>!q||(r.name||"").toLowerCase().includes(q)||r.code.includes(q));
   const holdList=Object.entries(d.holdings||{}).map(([code,h])=>({code,...h}));
   const byCode={}; rows.forEach(r=>{byCode[r.code]=r;});
   let nmChanged=false;
-  [...FAVS].forEach(c=>{
-    if(!FAVNAMES[c]){
+  [...HELD].forEach(c=>{
+    if(!HELDNAMES[c]){
       const nm=(byCode[c]&&byCode[c].name)||(d.holdings&&d.holdings[c]&&d.holdings[c].name);
-      if(nm){FAVNAMES[c]=nm;nmChanged=true;}
+      if(nm){HELDNAMES[c]=nm;nmChanged=true;}
     }
   });
-  if(nmChanged) saveFavs();
-  const favBox=rows.filter(r=>FAVS.has(r.code));
-  const favRest=[...FAVS].filter(c=>!byCode[c]).map(c=>({
-      code:c, name:FAVNAMES[c]||c,
-      status:(d.holdings&&d.holdings[c]&&d.holdings[c].status)||"박스 없음"}))
-    .sort((a,b)=>a.name.localeCompare(b.name,"ko"));
-  $("#fav-sec").hidden=!FAVS.size;
-  $("#fav-tbl").hidden=!FAVS.size;
-  document.getElementById("fav-cnt").textContent=FAVS.size?FAVS.size:"";
-  if(FAVS.size){
-    document.getElementById("fav-rows").innerHTML=
-      favBox.map(r=>rowHTML(r)).join("") + favRest.map(h=>favPH(h)).join("");
-  }else{ document.getElementById("fav-rows").innerHTML=""; }
-  const holdCodes=new Set(holdList.map(h=>h.code));
-  const sameSet=(FAVS.size===holdCodes.size)
-    && [...FAVS].every(c=>holdCodes.has(c));
-  const mm=$("#fav-mismatch");
-  if((FAVS.size||holdList.length) && !sameSet){
-    mm.hidden=false;
-    mm.innerHTML=`⚠️ 즐겨찾기 ${FAVS.size}종 ≠ 보유파일 ${holdList.length}종 — [⭐ 보유 목록 복사] → 텔레그램 전송으로 동기화`
-      +((!FAVS.size&&holdList.length)
-        ?` <button class="tblbtn" type="button" onclick="loadHoldingsToFavs()">보유파일 → 즐겨찾기 불러오기</button>`
-        :"");
-  }else{ mm.hidden=true; }
-  $("#hold-sec").hidden=!holdList.length;
-  $("#hold-tbl").hidden=!holdList.length;
-  if(holdList.length){
-    document.getElementById("hold-cnt").textContent=holdList.length;
-    document.getElementById("hold-rows").innerHTML=holdList.map(h=>{
-      const r=byCode[h.code];
-      const px=(h.px!=null)
+  if(nmChanged) saveHeld();
+  const srvCodes=new Set(holdList.map(h=>h.code));
+  const pending=[...HELD].filter(c=>!srvCodes.has(c));
+  const ordered=[...pending, ...holdList.map(h=>h.code)];
+  const cnt=HELD.size;
+  const btn=document.getElementById("btn-hold");
+  if(btn){
+    btn.disabled=!cnt;
+    btn.textContent=cnt?"☑ 보유 목록 복사":"☑ 체크 없음";
+  }
+  $("#hold-sec").hidden=!(cnt||holdList.length);
+  $("#hold-tbl").hidden=!ordered.length;
+  document.getElementById("hold-cnt").textContent=`체크 ${cnt} / 보유파일 ${holdList.length}`;
+  if(ordered.length){
+    document.getElementById("hold-rows").innerHTML=ordered.map(code=>{
+      const h=(d.holdings||{})[code];
+      const r=byCode[code];
+      const checked=HELD.has(code);
+      const name=(h&&h.name)||HELDNAMES[code]||(r&&r.name)||code;
+      const pendingFlag=checked&&!h;
+      const px=(h&&h.px!=null)
         ?(`${fmt(h.px)}`+(h.chg_pct!=null?` <span class="${cn(h.chg_pct)}">${pct(h.chg_pct)}</span>`:""))
         :(r?`${fmt(r.price)} <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>`:"-");
-      const band=(h.bkind==="abox")
-        ?(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-")
-        :((h.wlo!=null&&h.whi!=null)
-          ?`${fmt(h.wlo)}~${fmt(h.whi)} <span class="sub">밴드</span>`
-          :(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-"));
-      const pl=h.pct_low!=null?`<span class="${h.pct_low<2?"deep":""}">${pct(h.pct_low)}</span>`:"-";
-      const dtip=(h.detail?`${h.status} — ${h.detail}`:(h.status||""));
-      const ntip=(h.live_state==null)?""
-        :(h.live_state+(h.pct_low!=null?` (${pct(h.pct_low)})`:""));
-      const dstat=(h.status||"").includes("데이터")?"-":(h.valid?"유지":"이탈");
-      const dcls=(dstat==="유지")?"hold-ok":(dstat==="이탈"?"hold-brk":"hold-etc");
-      const nstat=(h.live_state==null)?"-"
-        :((h.live_state==="이탈"||h.live_state==="이탈 지속")?"이탈":"유지");
-      const ncls=(nstat==="유지")?"up":(nstat==="이탈"?"deep":"");
-      const fv=FAVS.has(h.code);
-      return `<tr><td><button type="button" class="fav${fv?" on":""}" data-c="${h.code}" aria-pressed="${fv}" aria-label="${fv?"즐겨찾기 해제":"즐겨찾기 추가"}">${fv?"★":"☆"}</button></td>`
-        +`<td class="nm"><b>${h.name}</b><br><span class="sub">${h.detail||""}</span></td>`
+      const band=h
+        ?(h.bkind==="abox"
+          ?(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-")
+          :((h.wlo!=null&&h.whi!=null)
+            ?`${fmt(h.wlo)}~${fmt(h.whi)} <span class="sub">밴드</span>`
+            :(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-")))
+        :(r&&r.bline!=null?`${fmt(r.bline)} <span class="sub">·${r.bname||"경계"}</span>`:"-");
+      const plRaw=h?h.pct_low:(r?r.pct_low:null);
+      const pl=plRaw!=null?`<span class="${plRaw<2?"deep":""}">${pct(plRaw)}</span>`:"-";
+      let dstat="-",dcls="",dtip="",ntip="",nstat="-",ncls="";
+      if(pendingFlag){
+        dstat='<span class="hold-pending">전송 대기</span>';
+        dtip="체크됨 · 아직 보유파일에 없음";
+      }else if(h){
+        dtip=(h.detail?`${h.status} — ${h.detail}`:(h.status||""));
+        ntip=(h.live_state==null)?"":(h.live_state+(h.pct_low!=null?` (${pct(h.pct_low)})`:""));
+        dstat=(h.status||"").includes("데이터")?"-":(h.valid?"유지":"이탈");
+        dcls=(dstat==="유지")?"hold-ok":(dstat==="이탈"?"hold-brk":"hold-etc");
+        nstat=(h.live_state==null)?"-":((h.live_state==="이탈"||h.live_state==="이탈 지속")?"이탈":"유지");
+        ncls=(nstat==="유지")?"up":(nstat==="이탈"?"deep":"");
+      }
+      const fileOnly=(!checked&&h)?' <span class="sub">· 보유파일만</span>':"";
+      const detailLine=pendingFlag
+        ?'<br><span class="sub">체크됨 · 복사·전송 대기</span>'
+        :(h&&h.detail?`<br><span class="sub">${h.detail}</span>`:"");
+      return `<tr><td><input type="checkbox" class="heldchk" data-c="${code}" ${checked?"checked":""} aria-label="보유 체크"></td>`
+        +`<td class="nm"><b>${name}</b>${fileOnly}${detailLine}</td>`
         +`<td class="nm ${dcls}" title="${dtip}">${dstat}</td>`
         +`<td class="nm ${ncls}" title="${ntip}">${nstat}</td>`
         +`<td>${px}</td><td>${band}</td>`
         +`<td class="hidem">${pl}</td></tr>`;
     }).join("");
   }else{ document.getElementById("hold-rows").innerHTML=""; }
+  const sameSet=(HELD.size===srvCodes.size)&&[...HELD].every(c=>srvCodes.has(c));
+  const mm=$("#hold-mismatch");
+  if((HELD.size||holdList.length)&&!sameSet){
+    mm.hidden=false;
+    mm.innerHTML=`⚠️ 체크 ${HELD.size}종 ≠ 보유파일 ${holdList.length}종`
+      +(pending.length?` — 전송 대기 ${pending.length}종`:"")
+      +` — [☑ 보유 목록 복사] → 텔레그램 전송으로 동기화`
+      +((!HELD.size&&holdList.length)
+        ?` <button class="tblbtn" type="button" onclick="loadHoldingsToHeld()">보유파일 → 체크로 불러오기</button>`
+        :"");
+  }else{ mm.hidden=true; }
   $("#row-count").textContent=`표시 ${mainRows.length} / 전체 ${rows.length}`;
   $("#rows").innerHTML=mainRows.length
     ? mainRows.map(r=>rowHTML(r)).join("")
     : `<tr><td colspan="10">조건에 맞는 종목 없음 — <button class="tblbtn" onclick="clearFilters()">필터 해제</button></td></tr>`;
   if(EXPANDED!=null){
-    const tr=document.querySelector(`#fav-rows tr[data-code="${EXPANDED}"]`)
-          || document.querySelector(`#hold-rows tr[data-code="${EXPANDED}"]`)
+    const tr=document.querySelector(`#hold-rows tr[data-code="${EXPANDED}"]`)
           || document.querySelector(`#rows tr[data-code="${EXPANDED}"]`);
     if(tr) insertExp(EXPANDED, tr);
     else EXPANDED=null;
   }
   renderHoldingsHistory();
   updateScrollHints();
-}
-function favPH(h){
-  return `<tr><td class="nm"><button type="button" class="fav on" data-c="${h.code}" aria-pressed="true" aria-label="즐겨찾기 해제">★</button> <b>${h.name}</b>`
-    +`<span class="sub" style="margin-left:4px">· ${h.status}</span></td>`
-    +`<td class="sub">–</td><td class="sub">–</td>`
-    +`<td class="mhide sub">–</td><td class="sub">–</td>`
-    +`<td class="mhide sub">–</td><td class="hidem sub">–</td>`
-    +`<td class="sub">–</td><td class="sub">–</td>`
-    +`<td class="hidem sub">–</td></tr>`;
 }
 function rowHTML(r){
     const isbrk = r.pct_low!=null && r.pct_low<0;
@@ -616,14 +625,14 @@ function rowHTML(r){
         ?`<span class="posbar out" title="박스 경계 하향 이탈"></span>`
         :`<span class="posbar"><i style="width:${Math.min(100,Math.max(0,r.pos)).toFixed(0)}%;background:${pcol}"></i></span>`);
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
-    const fav = FAVS.has(r.code);
+    const chk = HELD.has(r.code);
     const sCell=(r.score==null?"-":
       `${r.score}점`
       +((r.score_m!=null&&r.score>r.score_m)?` <span class="up">▲</span>`
         :((r.score_m!=null&&r.score<r.score_m)?` <span class="dn">▼</span>`:"")));
     const escCell=(r.esc_p==null?"-":`${r.esc_p}%`);
     return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}" tabindex="0" role="button" aria-expanded="${EXPANDED===r.code?"true":"false"}" aria-label="${r.name} 상세 보기">
-      <td class="nm"><button type="button" class="fav${fav?" on":""}" data-c="${r.code}" aria-pressed="${fav}" aria-label="${fav?"즐겨찾기 해제":"즐겨찾기 추가"}">${fav?"★":"☆"}</button>
+      <td class="nm"><input type="checkbox" class="heldchk" data-c="${r.code}" ${chk?"checked":""} aria-label="보유 체크">
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
         ${r.bkind==="wbox"?`<span class="btyp bw" title="주봉 박스 — 13주 종가 밴드 ±30% · 진입=밴드 하위 절반 · 청산=밴드 이탈">주봉</span>`
           :`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`}
@@ -708,8 +717,7 @@ function toggleBreak(code, trEl){
   if(EXPANDED===code){ EXPANDED=null;
     const old=document.getElementById("exp-row");
     if(old) old.remove();
-    const cur=document.querySelector(`#fav-rows tr[data-code="${code}"]`)
-      || document.querySelector(`#hold-rows tr[data-code="${code}"]`)
+    const cur=document.querySelector(`#hold-rows tr[data-code="${code}"]`)
       || document.querySelector(`#rows tr[data-code="${code}"]`);
     if(cur) cur.setAttribute("aria-expanded","false");
     refreshStamp();
@@ -756,15 +764,15 @@ restoreUIState();
 load(); setInterval(load,60000);
 document.getElementById("btn-hold").addEventListener("click",async()=>{
   const btn=document.getElementById("btn-hold");
-  if(!FAVS.size){ btn.textContent="⭐ 없음"; setTimeout(()=>btn.textContent="⭐ 보유 목록 복사",1500); return; }
-  const codes=[...FAVS].join("\n");
+  if(!HELD.size){ btn.textContent="☑ 체크 없음"; setTimeout(()=>{ if(HELD.size) btn.textContent="☑ 보유 목록 복사"; },1500); return; }
+  const codes=[...HELD].join("\n");
   try{
     await navigator.clipboard.writeText(codes);
-    btn.textContent="복사됨 ✓ ("+FAVS.size+"종)";
+    btn.textContent="복사됨 ✓ ("+HELD.size+"종)";
   }catch(e){
     prompt("holdings.txt에 붙여넣기:", codes); return;
   }
-  setTimeout(()=>btn.textContent="⭐ 보유 목록 복사",1800);
+  setTimeout(()=>{ if(HELD.size) btn.textContent="☑ 보유 목록 복사"; },1800);
 });
 async function jget(p){const r=await fetch(p+"?t="+Date.now()); if(!r.ok) throw new Error(r.status); return r.json();}
 function setTab(t){
@@ -782,7 +790,7 @@ document.querySelectorAll(".tab").forEach(b=>
   b.addEventListener("click",()=>setTab(b.dataset.t)));
 function gotoLiveCandidates(){
   setTab("live");
-  $("#candonly").checked=true; $("#favonly").checked=false;
+  $("#candonly").checked=true;
   $("#q").value=""; $("#kindfilter").value="all";
   render();
   const el=document.getElementById("main-tbl");
