@@ -39,6 +39,9 @@
   .toolbar button.on{border-color:var(--blue);color:var(--blue)}
   .tablewrap{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
   .tablewrap>table{min-width:max-content}
+  .tablewrap-main{max-height:70vh;overflow:auto}
+  #main-tbl{overflow:visible}
+  #main-tbl thead th{position:sticky;top:0;z-index:3;background:#1b1f28}
   table{width:100%;border-collapse:collapse;background:var(--card);
         border:1px solid var(--line);border-radius:8px;overflow:hidden}
   th,td{padding:6px 7px;text-align:right;white-space:nowrap;font-size:12.8px}
@@ -89,6 +92,7 @@
       position:sticky;left:0;z-index:2;background:var(--card);
       box-shadow:1px 0 0 var(--line)}
     #main-tbl th:first-child,#fav-tbl th:first-child{background:#1b1f28}
+    #main-tbl thead th:first-child{z-index:4}
     #main-tbl tr.brk td:first-child,#fav-tbl tr.brk td:first-child{background:#2a1215}
   }
   .tablehint{display:none;color:var(--dim);font-size:11px;text-align:right;margin:3px 2px 7px}
@@ -178,7 +182,7 @@
   </div>
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 이내 = 청산/손절 구역 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ⭐ 보유편집=즐겨찾기 전체(박스 밖 포함)→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산/손절 구역 · +2% 이상 = 매수존 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ⭐ 보유편집=즐겨찾기 전체(박스 밖 포함)→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 6점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -187,7 +191,7 @@
 const $=s=>document.querySelector(s);
 document.querySelectorAll("table").forEach(t=>{
   const w=document.createElement("div");
-  w.className="tablewrap";
+  w.className="tablewrap"+(t.id==="main-tbl"?" tablewrap-main":"");
   t.parentNode.insertBefore(w,t);
   w.appendChild(t);
   t.querySelectorAll("th").forEach(th=>th.setAttribute("scope","col"));
@@ -288,6 +292,13 @@ function restoreUIState(){
 function refreshStamp(){
   $("#stamp").textContent=STAMP_BASE;
 }
+function loadHoldingsToFavs(){
+  if(!DATA) return;
+  const H=DATA.holdings||{};
+  FAVS=new Set(Object.keys(H));
+  Object.entries(H).forEach(([c,h])=>{ if(h&&h.name) FAVNAMES[c]=h.name; });
+  saveFavs(); render();
+}
 function clearFilters(){
   $("#q").value=""; $("#kindfilter").value="all";
   $("#favonly").checked=false; $("#candonly").checked=false;
@@ -359,7 +370,10 @@ function render(){
   const mm=$("#fav-mismatch");
   if((FAVS.size||holdList.length) && !sameSet){
     mm.hidden=false;
-    mm.textContent=`⚠️ 즐겨찾기 ${FAVS.size}종 ≠ 보유파일 ${holdList.length}종 — [⭐ 보유 목록 복사] → 텔레그램 전송으로 동기화`;
+    mm.innerHTML=`⚠️ 즐겨찾기 ${FAVS.size}종 ≠ 보유파일 ${holdList.length}종 — [⭐ 보유 목록 복사] → 텔레그램 전송으로 동기화`
+      +((!FAVS.size&&holdList.length)
+        ?` <button class="tblbtn" type="button" onclick="loadHoldingsToFavs()">보유파일 → 즐겨찾기 불러오기</button>`
+        :"");
   }else{ mm.hidden=true; }
   $("#hold-sec").hidden=!holdList.length;
   $("#hold-tbl").hidden=!holdList.length;
@@ -375,7 +389,7 @@ function render(){
         :((h.wlo!=null&&h.whi!=null)
           ?`${fmt(h.wlo)}~${fmt(h.whi)} <span class="sub">밴드</span>`
           :(h.tl!=null?`선 ${fmt(h.tl)} <span class="sub">추세선</span>`:"-"));
-      const pl=h.pct_low!=null?`<span class="${h.pct_low<=2?"deep":""}">${pct(h.pct_low)}</span>`:"-";
+      const pl=h.pct_low!=null?`<span class="${h.pct_low<2?"deep":""}">${pct(h.pct_low)}</span>`:"-";
       const dtip=(h.detail?`${h.status} — ${h.detail}`:(h.status||""));
       const ntip=(h.live_state==null)?""
         :(h.live_state+(h.pct_low!=null?` (${pct(h.pct_low)})`:""));
@@ -418,7 +432,7 @@ function favPH(h){
 function rowHTML(r){
     const isbrk = r.pct_low!=null && r.pct_low<0;
     const rc = isbrk?"brk":"";   // 행 배경 = 이탈(빨강)만 — 위치 구간은 바 색 담당
-    const kill = r.pct_low!=null && r.pct_low<=2;          // 청산/손절 구역
+    const kill = r.pct_low!=null && r.pct_low<2;           // 청산/손절 구역 (경계 +2% 미만)
     const bk=r.bkind;
     const blue = (bk==="wbox" && r.pos!=null && r.pos<=50)
               || (bk==="abox" && r.pct_low!=null && r.pct_low<=5);
