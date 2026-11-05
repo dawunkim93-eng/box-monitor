@@ -58,6 +58,7 @@ ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
 CANDLE_MODE = "all"    # all | bear(음봉 신호만) | bear_tail(음봉+아래꼬리1%+)
 WBREAK = "close"       # 주봉박스 소멸 판정: close | confirm2(2연속) | buffer1(1% 버퍼)
 APOS = "far"           # A박스 위치 점수 방향: far(현행, 선에서 먼 쪽 가점) | near(가까운 쪽 가점)
+ROTATE = "keep"        # keep(현행) | flat_first(플랫 시 회전) | flat_first_excl(회전 당일 동일종목 배제)
 COMP_DUMP = None       # --dump 지정 시 포지션별 진입 지표 기록 (점수 재설계 분석용)
 SWEEP_GAPS = [0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
 
@@ -334,6 +335,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
     for D in all_days:
         if D < START:
             continue
+        rotated_today = set()
         for i in list(holdings):
             hst, s = holdings[i], U[i]
             dn = s["dn"]
@@ -408,7 +410,11 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     if extra:
                         hst["net"] += extra * (gap * UNIT - FEE * UNIT)
                         hst["cycles"] += extra
-            if not any(held):      # 재눌림 → 재그리드 (타입별 매수존 복귀)
+            if not any(held):      # 재눌림 → 재그리드/회전 (타입별 매수존 복귀)
+                if ROTATE in ("flat_first", "flat_first_excl") and hst.get("escape0"):
+                    close_position(done, holdings, curve, i, px, "1차탈출 회전", D)
+                    rotated_today.add(i)
+                    continue
                 if knd == "wbox":
                     in_zone = (float(s["wpos"][j]) <= 0.5)
                 else:
@@ -430,6 +436,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 if free <= 0:
                     break
                 if i in holdings:
+                    continue
+                if ROTATE == "flat_first_excl" and i in rotated_today:
                     continue
                 s = U[i]
                 dn_s = s["dn"]
@@ -687,6 +695,9 @@ def main():
                          "limit_signal=신호종가 지정가 · limit_line=경계+3% 지정가)")
     ap.add_argument("--apos", choices=["far", "near"], default="far",
                     help="A박스 위치 점수 방향 (far=먼 쪽 가점(현행) · near=가까운 쪽 가점)")
+    ap.add_argument("--rotate",
+                    choices=["keep", "flat_first", "flat_first_excl"], default="keep",
+                    help="1차 탈출 후 슬롯 처리 (keep=재그리드 · flat_first=플랫 시 회전 · flat_first_excl=회전 당일 동일종목 배제)")
     ap.add_argument("--wbreak", choices=["close", "confirm2", "buffer1"],
                     default="close",
                     help="주봉박스 소멸 판정 (close=일봉 즉시 · confirm2=2연속 · buffer1=1% 버퍼)")
@@ -701,13 +712,14 @@ def main():
     ap.add_argument("--max-trips", type=int, default=1,
                     help="sameday=multi 시 차수당 당일 추가 왕복 상한 (기본 1)")
     args = ap.parse_args()
-    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS
+    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE
     SCHEME = args.scheme
     ENTRY_MODE = args.entry
     ENTRY_ZONE = args.entry_zone
     CANDLE_MODE = args.candle
     WBREAK = args.wbreak
     APOS = args.apos
+    ROTATE = args.rotate
     MAX_TRIPS = max(0, args.max_trips)
     COMP_DUMP = [] if args.dump else None
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))
@@ -773,6 +785,7 @@ def main():
                    "buy_zone": "주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5%",
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
+                   "rotate": ROTATE,
                    "pool": "주봉박스+상승저점",
                    "start": str(s["start_year"]),
                    "end": str(s["end_year"])},
