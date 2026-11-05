@@ -104,6 +104,18 @@
            padding:8px 12px;margin:6px 0}
   .rulebox.good{border-color:rgba(34,197,94,.5)}
   .rulebox.warn{border-color:rgba(245,158,11,.6)}
+  .strategychk{display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:13px}
+  .strategychk input{width:18px;height:18px;accent-color:var(--blue)}
+  .strategy-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .strategy{border:1px solid var(--line);border-radius:8px;padding:8px 10px;
+            background:var(--bg);transition:opacity .15s,border-color .15s}
+  .strategy.sel{border-color:var(--blue);box-shadow:0 0 0 1px rgba(59,130,246,.35) inset}
+  .strategy.dim{opacity:.5}
+  .strategy b{display:block;margin-bottom:3px}
+  .pick{display:none;float:right;font-size:10px;color:var(--blue);
+        border:1px solid rgba(59,130,246,.45);border-radius:4px;padding:0 4px}
+  .strategy.sel .pick{display:inline-block}
+  @media(max-width:640px){ .strategy-grid{grid-template-columns:1fr} }
   .rules .rowbtns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
   @media(max-width:640px){ .rules{max-width:100%;font-size:12.5px} .rulebox{padding:7px 9px} }
 </style>
@@ -251,6 +263,37 @@
         </ul>
       </div>
 
+      <h2 class="sec">수익 극대화 기능</h2>
+      <div class="rulebox">
+        <div class="strategychk">
+          <input type="checkbox" id="maxfn" aria-label="수익 극대화 기능 사용 가능">
+          <label for="maxfn">수익 극대화 기능 사용 가능 <span class="sub">(자동 재매수·재그리드)</span></label>
+        </div>
+        <div class="sub" style="margin:2px 0 6px">2·3·4차 등 아래 차수가 모두 매도되어 1차수만 남은 상태에서, 주가가 1차 매수가를 돌파해 1차수가 매도되면 슬롯이 마무리됩니다.</div>
+        <div class="strategy-grid">
+          <div class="strategy" id="strat-on">
+            <span class="pick">현재 선택</span><b>기능 사용 시 — 슬롯 유지</b>
+            <ul>
+              <li>1차 탈출 후에도 <b>슬롯 유지</b></li>
+              <li>매도된 차수를 같은 가격대에서 <b>재매수</b></li>
+              <li>전량 매도 후 <b>같은 종목 재그리드</b> (매수존 복귀 시)</li>
+              <li>회전 느림 · 보유 길어짐 · MDD 상대적으로 낮음</li>
+              <li>자동 재매수·재그리드 필요</li>
+            </ul>
+          </div>
+          <div class="strategy" id="strat-off">
+            <span class="pick">현재 선택</span><b>기능 미사용 시 — 슬롯 종료</b>
+            <ul>
+              <li>1차 탈출(모든 차수 매도) 시 <b>슬롯 종료</b></li>
+              <li>그날은 <b>현금 대기</b></li>
+              <li>다음날 08:15 순위 → <b>시초가 신규 진입</b></li>
+              <li>회전 빠름 · 보유 짧음 · MDD 상대적으로 높음</li>
+              <li>수동 주문만으로 가능</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <h2 class="sec">매도(청산)</h2>
       <div class="rulebox warn">
         <ul>
@@ -370,6 +413,30 @@ let STAMP_BASE="";
 let UI_RESTORE=null;
 let VALID=null, HIST=null;
 let CURRENT_TAB="live";
+let MAXFN=false;
+try{ MAXFN=localStorage.getItem("boxmaxfn")==="1"; }catch(e){ MAXFN=false; }
+function applyMaxFn(){
+  const cb=document.getElementById("maxfn");
+  const on=document.getElementById("strat-on");
+  const off=document.getElementById("strat-off");
+  if(!cb||!on||!off) return;
+  cb.checked=MAXFN;
+  on.classList.toggle("sel",MAXFN);
+  on.classList.toggle("dim",!MAXFN);
+  off.classList.toggle("sel",!MAXFN);
+  off.classList.toggle("dim",MAXFN);
+}
+try{
+  const _cb=document.getElementById("maxfn");
+  if(_cb){
+    _cb.addEventListener("change",()=>{
+      MAXFN=_cb.checked;
+      try{ localStorage.setItem("boxmaxfn",MAXFN?"1":"0"); }catch(e){}
+      applyMaxFn();
+    });
+    applyMaxFn();
+  }
+}catch(e){}
 function saveUIState(){
   try{
     sessionStorage.setItem("boxui",JSON.stringify({
