@@ -37,6 +37,8 @@
   .toolbar button{background:var(--card);border:1px solid var(--line);color:var(--txt);
                   border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer}
   .toolbar button.on{border-color:var(--blue);color:var(--blue)}
+  .tablewrap{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  .tablewrap>table{min-width:max-content}
   table{width:100%;border-collapse:collapse;background:var(--card);
         border:1px solid var(--line);border-radius:8px;overflow:hidden}
   th,td{padding:6px 7px;text-align:right;white-space:nowrap;font-size:12.8px}
@@ -72,11 +74,12 @@
   .tag{color:var(--green);font-weight:700}
   .up{color:var(--green)} .dn{color:var(--red)}
   .stamp{color:var(--dim);font-size:11.5px;margin-top:10px;text-align:center}
-  @media(max-width:640px){ .wrap{padding:8px}
+  @media(max-width:640px){ .wrap{padding:8px;width:100%;max-width:100vw}
     th,td{padding:5px 4px;font-size:11.8px}
     tr.exp td{padding:5px 4px;font-size:11.8px}
     .exptxt{font-size:11.8px}
-    th.hidem,td.hidem{display:none} }
+    th.hidem,td.hidem{display:none}
+    th.mhide,td.mhide{display:none} }
 </style>
 </head>
 <body>
@@ -99,7 +102,7 @@
     <button id="btn-hold" class="tblbtn" title="⭐ 보유 종목 코드 복사 → 텔레그램에 붙여넣기 전송 = 보유 목록 자동 갱신 (2분 내)">⭐ 보유 목록 복사</button></h2>
   <table id="fav-tbl" hidden>
     <thead><tr>
-      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
+      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
       <th>위치</th><th>하단대비</th><th class="hidem">갭</th>
     </tr></thead>
     <tbody id="fav-rows"></tbody>
@@ -135,7 +138,7 @@
   </div>
   <table>
     <thead><tr>
-      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th>아침</th><th>현재가</th><th>당일</th><th class="hidem">ATR</th>
+      <th class="nm">⭐ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
       <th>위치</th><th>하단대비</th>
       <th class="hidem">갭</th>
     </tr></thead>
@@ -169,6 +172,12 @@
 </div>
 <script>
 const $=s=>document.querySelector(s);
+document.querySelectorAll("table").forEach(t=>{
+  const w=document.createElement("div");
+  w.className="tablewrap";
+  t.parentNode.insertBefore(w,t);
+  w.appendChild(t);
+});
 let DATA=null, SORT="prio", EXPANDED=null,
     FAVS=new Set(JSON.parse(localStorage.getItem("boxfavs")||"[]"));
 let FAVNAMES={};
@@ -351,9 +360,11 @@ function render(){
 function favPH(h){
   return `<tr><td class="nm"><span class="fav on" data-c="${h.code}">★</span> <b>${h.name}</b>`
     +`<span class="sub" style="margin-left:4px">· ${h.status}</span></td>`
-    +`<td class="sub">–</td><td class="sub">–</td><td class="sub">–</td><td class="sub">–</td>`
-    +`<td class="hidem sub">–</td><td class="sub">–</td><td class="sub">–</td>`
-    +`<td class="sub">–</td><td class="hidem sub">–</td></tr>`;
+    +`<td class="sub">–</td><td class="sub">–</td>`
+    +`<td class="mhide sub">–</td><td class="sub">–</td>`
+    +`<td class="mhide sub">–</td><td class="hidem sub">–</td>`
+    +`<td class="sub">–</td><td class="sub">–</td>`
+    +`<td class="hidem sub">–</td></tr>`;
 }
 function rowHTML(r){
     const isbrk = r.pct_low!=null && r.pct_low<0;
@@ -385,9 +396,9 @@ function rowHTML(r){
           :`<span class="wait" title="매수존/캔들 조건 미충족 — 지켜보기">⏳ 대기</span>`)}</td>
       <td>${sCell}</td>
       <td>${escCell}</td>
-      <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
+      <td class="mhide">${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
       <td>${fmt(r.price)}${r.no_trade?`<span class="deep" title="장중 시세 조회 실패 — 정지·미거재 의심"> ⛔</span>`:""}</td>
-      <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
+      <td class="mhide ${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
       <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
       <td>${pbar}${r.pos==null?"":`<span class="sub" style="margin-left:4px">${r.pos<=0?"이탈":r.pos.toFixed(0)+"%"}</span>`}</td>
       <td><span title="${r.bname||"경계"} 기준">${lowpct}</span><span class="sub" style="font-size:10px">·${r.bname||""}</span></td>
