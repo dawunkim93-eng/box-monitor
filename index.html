@@ -12,21 +12,21 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);
        font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;
-       font-size:14px;line-height:1.45;
+       font-size:13.5px;line-height:1.45;
        -webkit-text-size-adjust:100%;text-size-adjust:100%}
   .wrap{width:max-content;margin:0 auto;padding:14px}
   .wrap>:not(table){max-width:100vw}
-  h1{font-size:19px;margin:6px 0 2px} .sub{color:var(--dim);font-size:12px}
+  h1{font-size:18px;margin:6px 0 2px} .sub{color:var(--dim);font-size:11.5px}
   .head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px}
   .tabs{display:flex;gap:6px;margin:10px 0 4px}
   .tab{background:var(--card);border:1px solid var(--line);color:var(--txt);
-       border-radius:8px;padding:8px 18px;font-size:14px;cursor:pointer}
+       border-radius:8px;padding:8px 18px;font-size:13.5px;cursor:pointer}
   .tab.on{border-color:var(--blue);color:var(--blue);font-weight:700}
   .stats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:8px;
-        padding:6px 10px;font-size:12.5px}
-  .chip b{font-size:14px}
-  h2.sec{font-size:14.5px;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+        padding:6px 10px;font-size:12px}
+  .chip b{font-size:13.5px}
+  h2.sec{font-size:14px;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
   .alert{border:1px solid var(--red);border-left:4px solid var(--red);background:#1d1114;
          border-radius:6px;padding:7px 10px;margin:5px 0;display:flex;
          justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -35,7 +35,7 @@
   .warn{color:var(--amber)}
   .toolbar{display:flex;gap:6px;align-items:center;margin:10px 0 6px;flex-wrap:wrap;flex-direction:row}
   .toolbar button{background:var(--card);border:1px solid var(--line);color:var(--txt);
-                  border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer}
+                  border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer}
   .toolbar button.on{border-color:var(--blue);color:var(--blue)}
   .tablewrap{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
   .tablewrap>table{min-width:max-content}
@@ -44,19 +44,19 @@
   #main-tbl thead th{position:sticky;top:0;z-index:3;background:#1b1f28}
   table{width:100%;border-collapse:collapse;background:var(--card);
         border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  th,td{padding:6px 7px;text-align:right;white-space:nowrap;font-size:12.8px}
+  th,td{padding:6px 7px;text-align:right;white-space:nowrap;font-size:12.2px}
   th{color:var(--dim);font-weight:600;border-bottom:1px solid var(--line);
      background:#1b1f28}
   th.nm,td.nm{text-align:left}
   .tblbtn{background:var(--card);border:1px solid var(--line);color:var(--txt);
-          border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;margin-left:10px;
+          border-radius:6px;padding:3px 10px;font-size:11.5px;cursor:pointer;margin-left:10px;
           vertical-align:middle}
   .tblbtn:disabled{opacity:.45;cursor:not-allowed}
   tr.brk{background:#2a1215}
-  tr.exp td{background:#1a1e28;padding:8px 10px;text-align:left;font-size:12.8px;
+  tr.exp td{background:#1a1e28;padding:8px 10px;text-align:left;font-size:12.2px;
             color:var(--dim);white-space:normal;word-break:break-word}
-  .exptxt{font-size:12.8px;line-height:1.5}
-  .wait{color:var(--amber);font-size:10px;margin-left:4px}
+  .exptxt{font-size:12.2px;line-height:1.5}
+  .wait{color:var(--amber);font-size:9.5px;margin-left:4px}
   .hold-ok{color:var(--green);font-weight:700}
   .hold-zone{color:var(--blue)}
   .hold-brk{color:var(--red);font-weight:700}
@@ -74,17 +74,17 @@
   .hold-pending{color:var(--amber);font-weight:700}
   @media(max-width:640px){ .heldchk{width:22px;height:22px} }
   .btyp{display:inline-block;margin-left:4px;padding:0 4px;border-radius:4px;
-        font-size:10px;vertical-align:middle;line-height:1.55;cursor:default}
+        font-size:9.5px;vertical-align:middle;line-height:1.55;cursor:default}
   .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .bcand{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .ba{color:var(--green);border:1px solid rgba(34,197,94,.45)}
   .tag{color:var(--green);font-weight:700}
   .up{color:var(--green)} .dn{color:var(--red)}
-  .stamp{color:var(--dim);font-size:11.5px;margin-top:10px;text-align:center}
+  .stamp{color:var(--dim);font-size:11px;margin-top:10px;text-align:center}
   @media(max-width:640px){ .wrap{padding:8px;width:100%;max-width:100vw}
-    th,td{padding:5px 4px;font-size:11.8px}
-    tr.exp td{padding:5px 4px;font-size:11.8px}
-    .exptxt{font-size:11.8px}
+    th,td{padding:5px 4px;font-size:11.5px}
+    tr.exp td{padding:5px 4px;font-size:11.5px}
+    .exptxt{font-size:11.5px}
     th.hidem,td.hidem{display:none}
     th.mhide,td.mhide{display:none}
     #main-tbl th:first-child,#main-tbl td:first-child{
@@ -94,16 +94,16 @@
     #main-tbl thead th:first-child{z-index:4}
     #main-tbl tr.brk td:first-child{background:#2a1215}
   }
-  .tablehint{display:none;color:var(--dim);font-size:11px;text-align:right;margin:3px 2px 7px}
+  .tablehint{display:none;color:var(--dim);font-size:10.5px;text-align:right;margin:3px 2px 7px}
   @media(max-width:640px){ .tablehint:not([hidden]){display:block} }
-  .rules{max-width:780px;white-space:normal;line-height:1.55;font-size:13px}
+  .rules{max-width:780px;white-space:normal;line-height:1.55;font-size:12.5px}
   .rules ul{margin:4px 0 2px;padding-left:18px}
   .rules li{margin:3px 0}
   .rulebox{background:var(--card);border:1px solid var(--line);border-radius:8px;
            padding:8px 12px;margin:6px 0}
   .rulebox.good{border-color:rgba(34,197,94,.5)}
   .rulebox.warn{border-color:rgba(245,158,11,.6)}
-  .strategychk{display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:13px}
+  .strategychk{display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:12.5px}
   .strategychk input{width:18px;height:18px;accent-color:var(--blue)}
   .strategy-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
   .strategy{border:1px solid var(--line);border-radius:8px;padding:8px 10px;
@@ -111,12 +111,12 @@
   .strategy.sel{border-color:var(--blue);box-shadow:0 0 0 1px rgba(59,130,246,.35) inset}
   .strategy.dim{opacity:.5}
   .strategy b{display:block;margin-bottom:3px}
-  .pick{display:none;float:right;font-size:10px;color:var(--blue);
+  .pick{display:none;float:right;font-size:9.5px;color:var(--blue);
         border:1px solid rgba(59,130,246,.45);border-radius:4px;padding:0 4px}
   .strategy.sel .pick{display:inline-block}
   @media(max-width:640px){ .strategy-grid{grid-template-columns:1fr} }
   .rules .rowbtns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
-  @media(max-width:640px){ .rules{max-width:100%;font-size:12.5px} .rulebox{padding:7px 9px} }
+  @media(max-width:640px){ .rules{max-width:100%;font-size:12px} .rulebox{padding:7px 9px} }
 </style>
 </head>
 <body>
@@ -154,12 +154,12 @@
     <button data-s="pos">위치 낮은 순</button>
     <button data-s="pctlow">하단 대비 낮은 순</button>
     <button data-s="name">이름</button>
-    <input id="q" aria-label="종목명 또는 코드 검색" placeholder="종목/코드 검색" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12.5px;width:150px">
-    <select id="kindfilter" aria-label="박스 형태 필터" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:12.5px">
+    <input id="q" aria-label="종목명 또는 코드 검색" placeholder="종목/코드 검색" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;width:150px">
+    <select id="kindfilter" aria-label="박스 형태 필터" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:12px">
       <option value="all">전체 형태</option><option value="wbox">주봉</option><option value="abox">상승</option>
     </select>
     <span class="sub" id="row-count"></span>
-    <label style="margin-left:8px;font-size:12.5px;color:var(--dim)">
+    <label style="margin-left:8px;font-size:12px;color:var(--dim)">
       <input type="checkbox" id="candonly" style="vertical-align:middle"> ✅진입 가능만
     </label>
   </div>
@@ -647,7 +647,7 @@ function rowHTML(r){
       <td class="mhide ${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
       <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
       <td>${pbar}${r.pos==null?"":`<span class="sub" style="margin-left:4px">${r.pos<=0?"이탈":r.pos.toFixed(0)+"%"}</span>`}</td>
-      <td><span title="${r.bname||"경계"} 기준">${lowpct}</span><span class="sub" style="font-size:10px">·${r.bname||""}</span></td>
+      <td><span title="${r.bname||"경계"} 기준">${lowpct}</span><span class="sub" style="font-size:9.5px">·${r.bname||""}</span></td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
     </tr>`;
 }
