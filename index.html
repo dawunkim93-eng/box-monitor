@@ -67,6 +67,7 @@
   .btyp{display:inline-block;margin-left:4px;padding:0 4px;border-radius:4px;
         font-size:10px;vertical-align:middle;line-height:1.55;cursor:default}
   .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
+  .bcand{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .ba{color:var(--green);border:1px solid rgba(34,197,94,.45)}
   .tag{color:var(--green);font-weight:700}
   .up{color:var(--green)} .dn{color:var(--red)}
@@ -115,11 +116,16 @@
   <div class="toolbar">
     <span class="sub">정렬</span>
     <button data-s="prio" class="on">진입 우선</button>
-    <button data-s="score">점수만</button>
-    <button data-s="atr">ATR</button>
+    <button data-s="score">점수 높은 순</button>
+    <button data-s="atr">ATR 높은 순</button>
     <button data-s="pos">위치 낮은 순</button>
     <button data-s="pctlow">하단 대비 낮은 순</button>
     <button data-s="name">이름</button>
+    <input id="q" placeholder="종목/코드 검색" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12.5px;width:150px">
+    <select id="kindfilter" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:12.5px">
+      <option value="all">전체 형태</option><option value="wbox">주봉</option><option value="abox">상승</option>
+    </select>
+    <span class="sub" id="row-count"></span>
     <label style="margin-left:8px;font-size:12.5px;color:var(--dim)">
       <input type="checkbox" id="favonly" style="vertical-align:middle"> ⭐즐겨찾기만
     </label>
@@ -152,11 +158,14 @@
       <select id="snap-date" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px"></select>
     </div>
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th></tr></thead><tbody><tr><td colspan="6">로딩 중…</td></tr></tbody></table>
-    <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 진입 규칙: 매수존(위치≤50%) 상위 20 · 100,000원/차수 · 그리드 사다리(±2.5% 러그매도 되팔기 — 10년 5설정 비교 최적) · 순위 추적은 2026-10-24부터 축적</div>
+    <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 100,000원/차수 · 그리드 사다리(±2.5% 되팔기) · 당일 다중 왕복 근사 · 순위 추적은 2026-10-24부터 축적</div>
   </div>
-  <div class="stamp" id="foot"><span style="color:var(--red)">●</span>하단대비 +2% 이내 = 청산/손절 구역 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ⭐ 보유편집=즐겨찾기 전체(박스 밖 포함)→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <details class="stamp" id="foot" style="text-align:left">
+    <summary>도움말 · 규칙/색상/조작 설명</summary>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 이내 = 청산/손절 구역 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ⭐ 보유편집=즐겨찾기 전체(박스 밖 포함)→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ⭐=즐겨찾기(로컬) · 행 탭=점수 성분 상세 · [⭐ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 6점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
+  </details>
 </div>
 <script>
 const $=s=>document.querySelector(s);
@@ -178,19 +187,50 @@ document.querySelectorAll(".toolbar button").forEach(b=>{
 });
 $("#favonly").addEventListener("change",render);
 $("#candonly").addEventListener("change",render);
+$("#q").addEventListener("input",render);
+$("#kindfilter").addEventListener("change",render);
 let STAMP_BASE="";
+let UI_RESTORE=null;
+function saveUIState(){
+  try{
+    sessionStorage.setItem("boxui",JSON.stringify({
+      sort:SORT,q:$("#q").value,kind:$("#kindfilter").value,
+      favonly:$("#favonly").checked,candonly:$("#candonly").checked,
+      tab:$("#tb-valid").classList.contains("on")?"valid":"live",
+      expanded:EXPANDED,scrollY:window.scrollY}));
+  }catch(e){}
+}
+function restoreUIState(){
+  try{
+    const v=JSON.parse(sessionStorage.getItem("boxui")||"null");
+    if(!v)return;
+    UI_RESTORE=v;
+    SORT=v.sort||SORT;
+    $("#q").value=v.q||""; $("#kindfilter").value=v.kind||"all";
+    $("#favonly").checked=!!v.favonly; $("#candonly").checked=!!v.candonly;
+    document.querySelectorAll(".toolbar button").forEach(x=>
+      x.classList.toggle("on",x.dataset.s===SORT));
+    EXPANDED=v.expanded||null;
+    if(v.tab) setTab(v.tab);
+  }catch(e){}
+}
 function refreshStamp(){
-  const td=document.querySelector("#rows tr[data-code] td:not(.nm)")
-        || document.querySelector("#hold-rows tr[data-code] td:not(.nm)");
-  const expTd=document.getElementById("exp-row");
-  const ex=expTd?expTd.querySelector("td"):null;
-  const f=el=>el?getComputedStyle(el).fontSize:"-";
-  $("#stamp").textContent=STAMP_BASE+` · 글꼴 진단: 표 ${f(td)} / 확장 ${f(ex)}`;
+  $("#stamp").textContent=STAMP_BASE;
+}
+function clearFilters(){
+  $("#q").value=""; $("#kindfilter").value="all";
+  $("#favonly").checked=false; $("#candonly").checked=false;
+  render();
 }
 function render(){
   if(!DATA)return;
   const d=DATA;
+  const oldExp=document.getElementById("exp-row");
+  if(oldExp) oldExp.remove();
   STAMP_BASE=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")} · 빌드 ${d.ver||"-"}`;
+  const upd=new Date((d.updated_at||"").replace(" ","T"));
+  const ageMin=upd.getTime()?(Date.now()-upd.getTime())/60000:0;
+  if(d.market==="장중"&&ageMin>30) STAMP_BASE+=" · ⚠️ 데이터 지연";
   refreshStamp();
   $("#stats").innerHTML=
     `<div class="chip">박스 유지 <b>${d.live_count}</b>종목</div>
@@ -215,8 +255,11 @@ function render(){
     pctlow:(x,y)=>(x.pct_low==null?999:x.pct_low)-(y.pct_low==null?999:y.pct_low),
     name:(x,y)=>x.name.localeCompare(y.name,"ko")};
   rows.sort(srt[SORT]||srt.prio);
+  const q=$("#q").value.trim().toLowerCase(), kf=$("#kindfilter").value;
   const mainRows=(favonly?rows.filter(r=>FAVS.has(r.code)):rows)
-                   .filter(r=>candonly?!!r.cand:true);
+                   .filter(r=>candonly?!!r.cand:true)
+                   .filter(r=>kf==="all"||r.bkind===kf)
+                   .filter(r=>!q||(r.name||"").toLowerCase().includes(q)||r.code.includes(q));
   const holdList=Object.entries(d.holdings||{}).map(([code,h])=>({code,...h}));
   const byCode={}; rows.forEach(r=>{byCode[r.code]=r;});
   let nmChanged=false;
@@ -238,7 +281,7 @@ function render(){
   if(FAVS.size){
     document.getElementById("fav-rows").innerHTML=
       favBox.map(r=>rowHTML(r)).join("") + favRest.map(h=>favPH(h)).join("");
-  }
+  }else{ document.getElementById("fav-rows").innerHTML=""; }
   const holdCodes=new Set(holdList.map(h=>h.code));
   const sameSet=(FAVS.size===holdCodes.size)
     && [...FAVS].every(c=>holdCodes.has(c));
@@ -278,8 +321,11 @@ function render(){
         +`<td>${px}</td><td>${band}</td>`
         +`<td class="hidem">${pl}</td></tr>`;
     }).join("");
-  }
-  $("#rows").innerHTML=mainRows.map(r=>rowHTML(r)).join("");
+  }else{ document.getElementById("hold-rows").innerHTML=""; }
+  $("#row-count").textContent=`표시 ${mainRows.length} / 전체 ${rows.length}`;
+  $("#rows").innerHTML=mainRows.length
+    ? mainRows.map(r=>rowHTML(r)).join("")
+    : `<tr><td colspan="10">조건에 맞는 종목 없음 — <button class="tblbtn" onclick="clearFilters()">필터 해제</button></td></tr>`;
   document.querySelectorAll(".fav").forEach(el=>
     el.addEventListener("click",e=>{
       e.stopPropagation();
@@ -295,9 +341,11 @@ function render(){
   document.querySelectorAll("tr[data-code]").forEach(tr=>
     tr.addEventListener("click",()=>toggleBreak(tr.dataset.code, tr)));
   if(EXPANDED!=null){
-    const tr=document.querySelector(`#hold-rows tr[data-code="${EXPANDED}"]`)
+    const tr=document.querySelector(`#fav-rows tr[data-code="${EXPANDED}"]`)
+          || document.querySelector(`#hold-rows tr[data-code="${EXPANDED}"]`)
           || document.querySelector(`#rows tr[data-code="${EXPANDED}"]`);
     if(tr) insertExp(EXPANDED, tr);
+    else EXPANDED=null;
   }
 }
 function favPH(h){
@@ -333,14 +381,15 @@ function rowHTML(r){
           :`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`}
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}
         ${r.held?`<span class="wait" title="보유 종목 (진입 후보 제외)">📋 보유</span>`
-          :(r.cand?"":`<span class="wait" title="매수존 밖 — 지켜보기">⏳ 대기</span>`)}</td>
+          :(r.cand?`<span class="btyp bcand" title="매수존 + 전일 음봉·꼬리 조건 충족">✅ 진입</span>`
+          :`<span class="wait" title="매수존/캔들 조건 미충족 — 지켜보기">⏳ 대기</span>`)}</td>
       <td>${sCell}</td>
       <td>${escCell}</td>
       <td>${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
       <td>${fmt(r.price)}${r.no_trade?`<span class="deep" title="장중 시세 조회 실패 — 정지·미거재 의심"> ⛔</span>`:""}</td>
       <td class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</td>
       <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
-      <td>${pbar}</td>
+      <td>${pbar}${r.pos==null?"":`<span class="sub" style="margin-left:4px">${r.pos<=0?"이탈":r.pos.toFixed(0)+"%"}</span>`}</td>
       <td><span title="${r.bname||"경계"} 기준">${lowpct}</span><span class="sub" style="font-size:10px">·${r.bname||""}</span></td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
     </tr>`;
@@ -397,8 +446,10 @@ async function loadHist(code){
     const el=document.getElementById(`hist-${code}`);
     if(!el) return;
     const h=(VALID.stock_history||{})[code];
-    if(!h||!h.ep) el.innerHTML=`📁 박스 12년: 이력 없음 (첫 진입)`;
-    else el.innerHTML=`📁 박스 12년: ${h.ep}회 진입 · ${h.esc}회 탈출(${Math.round(h.esc/h.ep*100)}%) · 평균 ${h.hold}일 · ${h.net>=0?"+":""}${fmt(h.net)}원/건`;
+    const yrs=(VALID&&VALID.params)
+      ?(Number(VALID.params.end)-Number(VALID.params.start)+1):13;
+    if(!h||!h.ep) el.innerHTML=`📁 박스 ${yrs}년: 이력 없음 (첫 진입)`;
+    else el.innerHTML=`📁 박스 ${yrs}년: ${h.ep}회 진입 · ${h.esc}회 탈출(${Math.round(h.esc/h.ep*100)}%) · 평균 ${h.hold}일 · ${h.net>=0?"+":""}${fmt(h.net)}원/건`;
   }catch(e){
     const el=document.getElementById(`hist-${code}`);
     if(el) el.innerHTML="";
@@ -424,16 +475,28 @@ async function load(){
       const seen=localStorage.getItem("boxver");
       if(seen && seen!==DATA.ver){
         localStorage.setItem("boxver",DATA.ver);
+        saveUIState();
         location.replace(location.pathname+"?b="+DATA.ver);
         return;
       }
       localStorage.setItem("boxver",DATA.ver);
     }
     render();
+    if(UI_RESTORE){
+      window.scrollTo(0,UI_RESTORE.scrollY||0);
+      UI_RESTORE=null;
+    }
   }catch(e){
-    $("#stamp").innerHTML=`<span style="color:var(--red)">조회 실패: ${e.message}</span>`;
+    const suffix=DATA?" · 이전 데이터 표시 중":"";
+    $("#stamp").innerHTML=(STAMP_BASE?STAMP_BASE+" · ":"")
+      + `<span style="color:var(--red)">조회 실패: ${e.message}${suffix}</span>`;
+    if(!DATA){
+      $("#rows").innerHTML=`<tr><td colspan="10">데이터 조회 실패: ${e.message} — 자동 재시도 중</td></tr>`;
+    }
   }
 }
+window.addEventListener("beforeunload",saveUIState);
+restoreUIState();
 load(); setInterval(load,60000);
 document.getElementById("btn-hold").addEventListener("click",async()=>{
   const btn=document.getElementById("btn-hold");
@@ -460,25 +523,39 @@ document.querySelectorAll("#tb-live,#tb-valid").forEach(b=>
   b.addEventListener("click",()=>setTab(b.dataset.t)));
 async function initValid(){
   const info=document.getElementById("v-info");
-  try{
-    if(VALID==null){
+  if(VALID==null){
+    try{
       VALID=await jget("data/box_validation.json");
       renderValid(VALID);
+    }catch(e){
+      info.innerHTML=`<span style="color:var(--red)">검증 데이터 로드 실패: ${e.message}</span>`;
     }
-    if(HIST==null){
+  }
+  if(HIST==null){
+    const sel=document.getElementById("snap-date");
+    try{
       HIST=await jget("data/box_rank_history.json");
-      const sel=document.getElementById("snap-date");
+      if(!HIST.length){
+        document.getElementById("snap-tbl").tBodies[0].innerHTML='<tr><td colspan="6">순위 이력 없음</td></tr>';
+        sel.hidden=true;
+        return;
+      }
       sel.innerHTML=HIST.map((d,i)=>`<option value="${i}">${d.date}</option>`).reverse().join("");
       sel.selectedIndex=0;
       sel.onchange=()=>renderHist();
       renderHist();
+    }catch(e){
+      document.getElementById("snap-tbl").tBodies[0].innerHTML=`<tr><td colspan="6">순위 이력 로드 실패: ${e.message}</td></tr>`;
     }
-  }catch(e){ info.innerHTML=`<span style="color:var(--red)">검증 데이터 로드 실패: ${e.message}</span>`; }
+  }
 }
 function renderValid(V){
   const S=V.summary;
+  const A=V.assumptions||{};
   document.getElementById("v-info").textContent=
-    `매수존(위치≤50%) 상위 ${V.params.slots}개 순위대로 진입 · ${V.params.start}~${V.params.end} · 갱신 ${V.updated_at}`;
+    `${V.params.buy_zone||"매수존"} 상위 ${V.params.slots}개 순위대로 진입`
+    + ` · 진입=${A.entry||"-"} · 근접 청산 ${A.near==null?"-":A.near+"%"}`
+    + ` · ${V.params.start}~${V.params.end} · 갱신 ${V.updated_at}`;
   document.getElementById("v-chips").innerHTML=
     `<div class="chip">1차 탈출율 <b>${S.escape_rate}%</b></div>
      <div class="chip">1차 손실률 ${S.loss0_rate}%</div>
@@ -500,7 +577,7 @@ function renderValid(V){
 }
 function renderHist(){
   if(!HIST||!HIST.length)return;
-  const day=HIST[document.getElementById("snap-date").selectedIndex];
+  const day=HIST[Number(document.getElementById("snap-date").value)];
   if(!day)return;
   document.getElementById("snap-tbl").tBodies[0].innerHTML=day.rows.map(r=>{
     const rk=r.prev_rank==null?`<span class="sub">신규</span>`
