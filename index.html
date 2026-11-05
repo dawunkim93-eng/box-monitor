@@ -96,6 +96,25 @@
   }
   .tablehint{display:none;color:var(--dim);font-size:10.5px;text-align:right;margin:3px 2px 7px}
   @media(max-width:640px){ .tablehint:not([hidden]){display:block} }
+  .mob-list{display:none}
+  .mcard{background:var(--card);border:1px solid var(--line);border-radius:8px;
+         padding:8px 10px;margin:6px 0;line-height:1.45;font-size:12px}
+  .mcard.brk{border-left:4px solid var(--red);background:#1d1114}
+  .mtop{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .mname{font-weight:700}
+  .mrow{display:flex;align-items:center;gap:4px 9px;flex-wrap:wrap;margin-top:3px}
+  .mrow .sub{font-size:11px}
+  .mcard .posbar{width:48px}
+  .mcard .posbar.out{width:46px}
+  .mdet{margin-top:5px}
+  .mdet summary{cursor:pointer;color:var(--dim);font-size:11px}
+  .mexp{white-space:normal;color:var(--dim);font-size:11.5px;line-height:1.5;padding-top:3px}
+  .mcard .msub{white-space:normal;color:var(--dim);font-size:11px;line-height:1.45;margin-top:3px}
+  @media(max-width:640px){
+    .tablewrap-main,.tablewrap-hold,
+    .tablewrap-main + .tablehint,.tablewrap-hold + .tablehint{display:none}
+    #mobile-list,#mobile-holds{display:block}
+  }
   .rules{max-width:780px;white-space:normal;line-height:1.55;font-size:12.5px}
   .rules ul{margin:4px 0 2px;padding-left:18px}
   .rules li{margin:3px 0}
@@ -144,6 +163,7 @@
     </tr></thead>
     <tbody id="hold-rows"></tbody>
   </table>
+  <div id="mobile-holds" class="mob-list"></div>
   <div class="sub" id="hold-mismatch" hidden style="margin:4px 0 8px;color:var(--amber)"></div>
   <h2 class="sec">전체 목록</h2>
   <div class="toolbar">
@@ -171,6 +191,7 @@
     </tr></thead>
     <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
   </table>
+  <div id="mobile-list" class="mob-list"><div class="sub" style="margin:8px 0">로딩 중…</div></div>
   </div>
   <div id="view-valid" hidden role="tabpanel" aria-labelledby="tb-valid">
     <h2 class="sec">📊 Top-20 진입 시뮬레이션</h2>
@@ -326,7 +347,7 @@
 const $=s=>document.querySelector(s);
 document.querySelectorAll("table").forEach(t=>{
   const w=document.createElement("div");
-  w.className="tablewrap"+(t.id==="main-tbl"?" tablewrap-main":"");
+  w.className="tablewrap"+(t.id==="main-tbl"?" tablewrap-main":(t.id==="hold-tbl"?" tablewrap-hold":""));
   t.parentNode.insertBefore(w,t);
   w.appendChild(t);
   t.querySelectorAll("th").forEach(th=>th.setAttribute("scope","col"));
@@ -413,7 +434,7 @@ $("#q").addEventListener("input",render);
 $("#kindfilter").addEventListener("change",render);
 let STAMP_BASE="";
 let UI_RESTORE=null;
-let VALID=null, HIST=null;
+let VALID=null, HIST=null, VALID_P=null;
 let CURRENT_TAB="live";
 let MAXFN=false;
 try{ MAXFN=localStorage.getItem("boxmaxfn")==="1"; }catch(e){ MAXFN=false; }
@@ -599,6 +620,26 @@ function render(){
         ?` <button class="tblbtn" type="button" onclick="loadHoldingsToHeld()">보유파일 → 체크로 불러오기</button>`
         :"");
   }else{ mm.hidden=true; }
+  const openMdet=new Set([...document.querySelectorAll("#mobile-list details.mdet[open]")]
+    .map(d=>d.dataset.c));
+  const ml=document.getElementById("mobile-list");
+  if(ml){
+    ml.innerHTML=mainRows.length
+      ? mainRows.map(r=>mobileRowHTML(r)).join("")
+      : `<div class="sub" style="margin:8px 0">조건에 맞는 종목 없음 — <button class="tblbtn" onclick="clearFilters()">필터 해제</button></div>`;
+    bindMobileDetails();
+    if(openMdet.size){
+      document.querySelectorAll("#mobile-list details.mdet").forEach(d=>{
+        if(openMdet.has(d.dataset.c)) d.open=true;
+      });
+    }
+  }
+  const mh=document.getElementById("mobile-holds");
+  if(mh){
+    mh.innerHTML=ordered.length
+      ? ordered.map(code=>mobileHoldHTML(code,(d.holdings||{})[code],byCode[code])).join("")
+      : "";
+  }
   $("#row-count").textContent=`표시 ${mainRows.length} / 전체 ${rows.length}`;
   $("#rows").innerHTML=mainRows.length
     ? mainRows.map(r=>rowHTML(r)).join("")
@@ -612,18 +653,99 @@ function render(){
   renderHoldingsHistory();
   updateScrollHints();
 }
+function mobileRowHTML(r){
+  const rc = (r.pct_low!=null && r.pct_low<0)?" brk":"";
+  const chk = HELD.has(r.code);
+  const tag = (r.bkind==="wbox")
+    ? '<span class="btyp bw">주봉</span>' : '<span class="btyp ba">상승</span>';
+  const strong = r.strong?'<span class="tag">🟢</span>':"";
+  const risk = r.risk?'<span class="deep" title="부채&gt;150%+영업적자">⚠재무</span>':"";
+  const status = r.held?'<span class="wait">📋 보유</span>'
+    :(r.cand?'<span class="btyp bcand">✅ 진입</span>':'<span class="wait">⏳ 대기</span>');
+  const score = (r.score==null)?"-":
+    `${r.score}점`+((r.score_m!=null&&r.score>r.score_m)?' <span class="up">▲</span>'
+      :((r.score_m!=null&&r.score<r.score_m)?' <span class="dn">▼</span>':""));
+  const esc = (r.esc_p==null)?"탈출 -":`탈출 ${r.esc_p}%`;
+  const mor = (r.score_m==null)?"아침 -":`아침 ${r.score_m}점`;
+  const atr = (r.atr==null)?"ATR -":`ATR ${(r.atr*100).toFixed(1)}%`;
+  const gap = (r.gap==null)?"갭 -":`갭 ${r.gap}%`;
+  const pl = (r.pct_low==null)?"-"
+    :`<span class="${r.pct_low<0?"deep":""}">${pct(r.pct_low)}</span>`
+      +` <span class="sub">·${r.bname||""}</span>`;
+  const posTxt = (r.pos==null)?"-":(r.pos<=0?"이탈":r.pos.toFixed(0)+"%");
+  const scoreLine = (r.score==null)?"점수 없음":`📊 ${r.score}점 = ${breakdown(r)}`;
+  return `<div class="mcard${rc}">
+    <div class="mtop"><input type="checkbox" class="heldchk" data-c="${r.code}" ${chk?"checked":""} aria-label="보유 체크">
+      ${strong}<b class="mname">${r.name}</b>${tag}${risk}${status}</div>
+    <div class="mrow">${score} · ${esc} · ${mor}</div>
+    <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
+    <div class="mrow">하단 ${pl} · ${atr} · ${gap}</div>
+    <details class="mdet" data-c="${r.code}">
+      <summary>점수 상세 · 이력</summary>
+      <div class="mexp">${scoreLine}</div>
+      <div class="mexp mhist">📁 이력 로딩…</div>
+    </details>
+  </div>`;
+}
+function mobileHoldHTML(code,h,r){
+  const checked=HELD.has(code);
+  const pending=checked&&!h;
+  const fileOnly=!checked&&h;
+  const name=(h&&h.name)||HELDNAMES[code]||(r&&r.name)||code;
+  const badge = pending?'<span class="hold-pending">전송 대기</span>'
+    :(fileOnly?'<span class="sub">보유파일만</span>':'<span class="up">보유 중</span>');
+  const px=(h&&h.px!=null)
+    ?(`${fmt(h.px)}`+(h.chg_pct!=null?` <span class="${cn(h.chg_pct)}">${pct(h.chg_pct)}</span>`:""))
+    :(r?`${fmt(r.price)} <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>`:"-");
+  const band=h
+    ?(h.bkind==="abox"
+      ?(h.tl!=null?`선 ${fmt(h.tl)}`:"-")
+      :((h.wlo!=null&&h.whi!=null)?`${fmt(h.wlo)}~${fmt(h.whi)}`
+        :(h.tl!=null?`선 ${fmt(h.tl)}`:"-")))
+    :(r&&r.bline!=null?`${fmt(r.bline)} <span class="sub">·${r.bname||"경계"}</span>`:"-");
+  const plRaw=h?h.pct_low:(r?r.pct_low:null);
+  const pl=plRaw!=null?`<span class="${plRaw<2?"deep":""}">${pct(plRaw)}</span>`:"-";
+  let dstat="-",dcls="",nstat="-",ncls="";
+  if(h){
+    dstat=(h.status||"").includes("데이터")?"-":(h.valid?"유지":"이탈");
+    dcls=(dstat==="유지")?"hold-ok":(dstat==="이탈")?"hold-brk":"hold-etc";
+    nstat=(h.live_state==null)?"-":((h.live_state==="이탈"||h.live_state==="이탈 지속")?"이탈":"유지");
+    ncls=(nstat==="유지")?"up":(nstat==="이탈")?"deep":"";
+  }
+  const detail=pending?"체크됨 · 복사·전송 대기":(h&&h.detail?h.detail:"");
+  return `<div class="mcard${(h&&h.pct_low!=null&&h.pct_low<0)?" brk":""}">
+    <div class="mtop"><input type="checkbox" class="heldchk" data-c="${code}" ${checked?"checked":""} aria-label="보유 체크">
+      <b class="mname">${name}</b>${badge}</div>
+    <div class="mrow">${px} · 하단대비 ${pl}</div>
+    <div class="mrow">전일 <span class="${dcls}">${dstat}</span> · 현재 <span class="${ncls}">${nstat}</span> · ${band}</div>
+    ${detail?`<div class="msub">${detail}</div>`:""}
+  </div>`;
+}
+function bindMobileDetails(){
+  document.querySelectorAll("#mobile-list details.mdet").forEach(d=>{
+    if(d.dataset.bound) return;
+    d.dataset.bound="1";
+    const fill=()=>{
+      const el=d.querySelector(".mhist");
+      if(d.open&&el&&!el.dataset.loaded){ el.dataset.loaded="1"; fillHist(d.dataset.c,el); }
+    };
+    d.addEventListener("toggle",fill);
+    fill();
+  });
+}
+function posBarHTML(r){
+  const kill = r.pct_low!=null && r.pct_low<2;
+  const blue = (r.bkind==="wbox" && r.pos!=null && r.pos<=50)
+            || (r.bkind==="abox" && r.pct_low!=null && r.pct_low<=5);
+  const pcol = r.pos==null?"var(--dim)":(kill?"var(--red)":(blue?"var(--blue)":(r.pos>=85?"var(--green)":"var(--txt)")));
+  if(r.pos==null) return "-";
+  if(r.pos<=0) return `<span class="posbar out" title="박스 경계 하향 이탈"></span>`;
+  return `<span class="posbar"><i style="width:${Math.min(100,Math.max(0,r.pos)).toFixed(0)}%;background:${pcol}"></i></span>`;
+}
 function rowHTML(r){
     const isbrk = r.pct_low!=null && r.pct_low<0;
     const rc = isbrk?"brk":"";   // 행 배경 = 이탈(빨강)만 — 위치 구간은 바 색 담당
-    const kill = r.pct_low!=null && r.pct_low<2;           // 청산/손절 구역 (경계 +2% 미만)
-    const bk=r.bkind;
-    const blue = (bk==="wbox" && r.pos!=null && r.pos<=50)
-              || (bk==="abox" && r.pct_low!=null && r.pct_low<=5);
-    const pcol = r.pos==null?"var(--dim)":(kill?"var(--red)":(blue?"var(--blue)":(r.pos>=85?"var(--green)":"var(--txt)")));
-    const pbar = r.pos==null?"-"
-      :(r.pos<=0
-        ?`<span class="posbar out" title="박스 경계 하향 이탈"></span>`
-        :`<span class="posbar"><i style="width:${Math.min(100,Math.max(0,r.pos)).toFixed(0)}%;background:${pcol}"></i></span>`);
+    const pbar = posBarHTML(r);
     const lowpct = r.pct_low==null?"-":(r.pct_low<0?`<span class="deep">${pct(r.pct_low)}</span>`:pct(r.pct_low));
     const chk = HELD.has(r.code);
     const sCell=(r.score==null?"-":
@@ -694,24 +816,31 @@ function insertExp(code, trEl){
   refreshStamp();
   loadHist(code);
 }
-async function loadHist(code){
+async function ensureValid(){
+  if(VALID) return VALID;
+  if(!VALID_P){
+    VALID_P=jget("data/box_validation.json")
+      .then(v=>{ VALID=v; return v; })
+      .catch(e=>{ VALID_P=null; throw e; });
+  }
+  return VALID_P;
+}
+async function fillHist(code, el){
+  if(!el) return;
   try{
-    if(VALID==null){
-      const r=await fetch("data/box_validation.json?t="+Date.now(),{cache:"no-store"});
-      if(!r.ok) throw new Error(r.status);
-      VALID=await r.json();
-    }
-    const el=document.getElementById(`hist-${code}`);
-    if(!el) return;
-    const h=(VALID.stock_history||{})[code];
-    const yrs=(VALID&&VALID.params)
-      ?(Number(VALID.params.end)-Number(VALID.params.start)+1):13;
+    const V=await ensureValid();
+    const h=(V.stock_history||{})[code];
+    const yrs=(V&&V.params)
+      ?(Number(V.params.end)-Number(V.params.start)+1):13;
     if(!h||!h.ep) el.innerHTML=`📁 박스 ${yrs}년: 이력 없음 (첫 진입)`;
     else el.innerHTML=`📁 박스 ${yrs}년: ${h.ep}회 진입 · ${h.esc}회 탈출(${Math.round(h.esc/h.ep*100)}%) · 평균 ${h.hold}일 · ${h.net>=0?"+":""}${fmt(h.net)}원/건`;
   }catch(e){
-    const el=document.getElementById(`hist-${code}`);
-    if(el) el.innerHTML="";
+    el.textContent="📁 이력 로드 실패";
   }
+}
+async function loadHist(code){
+  const el=document.getElementById(`hist-${code}`);
+  if(el) await fillHist(code, el);
 }
 function toggleBreak(code, trEl){
   if(EXPANDED===code){ EXPANDED=null;
@@ -755,6 +884,8 @@ async function load(){
       + `<span style="color:var(--red)">조회 실패: ${e.message}${suffix}</span>`;
     if(!DATA){
       $("#rows").innerHTML=`<tr><td colspan="10">데이터 조회 실패: ${e.message} — 자동 재시도 중</td></tr>`;
+      const ml=document.getElementById("mobile-list");
+      if(ml) ml.innerHTML=`<div class="sub" style="margin:8px 0">데이터 조회 실패: ${e.message} — 자동 재시도 중</div>`;
     }
   }
 }
