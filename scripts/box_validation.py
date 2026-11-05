@@ -58,7 +58,8 @@ ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
 CANDLE_MODE = "all"    # all | bear(음봉 신호만) | bear_tail(음봉+아래꼬리1%+)
 WBREAK = "close"       # 주봉박스 소멸 판정: close | confirm2(2연속) | buffer1(1% 버퍼)
 APOS = "far"           # A박스 위치 점수 방향: far(현행, 선에서 먼 쪽 가점) | near(가까운 쪽 가점)
-ROTATE = "keep"        # keep(현행) | flat_first(플랫 시 회전) | flat_first_excl(회전 당일 동일종목 배제)
+ROTATE = "keep"        # keep | flat_first | flat_first_excl | flat_first_score
+ROT_MARGIN = 2.0       # flat_first_score: 신규 후보 점수 우위 기준
 COMP_DUMP = None       # --dump 지정 시 포지션별 진입 지표 기록 (점수 재설계 분석용)
 SWEEP_GAPS = [0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
 
@@ -415,6 +416,17 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     close_position(done, holdings, curve, i, px, "1차탈출 회전", D)
                     rotated_today.add(i)
                     continue
+                if ROTATE == "flat_first_score" and hst.get("escape0"):
+                    base_sc = hst.get("score") or 0
+                    better = any(
+                        (-nsc2) >= base_sc + ROT_MARGIN
+                        and i2 not in holdings and i2 != i
+                        and i2 not in rotated_today
+                        for d2, nsc2, i2, j2, knd2 in ev_days.get(int(D), []))
+                    if better:
+                        close_position(done, holdings, curve, i, px, "1차탈출 회전", D)
+                        rotated_today.add(i)
+                        continue
                 if knd == "wbox":
                     in_zone = (float(s["wpos"][j]) <= 0.5)
                 else:
@@ -437,7 +449,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     break
                 if i in holdings:
                     continue
-                if ROTATE == "flat_first_excl" and i in rotated_today:
+                if ROTATE in ("flat_first_excl", "flat_first_score") and i in rotated_today:
                     continue
                 s = U[i]
                 dn_s = s["dn"]
@@ -696,8 +708,12 @@ def main():
     ap.add_argument("--apos", choices=["far", "near"], default="far",
                     help="A박스 위치 점수 방향 (far=먼 쪽 가점(현행) · near=가까운 쪽 가점)")
     ap.add_argument("--rotate",
-                    choices=["keep", "flat_first", "flat_first_excl"], default="keep",
-                    help="1차 탈출 후 슬롯 처리 (keep=재그리드 · flat_first=플랫 시 회전 · flat_first_excl=회전 당일 동일종목 배제)")
+                    choices=["keep", "flat_first", "flat_first_excl", "flat_first_score"],
+                    default="keep",
+                    help="1차 탈출 후 슬롯 처리 (keep=재그리드 · flat_first=플랫 시 회전 · "
+                         "flat_first_excl=회전 당일 동일종목 배제 · flat_first_score=점수 우위 시만)")
+    ap.add_argument("--rotate-margin", type=float, default=2.0,
+                    help="flat_first_score 점수 우위 기준 (기본 2점)")
     ap.add_argument("--wbreak", choices=["close", "confirm2", "buffer1"],
                     default="close",
                     help="주봉박스 소멸 판정 (close=일봉 즉시 · confirm2=2연속 · buffer1=1% 버퍼)")
@@ -712,7 +728,7 @@ def main():
     ap.add_argument("--max-trips", type=int, default=1,
                     help="sameday=multi 시 차수당 당일 추가 왕복 상한 (기본 1)")
     args = ap.parse_args()
-    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE
+    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN
     SCHEME = args.scheme
     ENTRY_MODE = args.entry
     ENTRY_ZONE = args.entry_zone
@@ -720,6 +736,7 @@ def main():
     WBREAK = args.wbreak
     APOS = args.apos
     ROTATE = args.rotate
+    ROT_MARGIN = args.rotate_margin
     MAX_TRIPS = max(0, args.max_trips)
     COMP_DUMP = [] if args.dump else None
     rungs = args.rungs if args.rungs else max(4, round(COVER / args.gap))
@@ -786,6 +803,7 @@ def main():
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
                    "rotate": ROTATE,
+                   "rotate_margin": ROT_MARGIN,
                    "pool": "주봉박스+상승저점",
                    "start": str(s["start_year"]),
                    "end": str(s["end_year"])},
