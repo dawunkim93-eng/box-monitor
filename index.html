@@ -695,6 +695,15 @@ function mobileRowHTML(r){
     </details>
   </div>`;
 }
+function holdPos(h,r){
+  if(h){
+    if(h.bkind==="wbox" && h.px!=null && h.wlo!=null && h.whi!=null && h.whi>h.wlo)
+      return (h.px-h.wlo)/(h.whi-h.wlo)*100;
+    if(h.bkind==="abox" && h.px!=null && h.tl!=null && h.ahi!=null && h.ahi>h.tl)
+      return (h.px-h.tl)/(h.ahi-h.tl)*100;
+  }
+  return (r&&r.pos!=null)?r.pos:null;
+}
 function mobileHoldHTML(code,h,r){
   const checked=HELD.has(code);
   const pending=checked&&!h;
@@ -713,6 +722,10 @@ function mobileHoldHTML(code,h,r){
     :(r&&r.bline!=null?`${fmt(r.bline)} <span class="sub">·${r.bname||"경계"}</span>`:"-");
   const plRaw=h?h.pct_low:(r?r.pct_low:null);
   const pl=plRaw!=null?`<span class="${plRaw<2?"deep":""}">${pct(plRaw)}</span>`:"-";
+  const pos=holdPos(h,r);
+  const posTxt=(pos==null)?"-":(pos<=0?"이탈":pos.toFixed(1)+"%");
+  const posBar=(pos==null)?"-":posBarHTML({pos:pos,
+    bkind:h?h.bkind:(r?r.bkind:"wbox"),pct_low:plRaw});
   let dstat="-",dcls="",nstat="-",ncls="";
   if(h){
     dstat=(h.status||"").includes("데이터")?"-":(h.valid?"유지":"이탈");
@@ -725,6 +738,7 @@ function mobileHoldHTML(code,h,r){
     <div class="mtop"><input type="checkbox" class="heldchk" data-c="${code}" ${checked?"checked":""} aria-label="보유 체크">
       <b class="mname">${name}</b>${badge}</div>
     <div class="mrow">${px} · 하단대비 ${pl}</div>
+    <div class="mrow">위치 ${posBar} ${posTxt}</div>
     <div class="mrow">전일 <span class="${dcls}">${dstat}</span> · 현재 <span class="${ncls}">${nstat}</span> · ${band}</div>
     ${detail?`<div class="msub">${detail}</div>`:""}
   </div>`;
