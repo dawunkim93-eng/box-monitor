@@ -97,6 +97,15 @@
   }
   .tablehint{display:none;color:var(--dim);font-size:11px;text-align:right;margin:3px 2px 7px}
   @media(max-width:640px){ .tablehint:not([hidden]){display:block} }
+  .rules{max-width:780px;white-space:normal;line-height:1.55;font-size:13px}
+  .rules ul{margin:4px 0 2px;padding-left:18px}
+  .rules li{margin:3px 0}
+  .rulebox{background:var(--card);border:1px solid var(--line);border-radius:8px;
+           padding:8px 12px;margin:6px 0}
+  .rulebox.good{border-color:rgba(34,197,94,.5)}
+  .rulebox.warn{border-color:rgba(245,158,11,.6)}
+  .rules .rowbtns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+  @media(max-width:640px){ .rules{max-width:100%;font-size:12.5px} .rulebox{padding:7px 9px} }
 </style>
 </head>
 <body>
@@ -109,10 +118,11 @@
     <div class="sub" id="stamp" aria-live="polite">로딩 중…</div>
   </div>
   <div class="tabs" role="tablist">
-    <button id="tb-live" class="tab on" data-t="live" role="tab" aria-selected="true">실시간</button>
-    <button id="tb-valid" class="tab" data-t="valid" role="tab" aria-selected="false">검증</button>
+    <button id="tb-live" class="tab on" data-t="live" role="tab" aria-selected="true" aria-controls="view-live">실시간</button>
+    <button id="tb-valid" class="tab" data-t="valid" role="tab" aria-selected="false" aria-controls="view-valid">검증</button>
+    <button id="tb-rules" class="tab" data-t="rules" role="tab" aria-selected="false" aria-controls="view-rules">매매 규칙</button>
   </div>
-  <div id="view-live">
+  <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
   <div class="stats" id="stats"></div>
   <div id="alertsec"></div>
   <h2 class="sec" id="fav-sec" hidden>⭐ 보유 편집 (<span id="fav-cnt"></span>)
@@ -162,7 +172,7 @@
     <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
   </table>
   </div>
-  <div id="view-valid" hidden>
+  <div id="view-valid" hidden role="tabpanel" aria-labelledby="tb-valid">
     <h2 class="sec">📊 Top-20 진입 시뮬레이션</h2>
     <div class="sub" id="v-info">로딩 중…</div>
     <div class="stats" id="v-chips"></div>
@@ -179,6 +189,97 @@
     </div>
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th></tr></thead><tbody><tr><td colspan="6">로딩 중…</td></tr></tbody></table>
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 100,000원/차수 · 그리드 사다리(±2.5% 되팔기) · 당일 다중 왕복 근사 · 순위 추적은 2026-10-24부터 축적</div>
+  </div>
+  <div id="view-rules" hidden role="tabpanel" aria-labelledby="tb-rules">
+    <h2 class="sec">📘 매매 규칙 — 박스권 그리드</h2>
+    <div class="rules">
+      <div class="rulebox good">
+        <b>한눈에</b>
+        <ul>
+          <li>대상: <b>주봉박스</b>(13주 종가 밴드) · <b>상승저점</b>(피벗 저가 3연속 상승)</li>
+          <li>진입: <b>매수존 + 전일 음봉·아래꼬리 1%+</b> → 점수 상위 20슬롯</li>
+          <li>청산: 종가가 <b>경계 +2% 미만</b>이면 청산 · 박스 이탈/소멸 · -15% 백스톱</li>
+          <li>모든 판정은 <b>종가 기준</b> · 장중 현재 상태는 잠정 표시</li>
+        </ul>
+        <div class="rowbtns">
+          <button class="tblbtn" type="button" onclick="gotoLiveCandidates()">✅ 진입 후보 보기</button>
+          <button class="tblbtn" type="button" onclick="gotoHoldings()">📋 보유 현황 보기</button>
+          <button class="tblbtn" type="button" onclick="setTab('valid')">📊 검증 상세</button>
+        </div>
+      </div>
+
+      <h2 class="sec">매수(진입)</h2>
+      <div class="rulebox">
+        <ul>
+          <li><b>주봉박스</b>: 최근 완료 13주 종가 밴드 · 폭 ≤30% · |순드리프트| ≤15% · 종가가 밴드 내</li>
+          <li><b>상승저점</b>: 피벗 저가 3개 연속 상승(v2&gt;v1×1.005 · v1&gt;v0×0.995) · 종가 ≥ 추세선×0.995</li>
+          <li><b>매수존</b>: 주봉 = 밴드 위치 ≤50% (하단 +2% 이상) / 상승 = 추세선 +2%~+5%</li>
+          <li><b>캔들 필터</b>: 신호일(전일) <b>음봉 + 아래꼬리 ≥1%</b></li>
+          <li>보유 종목 제외 · 상위 20슬롯 · 1차수 <b>100,000원</b></li>
+        </ul>
+      </div>
+
+      <h2 class="sec">점수(6점 만점) · 탈출율 배지</h2>
+      <div class="rulebox">
+        <ul>
+          <li><b>주봉</b>: 위치 &lt;20% 0 · ~35% 1 · ≥35% 2 / 13주 추세 &lt;0 0 · ~5% 1 · ≥5% 2 (≤−5% 감점 −1) / ATR 4~7% +1 / 밴드 폭 ≥22% +1</li>
+          <li><b>상승</b>: 선거리 ≤2% 0 · ~3.5% 1 · ≥3.5% 2 / 기울기 &lt;2.2%/주 0 · ~3 1 · ≥3 2 / ATR &lt;5% 0 · ~6% 1 · ≥6% 2</li>
+          <li><b>탈출율 배지</b>: 0~2점 29% · 3~4점 59% · 5~6점 67%</li>
+          <li>점수는 <b>순위용</b>이며 진입 신호가 아닙니다</li>
+        </ul>
+      </div>
+
+      <h2 class="sec">주문·실행</h2>
+      <div class="rulebox">
+        <ul>
+          <li>08:15 알림 확인 → 다음 거래일 <b>시가</b> 진입 (매수존 유지 시)</li>
+          <li>시가가 존 상단이면 <b>지정가</b>(신호 종가 또는 경계+3%)로 대기 · 미체결 시 스킵</li>
+          <li>장중 슬롯이 비어도 존에 후보가 없으면 <b>현금 대기</b> — 추격 금지</li>
+          <li>진입=지정가 · 그리드 매도=지정가 · 긴급 청산=시장가</li>
+        </ul>
+      </div>
+
+      <h2 class="sec">그리드</h2>
+      <div class="rulebox">
+        <ul>
+          <li>진입가 앵커 · <b>2.5% 간격 15차수</b> (하단 약 37.5% 커버)</li>
+          <li>각 차수 도달 시 매수 · <b>+2.5%</b> 매도 · 같은 차수 재매수</li>
+          <li>전량 매도 후 슬롯 유지 → 매수존 복귀 시 재그리드</li>
+        </ul>
+      </div>
+
+      <h2 class="sec">매도(청산)</h2>
+      <div class="rulebox warn">
+        <ul>
+          <li><b>⛔ 근접 청산</b>: 종가 &lt; 경계×1.02 (경계 = 주봉 밴드 하단 / 상승 추세선)</li>
+          <li><b>🚨 이탈</b>: 밴드 하단 이탈 · 추세선 붕괴 · 박스 소멸(폭/추세 위반)</li>
+          <li><b>-15% 백스톱</b>: 경계×0.85</li>
+          <li>상방 돌파는 청산 아님 (슬롯 유지)</li>
+        </ul>
+      </div>
+
+      <h2 class="sec">알림·스케줄</h2>
+      <div class="rulebox">
+        <ul>
+          <li>07:00 PIT 갱신 · 08:15 박스 알림 · 08:20 사이트 · 08:25 스냅샷</li>
+          <li>장중 5·35분 경고(보유∩LIVE) · 14:50 마감 전 체크 · 16:10 마감 확정</li>
+          <li>사이트는 15분마다 갱신 · 폰 자동 새로고침</li>
+        </ul>
+      </div>
+
+      <h2 class="sec">주의</h2>
+      <div class="rulebox warn">
+        <ul>
+          <li>장중 “현재 이탈/회복”은 잠정 · 최종 판정은 종가·다음 08:15</li>
+          <li>손익은 당일 다중 왕복 가정에 민감 (보수 가정 시 음수)</li>
+          <li>관찰 전용 · 투자 판단은 본인</li>
+        </ul>
+      </div>
+
+      <h2 class="sec">현재 검증 설정·성과</h2>
+      <div class="stats" id="rule-stats"><div class="chip">검증 데이터 로딩…</div></div>
+      <div class="sub" id="rule-config"></div>
+    </div>
   </div>
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
@@ -264,12 +365,14 @@ $("#q").addEventListener("input",render);
 $("#kindfilter").addEventListener("change",render);
 let STAMP_BASE="";
 let UI_RESTORE=null;
+let VALID=null, HIST=null;
+let CURRENT_TAB="live";
 function saveUIState(){
   try{
     sessionStorage.setItem("boxui",JSON.stringify({
       sort:SORT,q:$("#q").value,kind:$("#kindfilter").value,
       favonly:$("#favonly").checked,candonly:$("#candonly").checked,
-      tab:$("#tb-valid").classList.contains("on")?"valid":"live",
+      tab:CURRENT_TAB,
       expanded:EXPANDED,scrollY:window.scrollY}));
   }catch(e){}
 }
@@ -592,29 +695,43 @@ document.getElementById("btn-hold").addEventListener("click",async()=>{
   }
   setTimeout(()=>btn.textContent="⭐ 보유 목록 복사",1800);
 });
-let VALID=null, HIST=null;
 async function jget(p){const r=await fetch(p+"?t="+Date.now()); if(!r.ok) throw new Error(r.status); return r.json();}
 function setTab(t){
-  document.getElementById("view-live").hidden = t!=="live";
-  document.getElementById("view-valid").hidden = t!=="valid";
-  document.getElementById("tb-live").classList.toggle("on",t==="live");
-  document.getElementById("tb-valid").classList.toggle("on",t==="valid");
-  document.getElementById("tb-live").setAttribute("aria-selected",t==="live"?"true":"false");
-  document.getElementById("tb-valid").setAttribute("aria-selected",t==="valid"?"true":"false");
+  ["live","valid","rules"].forEach(x=>{
+    document.getElementById("view-"+x).hidden = t!==x;
+    const b=document.getElementById("tb-"+x);
+    b.classList.toggle("on",t===x);
+    b.setAttribute("aria-selected",t===x?"true":"false");
+  });
+  CURRENT_TAB=t;
   if(t==="valid") initValid();
+  else if(t==="rules") initRules();
 }
-document.querySelectorAll("#tb-live,#tb-valid").forEach(b=>
+document.querySelectorAll(".tab").forEach(b=>
   b.addEventListener("click",()=>setTab(b.dataset.t)));
+function gotoLiveCandidates(){
+  setTab("live");
+  $("#candonly").checked=true; $("#favonly").checked=false;
+  $("#q").value=""; $("#kindfilter").value="all";
+  render();
+  const el=document.getElementById("main-tbl");
+  if(el) el.scrollIntoView({block:"start"});
+}
+function gotoHoldings(){
+  setTab("live");
+  const el=document.getElementById("hold-sec");
+  if(el&&!el.hidden) el.scrollIntoView({block:"start"});
+}
 async function initValid(){
   const info=document.getElementById("v-info");
   if(VALID==null){
     try{
       VALID=await jget("data/box_validation.json");
-      renderValid(VALID);
     }catch(e){
       info.innerHTML=`<span style="color:var(--red)">검증 데이터 로드 실패: ${e.message}</span>`;
     }
   }
+  if(VALID!=null) renderValid(VALID);
   if(HIST==null){
     const sel=document.getElementById("snap-date");
     try{
@@ -632,6 +749,33 @@ async function initValid(){
       document.getElementById("snap-tbl").tBodies[0].innerHTML=`<tr><td colspan="6">순위 이력 로드 실패: ${e.message}</td></tr>`;
     }
   }
+}
+async function initRules(){
+  const stats=document.getElementById("rule-stats");
+  const cfg=document.getElementById("rule-config");
+  if(VALID==null){
+    try{
+      VALID=await jget("data/box_validation.json");
+    }catch(e){
+      stats.innerHTML=`<div class="chip">검증 데이터 로드 실패: ${e.message}</div>`;
+      cfg.textContent="";
+      return;
+    }
+  }
+  const S=VALID.summary||{}, C=VALID.capital||{};
+  const P=VALID.params||{}, A=VALID.assumptions||{};
+  stats.innerHTML=
+    `<div class="chip">기간 <b>${P.start||"-"}~${P.end||"-"}</b> (${S.years||"-"}년)</div>`
+    +`<div class="chip">포지션 <b>${fmt(S.positions)}</b>건</div>`
+    +`<div class="chip">1차 탈출 <b>${S.escape_rate==null?"-":S.escape_rate+"%"}</b></div>`
+    +`<div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b></div>`
+    +`<div class="chip">MDD(최대 낙폭) <b class="dn">${fmt(S.mdd_won)}원</b>`
+    +` <span class="sub">평균자본 대비 ${S.mdd_vs_capital_pct==null?"-":S.mdd_vs_capital_pct+"%"}</span></div>`
+    +`<div class="chip">적자연도 <b>${S.loss_years}/${S.n_years}</b></div>`
+    +`<div class="chip">자본수익률 ${C.ret_capital_pct==null?"-":C.ret_capital_pct+"%/년"}</div>`;
+  cfg.textContent=`검증 조건: ${P.pool||"-"} · ${P.buy_zone||"-"} · 진입=${A.entry||"-"}`
+    +` · 근접청산 ${A.near==null?"-":A.near+"%"}`
+    +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"} · 점수 S2b`;
 }
 function renderValid(V){
   const S=V.summary;
