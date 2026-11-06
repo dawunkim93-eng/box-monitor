@@ -47,7 +47,7 @@ PIT = Path("/home/lucky/backtest/data/pit")
 MASTER = PIT / "master.pkl"
 
 UNIT, FEE = 100_000, 0.002
-K = 20                 # 동시 보유 슬롯 (진입 = 순위 상위 20)
+K = 7                  # 동시 보유 슬롯 (무료 매직스플릿 7슬롯)
 GAP = 0.025            # 기본 갭 (gap-mode=fixed)
 GAP_MODE = "fixed"     # fixed | atr (atr: gap_i = clip(k × ATR14_i, min, max))
 ATR_K = 0.8            # atr 갭 계수
@@ -262,7 +262,7 @@ def load_universe():
     return U
 
 
-SCHEME = "S2b"  # 점수안: S2b 추세우선+W감점 (최종) · S1 균형 · S2 추세 · S3 ATR우선
+SCHEME = "S2c"  # 점수안: S2c (ATR 3~7 +1 · 폭 2단, 만점 7) · S2b · S1 · S2 · S3
 
 
 def score_new(kind, pos, atr, trend, height):
@@ -280,6 +280,14 @@ def score_new(kind, pos, atr, trend, height):
             h = 1 if (height is not None and height >= 0.22) else 0
             s = p + t + a + h
             if SCHEME == "S2b" and trend is not None and trend < -0.05:
+                s -= 1
+            return s
+        if SCHEME == "S2c":       # ATR 3~7% +1 · 폭 2단(≥26% 2, ≥22% 1) → 만점 7
+            a = 1 if (atr is not None and 0.03 <= atr < 0.07) else 0
+            h = (2 if (height is not None and height >= 0.26)
+                 else (1 if (height is not None and height >= 0.22) else 0))
+            s = p + t + a + h
+            if trend is not None and trend < -0.05:
                 s -= 1
             return s
         if SCHEME == "S3":       # ATR우선
@@ -768,6 +776,7 @@ def main():
     global MIN_ROOM
     global ADAPT_RUNGS
     global MIN_SCORE
+    global K
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -800,11 +809,13 @@ def main():
                     help="차수를 room에 맞춰 축소 (floor(room/gap)+1, 최대 5)")
     ap.add_argument("--min-score", type=int, default=MIN_SCORE,
                     help="최소 진입 점수 (0=비활성)")
+    ap.add_argument("--slots", type=int, default=K,
+                    help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
-    ap.add_argument("--scheme", choices=["S1", "S2", "S2b", "S3"],
-                    default="S2b", help="점수안 (S2b 최종)")
+    ap.add_argument("--scheme", choices=["S1", "S2", "S2b", "S2c", "S3"],
+                    default=SCHEME, help="점수안 (S2c 기본 · 만점 7)")
     ap.add_argument("--entry",
                     choices=["close", "next_open", "next_close",
                              "limit_signal", "limit_line"],
@@ -846,6 +857,7 @@ def main():
     MIN_ROOM = args.min_room
     ADAPT_RUNGS = args.adapt_rungs
     MIN_SCORE = args.min_score
+    K = args.slots
     if args.mkt_csv and args.cool > 0:
         _m = pd.read_csv(args.mkt_csv, parse_dates=["Date"]).set_index("Date")
         _dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
@@ -948,7 +960,7 @@ def main():
             "gap_pct": args.gap * 100, "rungs": rungs,
             "gap_mode": GAP_MODE,
             "exit_mode": EXIT_MODE, "entry_eval": ENTRY_EVAL,
-            "min_room": MIN_ROOM,
+            "min_room": MIN_ROOM, "scheme": SCHEME,
             "cool": args.cool, "cool_thr": args.cool_thr,
             "atr_k": (ATR_K if GAP_MODE == "atr" else None),
             "near_of_gap": (NEAR_OF_GAP if GAP_MODE == "atr" else None),

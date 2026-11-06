@@ -255,8 +255,8 @@
         <b>실전 전략 6줄</b>
         <ol class="quick">
           <li><b>무엇을</b> · 주봉 13주 종가 밴드 · 폭 ≤30% · 순드리프트 ±15% · 거래대금 10억+</li>
-          <li><b>언제 사나</b> · 밴드 하위 절반(경계 +6%↑) + 전일 음봉·아래꼬리 1%+ → 다음날 시가, 점수 순 최대 20슬롯</li>
-          <li><b>얼마나</b> · 10만/차 × 5차(최심 −9.6%) = 슬롯 50만 · 최대 20슬롯(1,000만)</li>
+          <li><b>언제 사나</b> · 밴드 하위 절반(경계 +6%↑) + 전일 음봉·아래꼬리 1%+ → 다음날 시가, 점수 순 최대 7슬롯</li>
+          <li><b>얼마나</b> · 10만/차 × 5차(최심 −9.6%) = 슬롯 50만 · 최대 7슬롯(350만) — 무료 앱 한도</li>
           <li><b>언제 파나</b> · 장중 경계×1.02 터치 <b>즉시</b> (진입일 포함) · 박스 소멸 시. 종가 대기 금지</li>
           <li><b>언제 쉬나</b> · 지수 −3% 마감 다음 1거래일 신규 중단 · 82% 이탈 같은 날도 중단</li>
           <li><b>하지 말 것</b> · 물타기 · 손절 종목 다음날 재매수 · −15% 백스톱 기대(13년 0건)</li>
@@ -277,18 +277,18 @@
           <li><b>상승저점</b>(현재 미사용): 피벗 저가 3개 연속 상승(v2&gt;v1×1.005 · v1&gt;v0×0.995) · 종가 ≥ 추세선×0.995</li>
           <li><b>매수존</b>: 밴드 위치 ≤50% · <b>경계 +6% 이상</b>(여지 4%)</li>
           <li><b>캔들 필터</b>: 신호일(전일) <b>음봉 + 아래꼬리 ≥1%</b></li>
-          <li>보유 종목 제외 · 상위 20슬롯 · 1차수 <b>100,000원</b></li>
+          <li>보유 종목 제외 · 상위 7슬롯 · 1차수 <b>100,000원</b></li>
         </ul>
       </div>
 
-      <h2 class="sec">점수(6점 만점) · 탈출율 배지</h2>
+      <h2 class="sec">점수(7점 만점) · 탈출율 배지</h2>
       <div class="rulebox">
         <ul>
-          <li><b>주봉</b>: 위치 &lt;20% 0 · ~35% 1 · ≥35% 2 / 13주 추세 &lt;0 0 · ~5% 1 · ≥5% 2 (≤−5% 감점 −1) / ATR 4~7% +1 / 밴드 폭 ≥22% +1</li>
+          <li><b>주봉</b>: 위치 &lt;20% 0 · ~35% 1 · ≥35% 2 / 13주 추세 &lt;0 0 · ~5% 1 · ≥5% 2 (≤−5% 감점 −1) / ATR 3~7% +1 / 밴드 폭 ≥26% +2 · 22~26% +1</li>
           <li><b>상승</b>(현재 미사용): 선거리 ≤2% 0 · ~3.5% 1 · ≥3.5% 2 / 기울기 &lt;2.2%/주 0 · ~3 1 · ≥3 2 / ATR &lt;5% 0 · ~6% 1 · ≥6% 2</li>
-          <li><b>탈출율 배지</b>: 점수 구간별 1차 탈출율 — 검증 탭 <code>score_escape</code> 실측값(0~2 / 3~4 / 5~6점)</li>
-          <li>점수는 <b>순위용</b>이며 진입 신호가 아닙니다 — 후보가 슬롯(20)보다 적은 날은 전부 진입합니다</li>
-          <li><b>필터로 쓰면 역효과</b>: 13년 실측에서 6점만 매수하면 +5.3M(전부 +14.4M), 자본수익률 14.6%/년(전부 31.6%) — 수익을 더 깎습니다</li>
+          <li><b>탈출율 배지</b>: 점수 구간별 1차 탈출율 — 검증 탭 <code>score_escape</code> 실측값(0~2 / 3~4 / 5~6 / 7점)</li>
+          <li>점수는 <b>순위용</b>이며 진입 신호가 아닙니다 — 후보가 슬롯(7)보다 적은 날은 전부 진입합니다</li>
+          <li><b>필터로 쓰면 역효과</b>: 7슬롯 기준 6점만 매수하면 +4.10M(전부 +5.04M), 자본수익률 18.6%/년(전부 22.8%) — 수익을 더 깎습니다</li>
         </ul>
       </div>
 
@@ -381,7 +381,7 @@
     <summary>도움말 · 규칙/색상/조작 설명</summary>
   <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 장중 가격이 <b>하단×1.02</b> 터치 즉시 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
-  <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 6점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
+  <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 7점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
 </div>
 <script>
@@ -740,8 +740,8 @@ function mobileRowHTML(r){
   const scoreTxt = (r.score==null)?"-":
     `${r.score}점`+((r.score_m!=null&&r.score>r.score_m)?'<span class="up">▲</span>'
       :((r.score_m!=null&&r.score<r.score_m)?'<span class="dn">▼</span>':""));
-  const scoreTier = (r.score==null)?"t0":(r.score>=5?"t5":(r.score>=3?"t3":"t0"));
-  const scoreBadge = `<span class="mscore ${scoreTier}" title="점수 ${r.score==null?"-":r.score}점 (6점 만점)">${scoreTxt}</span>`;
+  const scoreTier = (r.score==null)?"t0":(r.score>=6?"t5":(r.score>=3?"t3":"t0"));
+  const scoreBadge = `<span class="mscore ${scoreTier}" title="점수 ${r.score==null?"-":r.score}점 (7점 만점)">${scoreTxt}</span>`;
   const esc = (r.esc_p==null)?"탈출 -":`탈출 ${r.esc_p}%`;
   const mor = (r.score_m==null)?"아침 -":`아침 ${r.score_m}점`;
   const atr = (r.atr==null)?"ATR -":`ATR ${(r.atr*100).toFixed(1)}%`;
@@ -1099,7 +1099,7 @@ async function initRules(){
     +` <span class="sub">peak 자본 기준</span></div>`;
   cfg.textContent=`검증 조건: ${P.pool||"-"} · ${P.buy_zone||"-"} · 진입=${A.entry||"-"}`
     +` · 근접청산 ${A.near==null?"-":A.near+"%"}`
-    +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"}${A.gap_mode==="atr"?" (ATR×"+A.atr_k+")":""} · ${A.rungs||"-"}차 · 점수 S2b`;
+    +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"}${A.gap_mode==="atr"?" (ATR×"+A.atr_k+")":""} · ${A.rungs||"-"}차 · 점수 ${A.scheme||"S2c"} · ${V.params.slots}슬롯`;
 }
 function renderValid(V){
   const S=V.summary;
