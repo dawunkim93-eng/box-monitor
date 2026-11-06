@@ -238,8 +238,8 @@
         <ul>
           <li>대상: <b>주봉박스</b>(13주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 제외</li>
           <li>진입: <b>매수존 + 전일 음봉·아래꼬리 1%+</b> → 점수 상위 20슬롯</li>
-          <li>청산: 종가가 <b>경계 +2% 미만</b> · 박스 소멸(폭/추세 이탈·상단 돌파) — -15% 백스톱은 형식적</li>
-          <li>모든 판정은 <b>종가 기준</b> · 장중 현재 상태는 잠정 표시</li>
+          <li>청산: <b>장중 경계×1.02 터치 즉시</b>(진입일 포함) · 박스 소멸(폭/추세 이탈·상단 돌파) — -15% 백스톱은 형식적</li>
+          <li>신호·점수는 <b>종가 기준</b>, 청산은 <b>장중 터치 기준</b></li>
         </ul>
         <div class="rowbtns">
           <button class="tblbtn" type="button" onclick="gotoLiveCandidates()">✅ 진입 후보 보기</button>
@@ -322,10 +322,21 @@
       <h2 class="sec">매도(청산)</h2>
       <div class="rulebox warn">
         <ul>
-          <li><b>⛔ 근접 청산</b>: 종가 &lt; 경계×1.02 (경계 = 주봉 밴드 하단)</li>
+          <li><b>⛔ 근접 청산</b>: 장중 가격이 경계×1.02 터치 → <b>즉시 시장가</b> (종가 대기 금지)</li>
           <li><b>🚨 이탈</b>: 밴드 하단 이탈 · 박스 소멸(폭/추세 위반 · 상단 돌파)</li>
           <li><b>-15% 백스톱</b>: 경계×0.85 (형식적 · 13년 발동 0건)</li>
           <li>상방 돌파(밴드 상단 초과) = 박스 소멸 → 청산</li>
+        </ul>
+      </div>
+
+      <h2 class="sec">실전 생존 수칙</h2>
+      <div class="rulebox good">
+        <ul>
+          <li><b>청산은 장중</b>: 경계×1.02 터치 즉시 시장가. 종가 대기 금지 — 트리거일 종가는 시가보다 평균 3.0% 낮았습니다(13년 3,493건).</li>
+          <li><b>진입일 포함</b>: 매수 당일에도 같은 기준. 진입일 판정을 빼면 MDD가 -422k로 과소평가됩니다(포함 시 -649k).</li>
+          <li><b>급락 쿨다운</b>: 지수가 -3% 이하로 마감한 다음 1거래일은 신규 진입 스킵. 2일은 역효과.</li>
+          <li><b>사이즈</b>: 1차수 10만 × 5차 = 슬롯 50만 · 20슬롯 최대 1,000만. 실측 peak 자본 330만 — 계좌의 20~30% 이내.</li>
+          <li><b>재진입 금지</b>: 깨진 박스는 재형성에 수주가 걸립니다. 손절 종목 다음날 재매수 금지.</li>
         </ul>
       </div>
 
@@ -354,7 +365,7 @@
   </div>
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산/손절 구역 · +2% 이상 = 매수존 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 종가가 <b>하단 2% 위</b>에 닿으면 청산 · 이탈 확정(경계 하향)=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산/손절 구역 · +2% 이상 = 매수존 · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 장중 가격이 <b>하단×1.02</b> 터치 즉시 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 6점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -1056,7 +1067,7 @@ function renderValid(V){
   const A=V.assumptions||{};
   document.getElementById("v-info").textContent=
     `${V.params.buy_zone||"매수존"} 상위 ${V.params.slots}개 순위대로 진입`
-    + ` · 진입=${A.entry||"-"} · 근접 청산 ${A.near==null?"-":A.near+"%"}`
+    + ` · 진입=${A.entry||"-"} · 청산=${A.exit_mode==="intraday"?"장중 터치":"종가"}${A.entry_eval?"(진입일 포함)":""} · ${A.near==null?"-":A.near+"%"}`
     + ` · ${V.params.start}~${V.params.end} · 갱신 ${V.updated_at}`;
   document.getElementById("v-chips").innerHTML=
     `<div class="chip">1차 탈출율 <b>${S.escape_rate}%</b></div>
