@@ -20,10 +20,20 @@
   .wrap>:not(table){max-width:100vw}
   h1{font-size:18px;margin:6px 0 2px} .sub{color:var(--dim);font-size:11.5px}
   .head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px}
-  .tabs{display:flex;gap:6px;margin:10px 0 4px}
-  .tab{background:var(--card);border:1px solid var(--line);color:var(--txt);
-       border-radius:8px;padding:8px 18px;font-size:13.5px;cursor:pointer}
-  .tab.on{border-color:var(--blue);color:var(--blue);font-weight:700}
+  .tabbar{margin:10px 0 6px}
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:540px;
+        background:#12151c;border:1px solid var(--line);border-radius:11px;padding:4px}
+  .tab{appearance:none;background:transparent;border:0;color:var(--dim);
+       border-radius:8px;padding:11px 6px;min-height:46px;font-size:14.5px;font-weight:700;
+       letter-spacing:.02em;cursor:pointer}
+  .tab.on{background:#2563eb;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .tab:active{transform:translateY(1px)}
+  @media(max-width:640px){
+    .tabbar{position:sticky;top:0;z-index:20;background:var(--bg);
+            margin:8px -8px 4px;padding:8px 8px 7px;border-bottom:1px solid var(--line)}
+    .tabs{max-width:none}
+    .tab{font-size:15px;min-height:48px}
+  }
   .stats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:8px;
         padding:6px 10px;font-size:12px}
@@ -168,10 +178,12 @@
     </div>
     <div class="sub" id="stamp" aria-live="polite">로딩 중…</div>
   </div>
+  <div class="tabbar">
   <div class="tabs" role="tablist">
     <button id="tb-live" class="tab on" data-t="live" role="tab" aria-selected="true" aria-controls="view-live">실시간</button>
     <button id="tb-valid" class="tab" data-t="valid" role="tab" aria-selected="false" aria-controls="view-valid">검증</button>
     <button id="tb-rules" class="tab" data-t="rules" role="tab" aria-selected="false" aria-controls="view-rules">전략</button>
+  </div>
   </div>
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
   <div class="stats" id="stats"></div>
@@ -984,6 +996,7 @@ document.getElementById("btn-hold").addEventListener("click",async()=>{
 });
 async function jget(p){const r=await fetch(p+"?t="+Date.now()); if(!r.ok) throw new Error(r.status); return r.json();}
 function setTab(t){
+  const changed = (t!==CURRENT_TAB);
   ["live","valid","rules"].forEach(x=>{
     document.getElementById("view-"+x).hidden = t!==x;
     const b=document.getElementById("tb-"+x);
@@ -991,11 +1004,31 @@ function setTab(t){
     b.setAttribute("aria-selected",t===x?"true":"false");
   });
   CURRENT_TAB=t;
+  if(changed) window.scrollTo(0,0);
   if(t==="valid") initValid();
   else if(t==="rules") initRules();
 }
 document.querySelectorAll(".tab").forEach(b=>
   b.addEventListener("click",()=>setTab(b.dataset.t)));
+// 모바일: 좌우 스와이프로 탭 전환 (세로 스크롤·표 가로스크롤과 충돌 방지)
+(function(){
+  let x0=null, y0=null;
+  document.addEventListener("touchstart",e=>{
+    if(innerWidth>640||e.touches.length!==1) return;
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener("touchend",e=>{
+    if(x0===null||innerWidth>640) return;
+    const dx=e.changedTouches[0].clientX-x0;
+    const dy=e.changedTouches[0].clientY-y0;
+    x0=null;
+    if(Math.abs(dx)<70||Math.abs(dy)>45) return;
+    if(e.target.closest(".tablewrap,select,input,button")) return;
+    const order=["live","valid","rules"];
+    const j=order.indexOf(CURRENT_TAB)+(dx<0?1:-1);
+    if(j>=0&&j<order.length) setTab(order[j]);
+  },{passive:true});
+})();
 function gotoLiveCandidates(){
   setTab("live");
   $("#candonly").checked=true;
