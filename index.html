@@ -1075,7 +1075,8 @@ function renderValid(V){
      <div class="chip">회전 <b>${S.turnover_year}회/년</b> (슬롯당 ${S.turnover_slot})</div>
      <div class="chip">지속 <b>${S.hold_avg}일</b> (중앙 ${S.hold_median})</div>
      <div class="chip">포지션 ${S.positions}건</div>
-     <div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b></div>
+     <div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b> <span class="sub">당일 재왕복 가정</span></div>
+     ${(V.sensitivity&&V.sensitivity.all)?`<div class="chip">지정가 체결 시 <b class="${V.sensitivity.all.net_total>=0?"up":"dn"}">${fmt(V.sensitivity.all.net_total)}원</b> <span class="sub">재왕복 제외</span></div>`:""}
      <div class="chip">사이클/건 ${S.cycles_avg}</div>
      <div class="chip">최대낙폭 ${fmt(S.mdd_won)}원</div>
      <div class="chip">적자연도 ${S.loss_years}/${S.n_years}</div>`;
