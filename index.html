@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>박스권 모니터</title>
+<title>📦 박스권 모니터</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%A6%3C/text%3E%3C/svg%3E">
+<meta name="description" content="국내 주식 박스권(주봉 13주 종가 밴드) 관찰 대시보드 — 사다리 5차·갭 2.5% 관찰용">
 <style>
   :root{
     --bg:#0f1115; --card:#171a21; --line:#262b35; --txt:#e6e8ee; --dim:#8b93a3;
@@ -30,16 +32,20 @@
   .alert{border:1px solid var(--red);border-left:4px solid var(--red);background:#1d1114;
          border-radius:6px;padding:7px 10px;margin:5px 0;display:flex;
          justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .alert.rec{border-color:var(--line);border-left-color:var(--dim);background:var(--card)}
+  .alert.rec .n{color:var(--dim)}
+  #alertsec .tblbtn{margin:6px 0 10px}
   .alert .n{font-weight:700}
   .deep{color:var(--red);font-weight:700}
   .warn{color:var(--amber)}
-  .toolbar{display:flex;gap:6px;align-items:center;margin:10px 0 6px;flex-wrap:wrap;flex-direction:row}
+  .toolbar{display:flex;gap:6px;align-items:center;margin:6px 0 2px;flex-wrap:wrap;flex-direction:row;
+           position:sticky;top:0;z-index:6;background:var(--bg);padding:6px 0}
   .toolbar button{background:var(--card);border:1px solid var(--line);color:var(--txt);
                   border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer}
   .toolbar button.on{border-color:var(--blue);color:var(--blue)}
   .tablewrap{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
   .tablewrap>table{min-width:max-content}
-  .tablewrap-main{max-height:70vh;overflow:auto}
+  .tablewrap-main{overflow:auto}
   #main-tbl{overflow:visible}
   #main-tbl thead th{position:sticky;top:0;z-index:3;background:#1b1f28}
   table{width:100%;border-collapse:collapse;background:var(--card);
@@ -140,6 +146,7 @@
         border:1px solid rgba(59,130,246,.45);border-radius:4px;padding:0 4px}
   .strategy.sel .pick{display:inline-block}
   @media(max-width:640px){ .strategy-grid{grid-template-columns:1fr} }
+  @media(max-width:640px){ .toolbar{position:static;padding:0} }
   .rules .rowbtns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
   @media(max-width:640px){ .rules{max-width:100%;font-size:12px} .rulebox{padding:7px 9px} }
 </style>
@@ -160,7 +167,6 @@
   </div>
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
   <div class="stats" id="stats"></div>
-  <div id="alertsec"></div>
   <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)
     <button id="btn-hold" class="tblbtn" type="button" title="체크한 보유 종목 코드 복사 → 텔레그램 전송 = 보유 목록 자동 갱신 (2분 내)" disabled>☑ 보유 목록 복사</button></h2>
   <table id="hold-tbl" hidden>
@@ -198,6 +204,7 @@
     <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
   </table>
   <div id="mobile-list" class="mob-list"><div class="sub" style="margin:8px 0">로딩 중…</div></div>
+  <div id="alertsec"></div>
   </div>
   <div id="view-valid" hidden role="tabpanel" aria-labelledby="tb-valid">
     <h2 class="sec">📊 Top-20 진입 시뮬레이션</h2>
@@ -226,9 +233,9 @@
       <div class="rulebox good">
         <b>한눈에</b>
         <ul>
-          <li>대상: <b>주봉박스</b>(13주 종가 밴드) · <b>상승저점</b>(피벗 저가 3연속 상승)</li>
+          <li>대상: <b>주봉박스</b>(13주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 제외</li>
           <li>진입: <b>매수존 + 전일 음봉·아래꼬리 1%+</b> → 점수 상위 20슬롯</li>
-          <li>청산: 종가가 <b>경계 +2% 미만</b>이면 청산 · 박스 이탈/소멸 · -15% 백스톱</li>
+          <li>청산: 종가가 <b>경계 +2% 미만</b> · 박스 소멸(폭/추세 이탈·상단 돌파) — -15% 백스톱은 형식적</li>
           <li>모든 판정은 <b>종가 기준</b> · 장중 현재 상태는 잠정 표시</li>
         </ul>
         <div class="rowbtns">
@@ -242,8 +249,8 @@
       <div class="rulebox">
         <ul>
           <li><b>주봉박스</b>: 최근 완료 13주 종가 밴드 · 폭 ≤30% · |순드리프트| ≤15% · 종가가 밴드 내</li>
-          <li><b>상승저점</b>: 피벗 저가 3개 연속 상승(v2&gt;v1×1.005 · v1&gt;v0×0.995) · 종가 ≥ 추세선×0.995</li>
-          <li><b>매수존</b>: 주봉 = 밴드 위치 ≤50% (하단 +2% 이상) / 상승 = 추세선 +2%~+5%</li>
+          <li><b>상승저점</b>(현재 미사용): 피벗 저가 3개 연속 상승(v2&gt;v1×1.005 · v1&gt;v0×0.995) · 종가 ≥ 추세선×0.995</li>
+          <li><b>매수존</b>: 밴드 위치 ≤50% (하단 +2% 이상)</li>
           <li><b>캔들 필터</b>: 신호일(전일) <b>음봉 + 아래꼬리 ≥1%</b></li>
           <li>보유 종목 제외 · 상위 20슬롯 · 1차수 <b>100,000원</b></li>
         </ul>
@@ -253,7 +260,7 @@
       <div class="rulebox">
         <ul>
           <li><b>주봉</b>: 위치 &lt;20% 0 · ~35% 1 · ≥35% 2 / 13주 추세 &lt;0 0 · ~5% 1 · ≥5% 2 (≤−5% 감점 −1) / ATR 4~7% +1 / 밴드 폭 ≥22% +1</li>
-          <li><b>상승</b>: 선거리 ≤2% 0 · ~3.5% 1 · ≥3.5% 2 / 기울기 &lt;2.2%/주 0 · ~3 1 · ≥3 2 / ATR &lt;5% 0 · ~6% 1 · ≥6% 2</li>
+          <li><b>상승</b>(현재 미사용): 선거리 ≤2% 0 · ~3.5% 1 · ≥3.5% 2 / 기울기 &lt;2.2%/주 0 · ~3 1 · ≥3 2 / ATR &lt;5% 0 · ~6% 1 · ≥6% 2</li>
           <li><b>탈출율 배지</b>: 점수 구간별 1차 탈출율 — 검증 탭 <code>score_escape</code> 실측값(0~2 / 3~4 / 5~6점)</li>
           <li>점수는 <b>순위용</b>이며 진입 신호가 아닙니다</li>
         </ul>
@@ -312,10 +319,10 @@
       <h2 class="sec">매도(청산)</h2>
       <div class="rulebox warn">
         <ul>
-          <li><b>⛔ 근접 청산</b>: 종가 &lt; 경계×1.02 (경계 = 주봉 밴드 하단 / 상승 추세선)</li>
-          <li><b>🚨 이탈</b>: 밴드 하단 이탈 · 추세선 붕괴 · 박스 소멸(폭/추세 위반)</li>
-          <li><b>-15% 백스톱</b>: 경계×0.85</li>
-          <li>상방 돌파는 청산 아님 (슬롯 유지)</li>
+          <li><b>⛔ 근접 청산</b>: 종가 &lt; 경계×1.02 (경계 = 주봉 밴드 하단)</li>
+          <li><b>🚨 이탈</b>: 밴드 하단 이탈 · 박스 소멸(폭/추세 위반 · 상단 돌파)</li>
+          <li><b>-15% 백스톱</b>: 경계×0.85 (형식적 · 13년 발동 0건)</li>
+          <li>상방 돌파(밴드 상단 초과) = 박스 소멸 → 청산</li>
         </ul>
       </div>
 
@@ -443,7 +450,7 @@ let UI_RESTORE=null;
 let VALID=null, HIST=null, VALID_P=null;
 let CURRENT_TAB="live";
 let MAXFN=false;
-try{ MAXFN=localStorage.getItem("boxmaxfn")==="1"; }catch(e){ MAXFN=false; }
+try{ const _mf=localStorage.getItem("boxmaxfn"); MAXFN=(_mf===null?"1":_mf)==="1"; }catch(e){ MAXFN=true; }
 function applyMaxFn(){
   const cb=document.getElementById("maxfn");
   const on=document.getElementById("strat-on");
@@ -506,6 +513,37 @@ function clearFilters(){
   $("#candonly").checked=false;
   render();
 }
+let ALERT_ALL=false;
+function relTime(t){
+  if(!t) return "";
+  const m=/^(\d{1,2}):(\d{2})$/.exec(String(t).trim()); if(!m) return t;
+  const base=(DATA&&DATA.updated_at_kst)||"";
+  const b=/(\d{1,2}):(\d{2})/.exec(base);
+  if(!b) return t;
+  let d=(+b[1]*60+ +b[2])-(+m[1]*60+ +m[2]); if(d<0) d+=1440;
+  if(d<=1) return "방금";
+  return d<60?`${d}분 전`:`${Math.floor(d/60)}시간 전`;
+}
+function alertRow(x,rec){
+  const v=Number(x.pct_low)||0;
+  return `<div class="alert${rec?" rec":""}"><span><span class="n">${x.name}</span>`
+    +` ${fmt(x.price)}원 · 하단 ${fmt(x.lo)} 대비 <span class="${rec?"up":"deep"}">${pct(v)}</span>`
+    +(x.deep?` <span class="deep">⛔심화</span>`:"")
+    +`</span><span class="warn">${relTime(x.time)}</span></div>`;
+}
+function renderAlerts(cur,rec){
+  const all=cur.concat(rec);
+  if(!all.length){ $("#alertsec").innerHTML=`<div class="sub" style="margin:6px 0 10px">오늘 장중 경고 없음</div>`; return; }
+  const show=ALERT_ALL?all:all.slice(0,5);
+  const more=all.length-show.length;
+  $("#alertsec").innerHTML=
+    `<h2 class="sec">⚠️ 오늘 장중 경고 ${all.length}건 <span class="sub">현재 이탈 ${cur.length} · 회복 ${rec.length}</span></h2>`
+    +show.map(x=>alertRow(x, Number(x.pct_low)>=0)).join("")
+    +(more>0?`<button class="tblbtn" id="alert-more" type="button">외 ${more}건 보기</button>`
+            :(ALERT_ALL?`<button class="tblbtn" id="alert-more" type="button">접기</button>`:""));
+  const b=document.getElementById("alert-more");
+  if(b) b.onclick=()=>{ ALERT_ALL=!ALERT_ALL; renderAlerts(cur,rec); };
+}
 function render(){
   if(!DATA)return;
   const d=DATA;
@@ -518,24 +556,20 @@ function render(){
   }
   const oldExp=document.getElementById("exp-row");
   if(oldExp) oldExp.remove();
-  STAMP_BASE=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")} · 빌드 ${d.ver||"-"}`;
+  STAMP_BASE=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")} · 데이터 버전 ${d.ver||"-"}`;
   const upd=new Date((d.updated_at||"").replace(" ","T"));
   const ageMin=upd.getTime()?(Date.now()-upd.getTime())/60000:0;
   if(d.market==="장중"&&ageMin>30) STAMP_BASE+=" · ⚠️ 데이터 지연";
   refreshStamp();
+  const a=d.alerts||[];
+  const cur=a.filter(x=>Number(x.pct_low)<0).sort((x,y)=>x.pct_low-y.pct_low);
+  const rec=a.filter(x=>Number(x.pct_low)>=0).sort((x,y)=>y.pct_low-x.pct_low);
   $("#stats").innerHTML=
     `<div class="chip">박스 유지 <b>${d.live_count}</b>종목</div>
      <div class="chip">재무강화 <b>${d.strong_count}</b>종목</div>
      <div class="chip">✅ 진입 가능 <b>${(d.rows||[]).filter(r=>r.cand).length}</b>종목</div>
-     <div class="chip">⚠️ 장중 이탈 <b>${(d.alerts||[]).length}건</b></div>`;
-  const a=d.alerts||[];
-  $("#alertsec").innerHTML=a.length?
-    `<h2 class="sec">⚠️ 장중 이탈 (현재가 &lt; 박스 하단)</h2>`+
-    a.map(x=>`<div class="alert"><span><span class="n">${x.name}</span>
-      ${fmt(x.price)}원 · 하단 ${fmt(x.lo)} 대비 <span class="deep">${pct(x.pct_low)}</span>
-      ${x.deep?`<span class="deep">⛔심화</span>`:""}</span>
-      <span class="warn">${x.time||""} 감지</span></div>`).join("")
-    :`<div class="sub" style="margin:6px 0 10px">오늘 장중 이탈 감지 없음</div>`;
+     <div class="chip">⚠️ 현재 이탈 <b>${cur.length}</b>건 <span class="sub">/ 오늘 경고 ${a.length}</span></div>`;
+  renderAlerts(cur,rec);
   let rows=(d.rows||[]).slice();
   const candonly=$("#candonly").checked;
   const srt={
@@ -685,9 +719,8 @@ function mobileRowHTML(r){
   return `<div class="mcard${rc}">
     <div class="mtop"><input type="checkbox" class="heldchk" data-c="${r.code}" ${chk?"checked":""} aria-label="보유 체크">
       ${strong}<b class="mname">${r.name}</b>${tag}${risk}${status}${scoreBadge}</div>
-    <div class="mrow">${esc} · ${mor}</div>
     <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
-    <div class="mrow">하단 ${pl} · ${atr} · ${gap}</div>
+    <div class="mrow">하단 ${pl} · ${atr} · ${esc}</div>
     <details class="mdet" data-c="${r.code}">
       <summary>점수 상세 · 이력</summary>
       <div class="mexp">${scoreLine}</div>
