@@ -48,6 +48,9 @@
   .tablewrap-main{overflow:auto}
   #main-tbl{overflow:visible}
   #main-tbl thead th{position:sticky;top:0;z-index:3;background:#1b1f28}
+  /* 넓은 화면에서는 래퍼 스크롤을 풀어 thead가 페이지 스크롤에 sticky 되게 (툴바 44px 아래) */
+  @media(min-width:1100px){ .tablewrap-main{overflow:visible}
+    #main-tbl thead th{top:44px} }
   table{width:100%;border-collapse:collapse;background:var(--card);
         border:1px solid var(--line);border-radius:8px;overflow:hidden}
   th,td{padding:6px 7px;text-align:right;white-space:nowrap;font-size:12.2px}
@@ -534,7 +537,7 @@ function alertRow(x,rec){
 function renderAlerts(cur,rec){
   const all=cur.concat(rec);
   if(!all.length){ $("#alertsec").innerHTML=`<div class="sub" style="margin:6px 0 10px">오늘 장중 경고 없음</div>`; return; }
-  const show=ALERT_ALL?all:all.slice(0,5);
+  const show=ALERT_ALL?all:(cur.slice(0,5).concat(rec.slice(0,2)));
   const more=all.length-show.length;
   $("#alertsec").innerHTML=
     `<h2 class="sec">⚠️ 오늘 장중 경고 ${all.length}건 <span class="sub">현재 이탈 ${cur.length} · 회복 ${rec.length}</span></h2>`
@@ -556,7 +559,10 @@ function render(){
   }
   const oldExp=document.getElementById("exp-row");
   if(oldExp) oldExp.remove();
-  STAMP_BASE=`${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")} · 데이터 버전 ${d.ver||"-"}`;
+  const _mob=innerWidth<=640;
+  STAMP_BASE=_mob
+    ? `${d.market||""} · ${(d.updated_at_kst||"").slice(11,16)||d.updated_at||"-"} 갱신`
+    : `${d.market||""} · 데이터 ${d.updated_at_kst||d.updated_at||"-"} 갱신 · 조회 ${new Date().toLocaleTimeString("ko-KR")} · 데이터 버전 ${d.ver||"-"}`;
   const upd=new Date((d.updated_at||"").replace(" ","T"));
   const ageMin=upd.getTime()?(Date.now()-upd.getTime())/60000:0;
   if(d.market==="장중"&&ageMin>30) STAMP_BASE+=" · ⚠️ 데이터 지연";
@@ -568,7 +574,7 @@ function render(){
     `<div class="chip">박스 유지 <b>${d.live_count}</b>종목</div>
      <div class="chip">재무강화 <b>${d.strong_count}</b>종목</div>
      <div class="chip">✅ 진입 가능 <b>${(d.rows||[]).filter(r=>r.cand).length}</b>종목</div>
-     <div class="chip">⚠️ 현재 이탈 <b>${cur.length}</b>건 <span class="sub">/ 오늘 경고 ${a.length}</span></div>`;
+     <div class="chip" role="button" tabindex="0" title="경고 목록으로 이동" style="cursor:pointer" onclick="document.getElementById('alertsec').scrollIntoView({behavior:'smooth',block:'start'})">⚠️ 현재 이탈 <b>${cur.length}</b>건 <span class="sub">/ 오늘 경고 ${a.length}</span></div>`;
   renderAlerts(cur,rec);
   let rows=(d.rows||[]).slice();
   const candonly=$("#candonly").checked;
@@ -1037,9 +1043,10 @@ async function initRules(){
     +` <span class="sub">당일 재왕복 가정</span></div>`
     +((VALID.sensitivity&&VALID.sensitivity.all)?`<div class="chip">지정가 체결 시 <b class="${VALID.sensitivity.all.net_total>=0?"up":"dn"}">${fmt(VALID.sensitivity.all.net_total)}원</b> <span class="sub">당일 재왕복 제외</span></div>`:``)
     +`<div class="chip">MDD(최대 낙폭) <b class="dn">${fmt(S.mdd_won)}원</b>`
-    +` <span class="sub">평균자본 대비 ${S.mdd_vs_capital_pct==null?"-":S.mdd_vs_capital_pct+"%"}</span></div>`
+    +` <span class="sub">peak 자본 ${C.peak==null?"-":fmt(C.peak)+"원"}</span></div>`
     +`<div class="chip">적자연도 <b>${S.loss_years}/${S.n_years}</b></div>`
-    +`<div class="chip">자본수익률 ${C.ret_capital_pct==null?"-":C.ret_capital_pct+"%/년"}</div>`;
+    +`<div class="chip">자본수익률 ${(C.ret_peak_pct!=null?C.ret_peak_pct:C.ret_capital_pct)==null?"-":(C.ret_peak_pct!=null?C.ret_peak_pct:C.ret_capital_pct)+"%/년"}`
+    +` <span class="sub">peak 자본 기준</span></div>`;
   cfg.textContent=`검증 조건: ${P.pool||"-"} · ${P.buy_zone||"-"} · 진입=${A.entry||"-"}`
     +` · 근접청산 ${A.near==null?"-":A.near+"%"}`
     +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"}${A.gap_mode==="atr"?" (ATR×"+A.atr_k+")":""} · ${A.rungs||"-"}차 · 점수 S2b`;

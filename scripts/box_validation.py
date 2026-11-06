@@ -602,6 +602,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     "p95_capital": round(p95_cap),
                     "ret_capital_pct": round(summary["net_total"]
                                              / max(av_cap, 1) / years * 100, 1),
+                    "ret_peak_pct": round(summary["net_total"]
+                                          / max(pk_cap, 1) / years * 100, 1),
                     "max_positions": max_pos, "max_rungs": max_rungs})
         return res
     # 상세 (사이트 렌더용)
@@ -695,6 +697,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     "p95": round(p95_cap),
                     "ret_capital_pct": round(summary["net_total"]
                                              / max(av_cap, 1) / years * 100, 1),
+                    "ret_peak_pct": round(summary["net_total"]
+                                          / max(pk_cap, 1) / years * 100, 1),
                     "max_positions": max_pos, "max_rungs": max_rungs},
         "recent_positions": [
             {"name": name_of.get(p["code"], "?"), "entry_day": str(p["entry_day"]),
@@ -874,7 +878,8 @@ def main():
           f" {s['years']}년) · 탈출율 {s['escape_rate']}% · 지속 {s['hold_avg']}일 · "
           f"총 {s['net_total']:+,}원 · MDD {s['mdd_won']:+,}원"
           f"({s['mdd_vs_capital_pct']}%) · 적자연도 {s['loss_years']}/{s['n_years']} · "
-          f"평균자본 {r['capital']['avg']:,}원 · 자본수익률 {r['capital']['ret_capital_pct']:+.1f}%/년",
+          f"평균자본 {r['capital']['avg']:,}원 · peak {r['capital']['peak']:,}원"
+          f" · 자본수익률(peak) {r['capital']['ret_peak_pct']:+.1f}%/년",
           flush=True)
     print("[기간 버킷]", flush=True)
     for kd, blk in r.get("dur_escape", {}).items():
