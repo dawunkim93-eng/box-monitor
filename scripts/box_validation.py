@@ -58,6 +58,7 @@ ENTRY_EVAL = True       # 진입일 당일에도 청산 판정 (미적용 시 MD
 MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
 MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 경계×1.02까지. 채택값 4% (경계 +6%)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
+MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.125          # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -9.6%)
@@ -510,6 +511,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                             else float(s["o"][je]))
                 if not (px_e > 0):
                     continue
+                if MIN_SCORE and -nsc < MIN_SCORE:
+                    continue
                 if MIN_ROOM > 0 and knd == "wbox":
                     _w0 = float(s["wlo"][je])
                     if _w0 > 0 and (px_e / (_w0 * 1.02) - 1) * 100 < MIN_ROOM:
@@ -764,6 +767,7 @@ def main():
     global EXIT_MODE, ENTRY_EVAL, MKT_DN
     global MIN_ROOM
     global ADAPT_RUNGS
+    global MIN_SCORE
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -794,6 +798,8 @@ def main():
     ap.add_argument("--adapt-rungs", action=argparse.BooleanOptionalAction,
                     default=ADAPT_RUNGS,
                     help="차수를 room에 맞춰 축소 (floor(room/gap)+1, 최대 5)")
+    ap.add_argument("--min-score", type=int, default=MIN_SCORE,
+                    help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
@@ -839,6 +845,7 @@ def main():
     ENTRY_EVAL = args.entry_eval
     MIN_ROOM = args.min_room
     ADAPT_RUNGS = args.adapt_rungs
+    MIN_SCORE = args.min_score
     if args.mkt_csv and args.cool > 0:
         _m = pd.read_csv(args.mkt_csv, parse_dates=["Date"]).set_index("Date")
         _dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
