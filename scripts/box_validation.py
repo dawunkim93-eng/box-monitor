@@ -941,6 +941,7 @@ def main():
             "gap_pct": args.gap * 100, "rungs": rungs,
             "gap_mode": GAP_MODE,
             "exit_mode": EXIT_MODE, "entry_eval": ENTRY_EVAL,
+            "min_room": MIN_ROOM,
             "cool": args.cool, "cool_thr": args.cool_thr,
             "atr_k": (ATR_K if GAP_MODE == "atr" else None),
             "near_of_gap": (NEAR_OF_GAP if GAP_MODE == "atr" else None),
