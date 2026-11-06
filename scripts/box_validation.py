@@ -53,6 +53,9 @@ GAP_MODE = "fixed"     # fixed | atr (atr: gap_i = clip(k × ATR14_i, min, max))
 ATR_K = 0.8            # atr 갭 계수
 GAP_MIN, GAP_MAX = 0.015, 0.050   # atr 갭 하한/상한
 NEAR_OF_GAP = 0.8      # atr 모드 근접청산(%) = 0.8 × 갭 → 1차 체결 전 청산 방지
+EXIT_MODE = "close"    # close(종가 판정) | intraday(경계 터치 시 장중 청산)
+ENTRY_EVAL = False     # 진입일 당일에도 청산 판정 (현행 False = 진입일 스킵)
+MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.125          # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -9.6%)
@@ -333,6 +336,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                      "clower": hst.get("clower")})
         if COMP_DUMP is not None:
             COMP_DUMP.append({
+                "code": i, "exit_day": int(day),
                 "entry_day": hst["entry_day"], "kind": hst.get("kind", "std"),
                 "pos": hst.get("cpos"), "atr": hst.get("catr"),
                 "trend": hst.get("ctrend"), "height": hst.get("cheight"),
@@ -370,9 +374,19 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             #    near는 포지션별: 고정모드=near · ATR모드=NEAR_OF_GAP×갭
             B_ = (wlo if knd == "wbox" else tlv)
             B_ = B_ if B_ > 0 else None
-            if B_ is not None and px < B_ * (1 + n_i / 100):
-                close_position(done, holdings, curve, i, px, "하단근접 청산", D)
-                continue
+            if B_ is not None:
+                lvl = B_ * (1 + n_i / 100)
+                if EXIT_MODE == "intraday":
+                    o_j = float(s["o"][j])
+                    fill = (o_j if (o_j > 0 and o_j < lvl)
+                            else (lvl if lw < lvl else None))
+                    if fill is not None:
+                        close_position(done, holdings, curve, i, fill,
+                                       "하단근접(장중)", D)
+                        continue
+                elif px < lvl:
+                    close_position(done, holdings, curve, i, px, "하단근접 청산", D)
+                    continue
             # 2) 소멸 — wbox: 밴드 유지·상방 / abox: 구조 붕괴
             if knd == "wbox":
                 if WBREAK == "close":
@@ -456,7 +470,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             sum(h["held"]) for h in holdings.values()) * UNIT)
         max_pos = max(max_pos, len(holdings))
         free = K_ - len(holdings)
-        if free > 0:
+        if free > 0 and not (MKT_DN and int(D) in MKT_DN):
             for d, nsc, i, j, knd in ev_days.get(int(D), []):
                 if free <= 0:
                     break
@@ -551,6 +565,23 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "cycles": 0, "net": 0.0}
                 holdings[i]["held"][0] = True
                 free -= 1
+                if ENTRY_EVAL:      # 진입일 당일 청산 판정 (매수 직후 밀리는 경우)
+                    b_e = (float(s["wlo"][je]) if knd == "wbox"
+                           else float(s["tlv"][je]))
+                    if b_e > 0:
+                        lvl_e = b_e * (1 + n_i / 100)
+                        o_e, l_e, c_e = (float(s["o"][je]), float(s["l"][je]),
+                                         float(s["c"][je]))
+                        if EXIT_MODE == "intraday":
+                            fill = (o_e if (o_e > 0 and o_e < lvl_e)
+                                    else (lvl_e if l_e < lvl_e else None))
+                        else:
+                            fill = c_e if c_e < lvl_e else None
+                        if fill is not None:
+                            close_position(done, holdings, curve, i, fill,
+                                           "하단근접(당일)", D)
+                            free += 1
+                            continue
     for i in list(holdings):
         s = U[i]
         close_position(done, holdings, curve, i, float(s["c"][holdings[i]["j"]]),
@@ -713,6 +744,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
 def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
+    global EXIT_MODE, ENTRY_EVAL, MKT_DN
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -729,6 +761,15 @@ def main():
     ap.add_argument("--rungs", type=int, default=0)
     ap.add_argument("--near", type=float, default=2.0,
                     help="하단 경계 N%% 위 접근 시 조기 청산 (%%) · 0=이탈 완료 시만")
+    ap.add_argument("--exit-mode", choices=["close", "intraday"], default=EXIT_MODE,
+                    help="청산 판정 (close=종가 · intraday=경계 터치 시 장중)")
+    ap.add_argument("--entry-eval", action=argparse.BooleanOptionalAction,
+                    default=ENTRY_EVAL, help="진입일 당일 청산 판정 포함")
+    ap.add_argument("--mkt-csv", type=str, default="",
+                    help="지수 일봉 CSV (Date,Close) — 급락 쿨다운용")
+    ap.add_argument("--cool", type=int, default=0,
+                    help="지수 -cool-thr%% 이하 마감 후 신규 진입 중단 일수")
+    ap.add_argument("--cool-thr", type=float, default=3.0)
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
@@ -770,6 +811,20 @@ def main():
     ATR_K = args.atr_k
     NEAR_OF_GAP = args.near_of_gap
     GAP_MIN, GAP_MAX = args.gap_min, args.gap_max
+    EXIT_MODE = args.exit_mode
+    ENTRY_EVAL = args.entry_eval
+    if args.mkt_csv and args.cool > 0:
+        _m = pd.read_csv(args.mkt_csv, parse_dates=["Date"]).set_index("Date")
+        _dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
+        _ret = _m["Close"].pct_change() * 100
+        _blk = set()
+        for _i in range(1, len(_dn)):
+            if _ret.iloc[_i] <= -args.cool_thr:
+                for _k in range(1, args.cool + 1):
+                    if _i + _k < len(_dn):
+                        _blk.add(_dn[_i + _k])
+        MKT_DN = _blk
+        print(f"[INFO] 급락 쿨다운 차단일 {len(_blk)}일 (thr -{args.cool_thr:g}%)")
     SCHEME = args.scheme
     ENTRY_MODE = args.entry
     ENTRY_ZONE = args.entry_zone
@@ -859,6 +914,8 @@ def main():
                         else "청산 = 전일 종가가 경계 하향 이탈(버퍼 없음)"),
             "gap_pct": args.gap * 100, "rungs": rungs,
             "gap_mode": GAP_MODE,
+            "exit_mode": EXIT_MODE, "entry_eval": ENTRY_EVAL,
+            "cool": args.cool, "cool_thr": args.cool_thr,
             "atr_k": (ATR_K if GAP_MODE == "atr" else None),
             "near_of_gap": (NEAR_OF_GAP if GAP_MODE == "atr" else None),
             "unit": UNIT, "fee_roundtrip": FEE,
