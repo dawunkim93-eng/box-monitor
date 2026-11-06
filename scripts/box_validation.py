@@ -16,6 +16,7 @@
    --near 2.0    경계 N% 위 접근 시 종가 청산 (0=경계 이탈 시만)
    --rungs 0     기본 max(4, round(COVER/gap)) = 5차
    --pool w      주봉박스만 (기본) · wa=주봉+상승저점 · a=상승저점만
+   --gap-mode fixed|atr   atr=clip(k×ATR14, 1.5~5%)·near=0.8×갭 (k 0.4~1.2 실측: fixed 우위)
    --entry next_open | close | next_close | limit_signal | limit_line
    --candle all | bear | bear_tail (기본 bear_tail)
    하드스톱 -15%(경계 기준)은 백스톱 — 근접청산(2%)보다 아래라 실측 발동 0건.
@@ -47,7 +48,11 @@ MASTER = PIT / "master.pkl"
 
 UNIT, FEE = 100_000, 0.002
 K = 20                 # 동시 보유 슬롯 (진입 = 순위 상위 20)
-GAP = 0.025            # 기본 갭 (결정 전까지 유지)
+GAP = 0.025            # 기본 갭 (gap-mode=fixed)
+GAP_MODE = "fixed"     # fixed | atr (atr: gap_i = clip(k × ATR14_i, min, max))
+ATR_K = 0.8            # atr 갭 계수
+GAP_MIN, GAP_MAX = 0.015, 0.050   # atr 갭 하한/상한
+NEAR_OF_GAP = 0.8      # atr 모드 근접청산(%) = 0.8 × 갭 → 1차 체결 전 청산 방지
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.125          # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -9.6%)
@@ -311,7 +316,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
 
     def close_position(done, holdings, curve, i, px, why, day):
         hst = holdings.pop(i)
-        for k in range(rungs):
+        for k in range(len(hst["held"])):
             if hst["held"][k]:
                 hst["net"] += (px - hst["levels"][k]) / hst["levels"][k] * UNIT
                 if k == 0 and hst["grid_n"] == 1:
@@ -360,10 +365,12 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             whi = float(s["whi"][j])
             tlv = (float(s["tlv"][j]) if not np.isnan(s["tlv"][j]) else 0.0)
             px, lw = float(s["c"][j]), float(s["l"][j])
+            g_i, n_i = hst.get("gap", gap), hst.get("near", near)
             # 1) 하단 near% 위 근접 청산 — wbox=밴드 하단 · abox=추세선
+            #    near는 포지션별: 고정모드=near · ATR모드=NEAR_OF_GAP×갭
             B_ = (wlo if knd == "wbox" else tlv)
             B_ = B_ if B_ > 0 else None
-            if B_ is not None and px < B_ * (1 + near / 100):
+            if B_ is not None and px < B_ * (1 + n_i / 100):
                 close_position(done, holdings, curve, i, px, "하단근접 청산", D)
                 continue
             # 2) 소멸 — wbox: 밴드 유지·상방 / abox: 구조 붕괴
@@ -387,14 +394,14 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             # 4) 그리드 진행 — 저가 채결(매수) → 고가 채결(매도)
             levels, held = hst["levels"], hst["held"]
             bought = set()
-            for k in range(1, rungs):
+            for k in range(1, len(held)):
                 if not held[k] and lw <= levels[k]:
                     held[k] = True
                     bought.add(k)
-            for k in range(rungs):
+            for k in range(len(held)):
                 if not held[k]:
                     continue
-                tgt = levels[k] * (1 + gap)
+                tgt = levels[k] * (1 + g_i)
                 if float(s["h"][j]) < tgt:
                     continue
                 if (k in bought) and sameday not in ("all", "multi"):
@@ -402,7 +409,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                         continue
                     if sameday == "close" and px < tgt:
                         continue
-                hst["net"] += gap * UNIT - FEE * UNIT
+                hst["net"] += g_i * UNIT - FEE * UNIT
                 held[k] = False
                 hst["cycles"] += 1
                 if k == 0 and hst["grid_n"] == 1:
@@ -411,10 +418,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 # (저가 매수→고가 매도→재매수→재매도 경로 가정 · 분봉 다중 체결 근사)
                 if sameday == "multi":
                     rng_d = float(s["h"][j]) - float(s["l"][j])
-                    extra = int(rng_d // (2 * levels[k] * gap))
+                    extra = int(rng_d // (2 * levels[k] * g_i))
                     extra = min(max(extra, 0), MAX_TRIPS)
                     if extra:
-                        hst["net"] += extra * (gap * UNIT - FEE * UNIT)
+                        hst["net"] += extra * (g_i * UNIT - FEE * UNIT)
                         hst["cycles"] += extra
             if not any(held):      # 재눌림 → 재그리드/회전 (타입별 매수존 복귀)
                 if ROTATE in ("flat_first", "flat_first_excl") and hst.get("escape0"):
@@ -439,8 +446,9 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     in_zone = (not np.isnan(ad_)) and ad_ <= 0.05
                 if in_zone:
                     hst["grid_n"] += 1
-                    hst["levels"] = [px * (1 - gap) ** k for k in range(rungs)]
-                    hst["held"] = [False] * rungs
+                    nr = len(hst["held"])
+                    hst["levels"] = [px * (1 - g_i) ** k for k in range(nr)]
+                    hst["held"] = [False] * nr
                     hst["held"][0] = True
             held_cnt = sum(holdings[i]["held"])
             max_rungs = max(max_rungs, held_cnt)
@@ -481,6 +489,14 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                             else float(s["o"][je]))
                 if not (px_e > 0):
                     continue
+                # 포지션별 갭 — ATR 모드: 신호일 ATR 기준(진입일 종가 미사용 = 룩어헤드 없음)
+                if GAP_MODE == "atr":
+                    a_sig = float(s["atr"][j])
+                    gi = (min(max(ATR_K * a_sig, GAP_MIN), GAP_MAX)
+                          if not np.isnan(a_sig) else gap)
+                    n_i = NEAR_OF_GAP * gi * 100
+                else:
+                    gi, n_i = gap, near
                 if CANDLE_MODE != "all":        # 신호일 캔들 필터
                     if not (float(s["c"][j]) < float(s["o"][j])):
                         continue
@@ -493,19 +509,19 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                         if not (w1 > w0 > 0):
                             continue
                         if not ((px_e - w0) / (w1 - w0) <= 0.5
-                                and px_e >= w0 * (1 + near / 100)):
+                                and px_e >= w0 * (1 + n_i / 100)):
                             continue
                     else:
                         t0 = float(s["tlv"][je])
                         if not (t0 > 0):
                             continue
                         dz = px_e / t0 - 1
-                        if not (near / 100 <= dz <= 0.05):
+                        if not (n_i / 100 <= dz <= 0.05):
                             continue
                 holdings[i] = {"j": je, "j_entry": je,
                                "entry_day": int(dn_s[je]),
                                "entry": px_e, "score": -nsc,
-                               "gap": gap, "kind": knd,
+                               "gap": gi, "near": n_i, "kind": knd,
                                "dur": (int(s["wdur"][je]) if knd == "wbox"
                                        else int(s["adur"][je]) if knd == "abox"
                                        else 0),
@@ -528,7 +544,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "cbull": bool(s["bull"][j]),
                                "cbody": float(s["body"][j]),
                                "clower": float(s["lower_sh"][j]),
-                               "levels": [px_e * (1 - gap) ** k
+                               "levels": [px_e * (1 - gi) ** k
                                           for k in range(rungs)],
                                "held": [False] * rungs,
                                "grid_n": 1, "escape0": False, "loss0": False,
@@ -692,11 +708,20 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
 
 def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
+    global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
                     help="당일 체결 가정 (기본 multi=분봉 다중 왕복 근사)")
     ap.add_argument("--gap", type=float, default=GAP)
+    ap.add_argument("--gap-mode", choices=["fixed", "atr"], default=GAP_MODE,
+                    help="갭 설정 (fixed=고정 · atr=k×ATR14 종목별)")
+    ap.add_argument("--atr-k", type=float, default=ATR_K,
+                    help="atr 갭 계수 (기본 0.8)")
+    ap.add_argument("--near-of-gap", type=float, default=NEAR_OF_GAP,
+                    help="atr 모드 근접청산(%%) = near-of-gap × 갭 (기본 0.8)")
+    ap.add_argument("--gap-min", type=float, default=GAP_MIN)
+    ap.add_argument("--gap-max", type=float, default=GAP_MAX)
     ap.add_argument("--rungs", type=int, default=0)
     ap.add_argument("--near", type=float, default=2.0,
                     help="하단 경계 N%% 위 접근 시 조기 청산 (%%) · 0=이탈 완료 시만")
@@ -737,6 +762,10 @@ def main():
                     help="박스 풀 (w=주봉박스만(기본) · wa=주봉+상승저점 · a=상승저점만)")
     args = ap.parse_args()
     POOL = args.pool
+    GAP_MODE = args.gap_mode
+    ATR_K = args.atr_k
+    NEAR_OF_GAP = args.near_of_gap
+    GAP_MIN, GAP_MAX = args.gap_min, args.gap_max
     SCHEME = args.scheme
     ENTRY_MODE = args.entry
     ENTRY_ZONE = args.entry_zone
@@ -825,6 +854,9 @@ def main():
                         f"{args.near:g}% 위에 접근하면 조기 청산" if args.near > 0
                         else "청산 = 전일 종가가 경계 하향 이탈(버퍼 없음)"),
             "gap_pct": args.gap * 100, "rungs": rungs,
+            "gap_mode": GAP_MODE,
+            "atr_k": (ATR_K if GAP_MODE == "atr" else None),
+            "near_of_gap": (NEAR_OF_GAP if GAP_MODE == "atr" else None),
             "unit": UNIT, "fee_roundtrip": FEE,
             "pool_ko": ("주봉박스(13주 종가 밴드 ±30%·드리프트≤15%·밴드 하위 절반 진입·"
                         "밴드 이탈 소멸) + 상승저점(피벗 저가 3개 연속 상승·추세선 근접 "
