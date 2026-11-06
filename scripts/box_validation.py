@@ -55,7 +55,9 @@ GAP_MIN, GAP_MAX = 0.015, 0.050   # atr 갭 하한/상한
 NEAR_OF_GAP = 0.8      # atr 모드 근접청산(%) = 0.8 × 갭 → 1차 체결 전 청산 방지
 EXIT_MODE = "intraday"  # close(종가 판정) | intraday(경계 터치 시 장중 청산) — 2026-11 채택
 ENTRY_EVAL = True       # 진입일 당일에도 청산 판정 (미적용 시 MDD 과소: -422k vs -649k)
-MKT_DN = set()          # 신규 진입 차단일 (지수 급락 쿨다운)
+MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
+MIN_ROOM = 0.0         # 최소 진입 여지(%) — 진입가에서 경계×1.02까지. 0=비활성
+ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.125          # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -9.6%)
@@ -461,6 +463,11 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 if in_zone:
                     hst["grid_n"] += 1
                     nr = len(hst["held"])
+                    if ADAPT_RUNGS and knd == "wbox":
+                        _b = float(s["wlo"][j])
+                        if _b > 0:
+                            _rm = (px / (_b * 1.02) - 1) * 100
+                            nr = int(min(max(int(_rm // (g_i * 100)) + 1, 1), rungs))
                     hst["levels"] = [px * (1 - g_i) ** k for k in range(nr)]
                     hst["held"] = [False] * nr
                     hst["held"][0] = True
@@ -503,6 +510,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                             else float(s["o"][je]))
                 if not (px_e > 0):
                     continue
+                if MIN_ROOM > 0 and knd == "wbox":
+                    _w0 = float(s["wlo"][je])
+                    if _w0 > 0 and (px_e / (_w0 * 1.02) - 1) * 100 < MIN_ROOM:
+                        continue
                 # 포지션별 갭 — ATR 모드: 신호일 ATR 기준(진입일 종가 미사용 = 룩어헤드 없음)
                 if GAP_MODE == "atr":
                     a_sig = float(s["atr"][j])
@@ -532,6 +543,12 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                         dz = px_e / t0 - 1
                         if not (n_i / 100 <= dz <= 0.05):
                             continue
+                ng = rungs
+                if ADAPT_RUNGS and knd == "wbox":
+                    _w0b = float(s["wlo"][je])
+                    if _w0b > 0:
+                        _rm = (px_e / (_w0b * 1.02) - 1) * 100
+                        ng = int(min(max(int(_rm // (gi * 100)) + 1, 1), rungs))
                 holdings[i] = {"j": je, "j_entry": je,
                                "entry_day": int(dn_s[je]),
                                "entry": px_e, "score": -nsc,
@@ -559,8 +576,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "cbody": float(s["body"][j]),
                                "clower": float(s["lower_sh"][j]),
                                "levels": [px_e * (1 - gi) ** k
-                                          for k in range(rungs)],
-                               "held": [False] * rungs,
+                                          for k in range(ng)],
+                               "held": [False] * ng,
                                "grid_n": 1, "escape0": False, "loss0": False,
                                "cycles": 0, "net": 0.0}
                 holdings[i]["held"][0] = True
@@ -745,6 +762,8 @@ def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
     global EXIT_MODE, ENTRY_EVAL, MKT_DN
+    global MIN_ROOM
+    global ADAPT_RUNGS
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -770,6 +789,11 @@ def main():
     ap.add_argument("--cool", type=int, default=0,
                     help="지수 -cool-thr%% 이하 마감 후 신규 진입 중단 일수")
     ap.add_argument("--cool-thr", type=float, default=3.0)
+    ap.add_argument("--min-room", type=float, default=0.0,
+                    help="최소 진입 여지(%%) — 진입가→경계×1.02 거리 (0=비활성)")
+    ap.add_argument("--adapt-rungs", action=argparse.BooleanOptionalAction,
+                    default=ADAPT_RUNGS,
+                    help="차수를 room에 맞춰 축소 (floor(room/gap)+1, 최대 5)")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
@@ -813,6 +837,8 @@ def main():
     GAP_MIN, GAP_MAX = args.gap_min, args.gap_max
     EXIT_MODE = args.exit_mode
     ENTRY_EVAL = args.entry_eval
+    MIN_ROOM = args.min_room
+    ADAPT_RUNGS = args.adapt_rungs
     if args.mkt_csv and args.cool > 0:
         _m = pd.read_csv(args.mkt_csv, parse_dates=["Date"]).set_index("Date")
         _dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
