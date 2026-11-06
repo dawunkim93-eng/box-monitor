@@ -35,6 +35,8 @@
   .alert.rec{border-color:var(--line);border-left-color:var(--dim);background:var(--card)}
   .alert.rec .n{color:var(--dim)}
   #alertsec .tblbtn{margin:6px 0 10px}
+  .cdbanner{border:1px solid var(--red);background:#2a1215;color:#ffc9c9;padding:8px 10px;
+            border-radius:6px;font-size:12.5px;margin:6px 0 2px}
   .alert .n{font-weight:700}
   .deep{color:var(--red);font-weight:700}
   .warn{color:var(--amber)}
@@ -151,6 +153,9 @@
   @media(max-width:640px){ .strategy-grid{grid-template-columns:1fr} }
   @media(max-width:640px){ .toolbar{position:static;padding:0} }
   .rules .rowbtns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+  .rules ol.quick{margin:6px 0 2px;padding-left:18px}
+  .rules ol.quick li{margin:3px 0;font-size:12.5px}
+  .rules-more summary{cursor:pointer;color:var(--blue);font-size:12.5px;margin:12px 0 2px}
   @media(max-width:640px){ .rules{max-width:100%;font-size:12px} .rulebox{padding:7px 9px} }
 </style>
 </head>
@@ -170,6 +175,7 @@
   </div>
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
   <div class="stats" id="stats"></div>
+  <div id="cdbanner"></div>
   <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)
     <button id="btn-hold" class="tblbtn" type="button" title="체크한 보유 종목 코드 복사 → 텔레그램 전송 = 보유 목록 자동 갱신 (2분 내)" disabled>☑ 보유 목록 복사</button></h2>
   <table id="hold-tbl" hidden>
@@ -231,16 +237,18 @@
     <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 100,000원/차수 · 그리드 사다리(±2.5% 되팔기) · 당일 다중 왕복 근사 · 순위 추적은 2026-10-24부터 축적</div>
   </div>
   <div id="view-rules" hidden role="tabpanel" aria-labelledby="tb-rules">
-    <h2 class="sec">📘 매매 규칙 — 박스권 그리드</h2>
+    <h2 class="sec">📘 실전 전략 — 박스권 그리드</h2>
     <div class="rules">
       <div class="rulebox good">
-        <b>한눈에</b>
-        <ul>
-          <li>대상: <b>주봉박스</b>(13주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 제외</li>
-          <li>진입: <b>매수존 + 전일 음봉·아래꼬리 1%+</b> → 점수 상위 20슬롯</li>
-          <li>청산: <b>장중 경계×1.02 터치 즉시</b>(진입일 포함) · 박스 소멸(폭/추세 이탈·상단 돌파) — -15% 백스톱은 형식적</li>
-          <li>신호·점수는 <b>종가 기준</b>, 청산은 <b>장중 터치 기준</b></li>
-        </ul>
+        <b>실전 전략 6줄</b>
+        <ol class="quick">
+          <li><b>무엇을</b> · 주봉 13주 종가 밴드 · 폭 ≤30% · 순드리프트 ±15% · 거래대금 10억+</li>
+          <li><b>언제 사나</b> · 밴드 하위 절반 + 전일 음봉·아래꼬리 1%+ → 다음날 시가, 점수 상위 20</li>
+          <li><b>얼마나</b> · 10만/차 × 5차(최심 −9.6%) = 슬롯 50만 · 최대 20슬롯(1,000만)</li>
+          <li><b>언제 파나</b> · 장중 경계×1.02 터치 <b>즉시</b> (진입일 포함) · 박스 소멸 시. 종가 대기 금지</li>
+          <li><b>언제 쉬나</b> · 지수 −3% 마감 다음 1거래일 신규 중단 · 82% 이탈 같은 날도 중단</li>
+          <li><b>하지 말 것</b> · 물타기 · 손절 종목 다음날 재매수 · −15% 백스톱 기대(13년 0건)</li>
+        </ol>
         <div class="rowbtns">
           <button class="tblbtn" type="button" onclick="gotoLiveCandidates()">✅ 진입 후보 보기</button>
           <button class="tblbtn" type="button" onclick="gotoHoldings()">📋 보유 현황 보기</button>
@@ -248,6 +256,8 @@
         </div>
       </div>
 
+      <details class="rules-more">
+      <summary>세부 규칙 펼치기 — 진입·점수·주문·청산·알림</summary>
       <h2 class="sec">매수(진입)</h2>
       <div class="rulebox">
         <ul>
@@ -329,17 +339,6 @@
         </ul>
       </div>
 
-      <h2 class="sec">실전 생존 수칙</h2>
-      <div class="rulebox good">
-        <ul>
-          <li><b>청산은 장중</b>: 경계×1.02 터치 즉시 시장가. 종가 대기 금지 — 트리거일 종가는 시가보다 평균 3.0% 낮았습니다(13년 3,493건).</li>
-          <li><b>진입일 포함</b>: 매수 당일에도 같은 기준. 진입일 판정을 빼면 MDD가 -422k로 과소평가됩니다(포함 시 -649k).</li>
-          <li><b>급락 쿨다운</b>: 지수가 -3% 이하로 마감한 다음 1거래일은 신규 진입 스킵. 2일은 역효과.</li>
-          <li><b>사이즈</b>: 1차수 10만 × 5차 = 슬롯 50만 · 20슬롯 최대 1,000만. 실측 peak 자본 330만 — 계좌의 20~30% 이내.</li>
-          <li><b>재진입 금지</b>: 깨진 박스는 재형성에 수주가 걸립니다. 손절 종목 다음날 재매수 금지.</li>
-        </ul>
-      </div>
-
       <h2 class="sec">알림·스케줄</h2>
       <div class="rulebox">
         <ul>
@@ -357,6 +356,8 @@
           <li>관찰 전용 · 투자 판단은 본인</li>
         </ul>
       </div>
+
+      </details>
 
       <h2 class="sec">현재 검증 설정·성과</h2>
       <div class="stats" id="rule-stats"><div class="chip">검증 데이터 로딩…</div></div>
@@ -561,6 +562,10 @@ function renderAlerts(cur,rec){
 function render(){
   if(!DATA)return;
   const d=DATA;
+  const cd=d.cooldown||{};
+  $("#cdbanner").innerHTML = cd.on
+    ? `<div class="cdbanner">⛔ <b>급락 쿨다운</b> — 전일 KOSPI ${cd.pct==null?"":(cd.pct>0?"+":"")+cd.pct+"%"}${cd.date?" ("+cd.date+")":""} · <b>오늘 신규 진입 스킵</b></div>`
+    : "";
   if(HELD_NEEDS_UNION){
     const H=d.holdings||{};
     Object.keys(H).forEach(c=>{ HELD.add(c); if(H[c]&&H[c].name) HELDNAMES[c]=H[c].name; });
