@@ -2,30 +2,29 @@
 # -*- coding: utf-8 -*-
 """박스권 Top-20(매수존) 순위 진입 시뮬레이션 — 검증 탭 데이터 (box-monitor 전용)
 ============================================================================
-매일: LIVE 박스(주봉 13주 종가 밴드 ±30% / 상승저점 피벗 3연속 상승 · 거래대금
-10억+) 중 **매수존(밴드 하위 절반 · 추세선 근접 ≤5%)**만 후보 → priority_score 랭킹 → **상위 20 슬롯** 진입.
-포지션: 그리드 사다리 (진입 종가 앵커·갭 고정·러그매도 되팔기·재그리드 허용
-· 박스 소멸·데이터갭 시 청산) — 슬롯 해제 후 다음 날 최고 순위 진입.
+매일: LIVE 박스(주봉 13주 종가 밴드 ±30% · 거래대금 10억+) 중 **매수존(밴드 하위 절반)**
+후보 → priority_score 랭킹 → **상위 20 슬롯** 진입. (--pool wa 로 상승저점 포함)
+포지션: 그리드 사다리 5차(최심 -9.6%) · 갭 2.5% · next_open 진입 · 종가<경계+2% 또는 소멸 시 청산
+· 슬롯 해제 후 다음 날 최고 순위 진입.
 
-■ 가정 스위치 (Phase 0 — 2026-10-30)
-   --sameday close|none|all   당일 신규체결 차수의 매도 가정
-        all  : 저가→고가 순서 가정 (상한선 — 현행 시뮬의 낙관)
-        close: 종가 ≥ 목표가일 때만 당일 매도 허용 (지정가 사다리 운용의 현실 기준)
-        none : 당일 신규차수 매도 금지 (보수 — 하한선)
-   --exit close0|close5|low0|low5|box
-        close0(기본): 종가 < 전일 박스 하단 → 그 종가에 청산 (확정 규칙)
-        close5      : 종가 < 전일 하단×0.95
-        low0        : 저가 < 전일 하단 → 하단가 청산
-        low5        : 저가 < 전일 하단×0.95 → ×0.95 청산
-        box         : 박스 소멸 시만 청산 (구 규칙)
-   하드스톱 -15%(전일 하단 기준)은 모든 규칙의 백스톱.
-   진입: 신호일 종가. 단, 종가 < 전일 하단(이탈일)에는 진입 금지.
+■ 현행 가정 (2026-11-06)
+   --sameday all|multi|close|none   당일 매도 가정 (기본 multi — 공개 수치가 쓰는 값)
+        all  : 지정가 터치 시 체결 (사다리 운용의 표준 모델)
+        multi: all + 같은 차수 당일 재왕복 (검증 불가 — 순익의 약 65%가 이 가정에서 발생)
+        close: 종가 ≥ 목표가일 때만 당일 매도 (보수)
+        none : 당일 신규차수 매도 금지 (하한)
+   --near 2.0    경계 N% 위 접근 시 종가 청산 (0=경계 이탈 시만)
+   --rungs 0     기본 max(4, round(COVER/gap)) = 5차
+   --pool w      주봉박스만 (기본) · wa=주봉+상승저점 · a=상승저점만
+   --entry next_open | close | next_close | limit_signal | limit_line
+   --candle all | bear | bear_tail (기본 bear_tail)
+   하드스톱 -15%(경계 기준)은 백스톱 — 근접청산(2%)보다 아래라 실측 발동 0건.
 
 ■ 산출: 회전 · 탈출율(첫 차수 +갭 매도 비율) · 지속 · 연도별 손익 · 승률 · MDD
    · 청산사유(방향 분리) · 점수구간별 탈출율(score_escape) · 투입자본/자본수익률
    · 가정 명시(assumptions) · 다른 sameday 모드 민감도(sensitivity)
 
-실행: python scripts/box_validation.py [--sweep] [--gap 0.025] [--no-push] [--out P]
+실행: python scripts/box_validation.py [--sweep] [--sameday all] [--out P]
       (--sweep: 갭 2.5~10% × sameday close/none/all 비교 → data/box_validation_sweep.json)
 """
 import argparse
@@ -51,7 +50,9 @@ K = 20                 # 동시 보유 슬롯 (진입 = 순위 상위 20)
 GAP = 0.025            # 기본 갭 (결정 전까지 유지)
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
-COVER = 0.375          # 사다리 커버 깊이 → rungs = max(4, round(COVER/gap)) ≈ 하단 28~30%
+COVER = 0.125          # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -9.6%)
+                       # 15차(-30%)는 박스 폭(22~30%) 밖: 5차 대비 순익 +6% · MDD +77% (2026-11-06 실측)
+POOL = "w"             # 박스 풀: w=주봉박스만(현행) · wa=주봉+상승저점 · a=상승저점만
 MAX_TRIPS = 5          # 당일 다중 왕복 상한 (sameday=multi — 같은 차수 재왕복 최대 횟수)
 ENTRY_MODE = "close"   # 진입 시점: close(신호일 종가) · next_open(다음날 시가) · next_close(다음날 종가)
 ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
@@ -156,10 +157,11 @@ def load_universe():
             wvalid = okb & inb
         liq = np.nan_to_num(amt20) >= AMT_MIN
         wdays = np.where(wflag & (wpos <= 0.5) & liq & (dn >= START))[0]
-        for j in wdays:
-            kind_map.setdefault(int(j), "wbox")
+        if POOL in ("wa", "w"):
+            for j in wdays:
+                kind_map.setdefault(int(j), "wbox")
         # ── A-box (상승 저점 추세선): 피벗 저가 3개 연속 상승 + 종가 ≥ 선×0.995
-        #    진입: 추세선 근접(종가 ≤ 선×1.05) · 소멸: 종가 < 선×0.995 또는 구조 붕괴
+        #    진입: 추세선 근접(종가 ≤ 선×1.05) · 청산: 하단근접(선+2%) 또는 구조 붕괴
         pmin = pd.Series(l).rolling(11, center=True).min().values
         PidA, PvA, PcA = [], [], []
         for i in range(5, n - 5):
@@ -197,12 +199,15 @@ def load_universe():
             rising = (v2 > v1 * 1.005) & (v1 > v0 * 0.995)
             slope = (v2 - v1) / np.maximum(i2 - i1, 1)
             tl_now = v2 + slope * (np.arange(n) - i2)
-            ok = okk & rising & (tl_now > 0) & (c >= tl_now * 0.995)
-            abox_ok = ok & okk
+            line_ok = okk & rising & (tl_now > 0)      # 구조 유효 = 선이 존재 (경계)
+            ok = line_ok & (c >= tl_now * 0.995)       # 라이브/진입 판정에만 가격 테스트
+            abox_ok = ok
             abox_rise = okk & rising
-            tlv = np.where(ok, tl_now, np.nan)
-            aslope = np.where(ok, slope / np.maximum(c, 1e-9) * 100 * 5, np.nan)
-            adist = np.where(ok, c / np.maximum(tl_now, 1e-9) - 1, np.nan)
+            # 경계(tlv)는 종가가 선 아래여도 유지 — 이탈일(가장 필요한 날)에
+            # 근접청산·스톱이 NaN으로 꺼지지 않도록 (2026-11-06 수정)
+            tlv = np.where(line_ok, tl_now, np.nan)
+            aslope = np.where(line_ok, slope / np.maximum(c, 1e-9) * 100 * 5, np.nan)
+            adist = np.where(line_ok, c / np.maximum(tl_now, 1e-9) - 1, np.nan)
         # 상승 스윙 높이 — 사슬 시작 저점 대비 현재 고가 (구조 고점 배율)
         aheight = np.zeros(n)
         if len(PvA) >= 1:
@@ -216,7 +221,7 @@ def load_universe():
         atrig = (abox_ok & (c <= np.nan_to_num(tlv, nan=0) * 1.05)
                  & (np.nan_to_num(tlv, nan=0) > 0)
                  & liq & (dn >= START))
-        for j in np.where(atrig)[0]:
+        for j in (np.where(atrig)[0] if POOL in ("wa", "a") else []):
             kind_map.setdefault(int(j), "abox")
         ti = np.array(sorted(kind_map), dtype=np.int64)
         kinds_arr = [kind_map[int(j)] for j in ti]
@@ -686,6 +691,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
 
 
 def main():
+    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -727,8 +733,10 @@ def main():
                     help="포지션별 진입 지표 JSON 저장 (점수 재설계 분석용)")
     ap.add_argument("--max-trips", type=int, default=1,
                     help="sameday=multi 시 차수당 당일 추가 왕복 상한 (기본 1)")
+    ap.add_argument("--pool", choices=["w", "wa", "a"], default=POOL,
+                    help="박스 풀 (w=주봉박스만(기본) · wa=주봉+상승저점 · a=상승저점만)")
     args = ap.parse_args()
-    global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN
+    POOL = args.pool
     SCHEME = args.scheme
     ENTRY_MODE = args.entry
     ENTRY_ZONE = args.entry_zone
@@ -799,12 +807,15 @@ def main():
     out = {
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "params": {"slots": K,
-                   "buy_zone": "주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5%",
+                   "buy_zone": ("주봉: 밴드 하위 절반" if POOL == "w" else
+                                "주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5%"),
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
                    "rotate": ROTATE,
                    "rotate_margin": ROT_MARGIN,
-                   "pool": "주봉박스+상승저점",
+                   "pool": {"w": "주봉박스(13주 종가밴드)만",
+                            "wa": "주봉박스+상승저점",
+                            "a": "상승저점만"}[POOL],
                    "start": str(s["start_year"]),
                    "end": str(s["end_year"])},
         "assumptions": {
