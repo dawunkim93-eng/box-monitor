@@ -897,7 +897,7 @@ def main():
              "exit": args.exit, "rows": rows}, ensure_ascii=False),
             encoding="utf-8")
         if not args.no_push:
-            subprocess.run(["git", "-C", str(REPO), "add", "-A"], capture_output=True)
+            subprocess.run(["git", "-C", str(REPO), "add", "data"], capture_output=True)
             subprocess.run(["git", "-C", str(REPO), "commit", "-m",
                             "chore: 갭 스윕 갱신"], capture_output=True)
             subprocess.run(["git", "-C", str(REPO), "push"], capture_output=True)
@@ -996,7 +996,7 @@ def main():
     if args.no_push or args.out:
         print(f"[INFO] 저장 {dest_out} (push 생략)")
         return
-    subprocess.run(["git", "-C", str(REPO), "add", "-A"], capture_output=True)
+    subprocess.run(["git", "-C", str(REPO), "add", "data"], capture_output=True)
     subprocess.run(["git", "-C", str(REPO), "commit", "-m",
                     f"chore: 시뮬 갱신 (포지션 {s['positions']})"], capture_output=True)
     subprocess.run(["git", "-C", str(REPO), "push"], capture_output=True)
