@@ -1099,7 +1099,7 @@ async function initRules(){
     +` <span class="sub">peak 자본 기준</span></div>`;
   cfg.textContent=`검증 조건: ${P.pool||"-"} · ${P.buy_zone||"-"} · 진입=${A.entry||"-"}`
     +` · 근접청산 ${A.near==null?"-":A.near+"%"}`
-    +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"}${A.gap_mode==="atr"?" (ATR×"+A.atr_k+")":""} · ${A.rungs||"-"}차 · 점수 ${A.scheme||"S2c"} · ${V.params.slots}슬롯`;
+    +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"}${A.gap_mode==="atr"?" (ATR×"+A.atr_k+")":""} · ${A.rungs||"-"}차 · 점수 ${A.scheme||"S2c"} · ${P.slots||"-"}슬롯`;
 }
 function renderValid(V){
   const S=V.summary;
