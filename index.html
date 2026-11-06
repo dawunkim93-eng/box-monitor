@@ -98,6 +98,7 @@
         font-size:9.5px;vertical-align:middle;line-height:1.55;cursor:default}
   .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .bcand{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
+  .broom{color:var(--amber);border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
   .ba{color:var(--green);border:1px solid rgba(34,197,94,.45)}
   .tag{color:var(--green);font-weight:700}
   .up{color:var(--green)} .dn{color:var(--red)}
@@ -393,7 +394,7 @@
   </div>
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 장중 가격이 <b>하단×1.02</b> 터치 즉시 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 장중 가격이 <b>하단×1.02</b> 터치 즉시 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~6%(여지 4% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 7점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -742,6 +743,12 @@ function render(){
   renderHoldingsHistory();
   updateScrollHints();
 }
+function roomShort(r){
+  // 조건은 다 맞는데 경계 +2~6%(여지 4% 미만)라 후보에서 빠진 경우
+  return !r.cand && !r.held && r.bkind==="wbox" && r.pct_low!=null
+    && r.pct_low>=2 && r.pct_low<6 && r.bull===false
+    && (r.clower||0)>=1 && r.pos!=null && r.pos<=50;
+}
 function mobileRowHTML(r){
   const rc = (r.pct_low!=null && r.pct_low<0)?" brk":"";
   const chk = HELD.has(r.code);
@@ -750,7 +757,9 @@ function mobileRowHTML(r){
   const strong = r.strong?'<span class="tag">🟢</span>':"";
   const risk = r.risk?'<span class="deep" title="부채&gt;150%+영업적자">⚠재무</span>':"";
   const status = r.held?'<span class="wait">📋 보유</span>'
-    :(r.cand?'<span class="btyp bcand">✅ 진입</span>':'<span class="wait">⏳ 대기</span>');
+    :(r.cand?'<span class="btyp bcand">✅ 진입</span>'
+      :(roomShort(r)?'<span class="btyp broom" title="경계 +2~6% — 여지 4% 미만이라 진입 제외">🕒 여지부족</span>'
+        :'<span class="wait">⏳ 대기</span>'));
   const scoreTxt = (r.score==null)?"-":
     `${r.score}점`+((r.score_m!=null&&r.score>r.score_m)?'<span class="up">▲</span>'
       :((r.score_m!=null&&r.score<r.score_m)?'<span class="dn">▼</span>':""));
@@ -864,8 +873,9 @@ function rowHTML(r){
           :`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`}
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}
         ${r.held?`<span class="wait" title="보유 종목 (진입 후보 제외)">📋 보유</span>`
-          :(r.cand?`<span class="btyp bcand" title="매수존 + 전일 음봉·꼬리 조건 충족">✅ 진입</span>`
-          :`<span class="wait" title="매수존/캔들 조건 미충족 — 지켜보기">⏳ 대기</span>`)}</td>
+          :(r.cand?`<span class="btyp bcand" title="매수존 + 전일 음봉·꼬리 + 여지 4% 조건 충족">✅ 진입</span>`
+          :(roomShort(r)?`<span class="btyp broom" title="경계 +2~6% — 여지 4% 미만이라 진입 제외">🕒 여지부족</span>`
+          :`<span class="wait" title="매수존/캔들 조건 미충족 — 지켜보기">⏳ 대기</span>`))}</td>
       <td>${sCell}</td>
       <td>${escCell}</td>
       <td class="mhide">${r.score_m!=null?`<span class="sub">${r.score_m}점</span>`:"-"}</td>
