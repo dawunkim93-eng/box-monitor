@@ -71,7 +71,7 @@ ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
 CANDLE_MODE = "all"    # all | bear(음봉 신호만) | bear_tail(음봉+아래꼬리1%+)
 WBREAK = "close"       # 주봉박스 소멸 판정: close | confirm2(2연속) | buffer1(1% 버퍼)
 APOS = "far"           # A박스 위치 점수 방향: far(현행, 선에서 먼 쪽 가점) | near(가까운 쪽 가점)
-ROTATE = "keep"        # keep | flat_first | flat_first_excl | flat_first_score
+ROTATE = "flat_first_excl"  # 무료 앱: 1차탈출 후 슬롯 종료·당일 재진입 금지 | keep=유료(슬롯 유지+재그리드)
 ROT_MARGIN = 2.0       # flat_first_score: 신규 후보 점수 우위 기준
 COMP_DUMP = None       # --dump 지정 시 포지션별 진입 지표 기록 (점수 재설계 분석용)
 SWEEP_GAPS = [0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
@@ -828,7 +828,7 @@ def main():
                     help="A박스 위치 점수 방향 (far=먼 쪽 가점(현행) · near=가까운 쪽 가점)")
     ap.add_argument("--rotate",
                     choices=["keep", "flat_first", "flat_first_excl", "flat_first_score"],
-                    default="keep",
+                    default=ROTATE,
                     help="1차 탈출 후 슬롯 처리 (keep=재그리드 · flat_first=플랫 시 회전 · "
                          "flat_first_excl=회전 당일 동일종목 배제 · flat_first_score=점수 우위 시만)")
     ap.add_argument("--rotate-margin", type=float, default=2.0,
