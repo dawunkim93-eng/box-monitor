@@ -254,7 +254,7 @@
         <ul>
           <li><b>주봉</b>: 위치 &lt;20% 0 · ~35% 1 · ≥35% 2 / 13주 추세 &lt;0 0 · ~5% 1 · ≥5% 2 (≤−5% 감점 −1) / ATR 4~7% +1 / 밴드 폭 ≥22% +1</li>
           <li><b>상승</b>: 선거리 ≤2% 0 · ~3.5% 1 · ≥3.5% 2 / 기울기 &lt;2.2%/주 0 · ~3 1 · ≥3 2 / ATR &lt;5% 0 · ~6% 1 · ≥6% 2</li>
-          <li><b>탈출율 배지</b>: 0~2점 29% · 3~4점 59% · 5~6점 67%</li>
+          <li><b>탈출율 배지</b>: 점수 구간별 1차 탈출율 — 검증 탭 <code>score_escape</code> 실측값(0~2 / 3~4 / 5~6점)</li>
           <li>점수는 <b>순위용</b>이며 진입 신호가 아닙니다</li>
         </ul>
       </div>
@@ -272,7 +272,7 @@
       <h2 class="sec">그리드</h2>
       <div class="rulebox">
         <ul>
-          <li>진입가 앵커 · <b>2.5% 간격 15차수</b> (하단 약 37.5% 커버)</li>
+          <li>진입가 앵커 · <b>2.5% 간격 5차수</b> (최심 −9.6%, 하단 약 12.5% 커버) — 15차는 박스 폭 밖</li>
           <li>각 차수 도달 시 매수 · <b>+2.5%</b> 매도 · 같은 차수 재매수</li>
           <li>전량 매도 후 슬롯 유지 → 매수존 복귀 시 재그리드</li>
         </ul>
@@ -1000,14 +1000,16 @@ async function initRules(){
     `<div class="chip">기간 <b>${P.start||"-"}~${P.end||"-"}</b> (${S.years||"-"}년)</div>`
     +`<div class="chip">포지션 <b>${fmt(S.positions)}</b>건</div>`
     +`<div class="chip">1차 탈출 <b>${S.escape_rate==null?"-":S.escape_rate+"%"}</b></div>`
-    +`<div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b></div>`
+    +`<div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b>`
+    +` <span class="sub">당일 재왕복 가정</span></div>`
+    +((VALID.sensitivity&&VALID.sensitivity.all)?`<div class="chip">지정가 체결 시 <b class="${VALID.sensitivity.all.net_total>=0?"up":"dn"}">${fmt(VALID.sensitivity.all.net_total)}원</b> <span class="sub">당일 재왕복 제외</span></div>`:``)
     +`<div class="chip">MDD(최대 낙폭) <b class="dn">${fmt(S.mdd_won)}원</b>`
     +` <span class="sub">평균자본 대비 ${S.mdd_vs_capital_pct==null?"-":S.mdd_vs_capital_pct+"%"}</span></div>`
     +`<div class="chip">적자연도 <b>${S.loss_years}/${S.n_years}</b></div>`
     +`<div class="chip">자본수익률 ${C.ret_capital_pct==null?"-":C.ret_capital_pct+"%/년"}</div>`;
   cfg.textContent=`검증 조건: ${P.pool||"-"} · ${P.buy_zone||"-"} · 진입=${A.entry||"-"}`
     +` · 근접청산 ${A.near==null?"-":A.near+"%"}`
-    +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"} · 점수 S2b`;
+    +` · 갭 ${A.gap_pct==null?"-":A.gap_pct+"%"}${A.gap_mode==="atr"?" (ATR×"+A.atr_k+")":""} · ${A.rungs||"-"}차 · 점수 S2b`;
 }
 function renderValid(V){
   const S=V.summary;
