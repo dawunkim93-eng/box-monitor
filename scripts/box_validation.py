@@ -56,7 +56,7 @@ NEAR_OF_GAP = 0.8      # atr 모드 근접청산(%) = 0.8 × 갭 → 1차 체결
 EXIT_MODE = "intraday"  # close(종가 판정) | intraday(경계 터치 시 장중 청산) — 2026-11 채택
 ENTRY_EVAL = True       # 진입일 당일에도 청산 판정 (미적용 시 MDD 과소: -422k vs -649k)
 MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
-MIN_ROOM = 0.0         # 최소 진입 여지(%) — 진입가에서 경계×1.02까지. 0=비활성
+MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 경계×1.02까지. 채택값 4% (경계 +6%)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
@@ -789,8 +789,8 @@ def main():
     ap.add_argument("--cool", type=int, default=0,
                     help="지수 -cool-thr%% 이하 마감 후 신규 진입 중단 일수")
     ap.add_argument("--cool-thr", type=float, default=3.0)
-    ap.add_argument("--min-room", type=float, default=0.0,
-                    help="최소 진입 여지(%%) — 진입가→경계×1.02 거리 (0=비활성)")
+    ap.add_argument("--min-room", type=float, default=MIN_ROOM,
+                    help="최소 진입 여지(%%) — 진입가→경계×1.02 거리")
     ap.add_argument("--adapt-rungs", action=argparse.BooleanOptionalAction,
                     default=ADAPT_RUNGS,
                     help="차수를 room에 맞춰 축소 (floor(room/gap)+1, 최대 5)")
