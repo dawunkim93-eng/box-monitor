@@ -59,6 +59,7 @@ MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
 MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 경계×1.02까지. 채택값 4% (경계 +6%)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
+SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.125          # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -9.6%)
@@ -362,6 +363,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
         if D < START:
             continue
         rotated_today = set()
+        free_prev = K_ - len(holdings)   # 당일 시작(전일 종가) 시점의 빈 슬롯
         for i in list(holdings):
             hst, s = holdings[i], U[i]
             dn = s["dn"]
@@ -485,7 +487,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
         cap_daily.append(sum(
             sum(h["held"]) for h in holdings.values()) * UNIT)
         max_pos = max(max_pos, len(holdings))
-        free = K_ - len(holdings)
+        free = free_prev if SLOT_FREE_MODE == "prev_close" else K_ - len(holdings)
         if free > 0 and not (MKT_DN and int(D) in MKT_DN):
             for d, nsc, i, j, knd in ev_days.get(int(D), []):
                 if free <= 0:
