@@ -491,28 +491,31 @@
     <h2 class="sec">🧾 오늘의 복기</h2>
     <div class="pcard" id="rev-head"><div class="pmuted">복기 데이터 불러오는 중…</div></div>
 
-    <h2 class="sec">내 체결 입력</h2>
-    <div class="pcard">
-      <div class="pform compact">
-        <div><label for="rv-side">구분</label>
-          <select id="rv-side"><option>매수</option><option>매도</option></select></div>
-        <div><label for="rv-name">종목</label>
-          <input id="rv-name" list="rv-dl" placeholder="종목명" autocomplete="off">
-          <datalist id="rv-dl"></datalist></div>
-        <div><label for="rv-px">체결가</label>
-          <input id="rv-px" type="number" inputmode="numeric" step="any" placeholder="예: 16770"></div>
-        <div><label for="rv-qty">수량</label>
-          <input id="rv-qty" type="number" inputmode="numeric" step="any" placeholder="예: 10"></div>
-        <div class="full"><button class="pbtn" id="rv-add" type="button">＋ 체결 추가</button></div>
-      </div>
-      <div class="pmuted">실제로 체결된 것만 넣으세요. 입력은 이 브라우저에만 저장되고 날짜별로 남습니다.</div>
-    </div>
-
-    <h2 class="sec">체결 목록</h2>
-    <div id="rv-trades"><div class="pempty">입력한 체결이 없습니다.</div></div>
+    <h2 class="sec">오늘 보유 변경 (자동)</h2>
+    <div id="rv-auto"><div class="pempty">보유 변경 기록이 없습니다.</div></div>
 
     <h2 class="sec">전략 대조</h2>
-    <div id="rv-check"><div class="pempty">체결을 입력하면 규칙과 대조합니다.</div></div>
+    <div id="rv-check"><div class="pempty">보유 변경이나 체결이 있으면 대조합니다.</div></div>
+
+    <details class="rules-more" id="rv-manual">
+      <summary>직접 추가 (보유 업데이트에 없는 체결)</summary>
+      <div class="pcard">
+        <div class="pform compact">
+          <div><label for="rv-side">구분</label>
+            <select id="rv-side"><option>매수</option><option>매도</option></select></div>
+          <div><label for="rv-name">종목</label>
+            <input id="rv-name" list="rv-dl" placeholder="종목명" autocomplete="off">
+            <datalist id="rv-dl"></datalist></div>
+          <div><label for="rv-px">체결가</label>
+            <input id="rv-px" type="number" inputmode="numeric" step="any" placeholder="예: 16770"></div>
+          <div><label for="rv-qty">수량</label>
+            <input id="rv-qty" type="number" inputmode="numeric" step="any" placeholder="예: 10"></div>
+          <div class="full"><button class="pbtn" id="rv-add" type="button">＋ 체결 추가</button></div>
+        </div>
+        <div class="pmuted">보유 업데이트로 잡히지 않는 체결만 넣으세요. 자동 목록에 있는 종목을 또 넣으면 두 번 셉니다.</div>
+      </div>
+      <div id="rv-trades"><div class="pempty">직접 추가한 체결이 없습니다.</div></div>
+    </details>
 
     <h2 class="sec">오늘의 신호 (참고)</h2>
     <div id="rv-sig" class="pcard"><div class="pmuted">불러오는 중…</div></div>
@@ -2105,7 +2108,7 @@ function render(){
   if(!REV){
     head.innerHTML='<div class="pmuted">복기 파일을 불러오지 못했습니다. 평일 16:40에 갱신됩니다.</div>';
     const s=document.getElementById("rv-sig"); if(s) s.innerHTML='<div class="pmuted">신호 없음</div>';
-    renderTrades(); renderCheck(); return;
+    renderTrades(); renderCheck(); renderAuto(); return;
   }
   const c=REV.cooldown||{};
   head.innerHTML=`<h3>${REV.date} <span class="sub" style="font-weight:400">${esc(REV.asof)} 기준 · ${esc(REV.market||"")}</span></h3>
@@ -2129,7 +2132,7 @@ function render(){
      <div class="pmuted" style="margin-bottom:4px"><b style="color:var(--txt)">시스템 진입 기록</b> ${ent.length?ent.map(x=>esc(x.name)).join(", "):"없음"}</div>
      <div class="pmuted" style="margin-bottom:4px"><b style="color:var(--txt)">청산 신호</b> ${ex.length?ex.map(x=>esc(x.name)).join(", "):"없음"}</div>
      <div class="pmuted"><b style="color:var(--txt)">경고</b> ${(REV.alerts||[]).length}건 — 실시간 탭에서 확인하세요.</div>`;
-  renderTrades(); renderCheck();
+  renderTrades(); renderCheck(); renderAuto();
 }
 function renderTrades(){
   const el=document.getElementById("rv-trades"); if(!el) return;
@@ -2142,8 +2145,33 @@ function renderTrades(){
       <div class="pcrow2"><span>${f(r.px)}원</span><span>${f(r.q)}주</span><span>${f(r.px*r.q)}원</span></div>
     </div>`).join("");
 }
+function allTrades(){
+  const auto=[];
+  if(REV){
+    (REV.auto_buys||[]).forEach(x=>auto.push({side:"매수",name:x.name,px:x.price||null,q:null,auto:true,at:x.at}));
+    (REV.auto_sells||[]).forEach(x=>auto.push({side:"매도",name:x.name,px:null,q:null,auto:true,at:x.at}));
+  }
+  return auto.concat(rows().map(r=>({side:r.side,name:r.name,px:r.px,q:r.q,auto:false})));
+}
+function renderAuto(){
+  const el=document.getElementById("rv-auto"); if(!el) return;
+  if(!REV){ el.innerHTML='<div class="pempty">기록 없음</div>'; return; }
+  const b=REV.auto_buys||[], s=REV.auto_sells||[];
+  if(!b.length&&!s.length){
+    el.innerHTML='<div class="pempty">오늘 보유 변경 기록이 없습니다. 텔레그램으로 보유를 업데이트하면 자동으로 잡힙니다.</div>';
+    return;
+  }
+  const row=(side,name,at,extra,cls)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px">
+      <span><b class="${cls}">${side}</b> ${esc(name)}</span>
+      <span class="sub" style="text-align:right">${esc(at||"")}${extra?"<br>"+extra:""}</span></div>`;
+  el.innerHTML=`<div class="pcard">
+    ${b.map(x=>row("매수",x.name,x.at,x.price?"신호가 "+f(x.price)+"원":"","up")).join("")}
+    ${s.map(x=>row("매도",x.name,x.at,(x.ref_ret!=null?"참고 "+x.ref_ret+"%":""),"dn")).join("")}
+    <div class="pmuted" style="margin-top:6px">텔레그램 보유 업데이트 기록에서 뽑았습니다. 체결가와 수량은 앱 기록을 보세요.</div>
+  </div>`;
+}
 function checks(){
-  const rs=rows(), out=[];
+  const rs=allTrades(), out=[];
   if(!REV) return out;
   const buys=rs.filter(r=>r.side==="매수"), sells=rs.filter(r=>r.side==="매도");
   const sigName=new Set([...(REV.candidates||[]).map(x=>x.name),...(REV.enters||[]).map(x=>x.name)]);
@@ -2159,16 +2187,17 @@ function checks(){
   if(chase.length) out.push({ok:false,t:`추격 매수 ${chase.length}건`,
     d:chase.map(b=>esc(b.name)).join(", ")+" — 신호가보다 3% 이상 높습니다."});
   if(buys.length>7) out.push({ok:false,t:`슬롯 초과 (매수 ${buys.length}건)`,d:"7슬롯이 한도입니다."});
-  const rebuy=buys.filter(b=>sells.some(s=>s.name===b.name));
+  const buyCount={}; buys.forEach(b=>{ buyCount[b.name]=(buyCount[b.name]||0)+1; });
+  const rebuy=Object.keys(buyCount).filter(n=>buyCount[n]>=2);
   if(rebuy.length) out.push({ok:false,t:`당일 재매수 ${rebuy.length}건`,
-    d:rebuy.map(b=>esc(b.name)).join(", ")+" — 청산한 종목의 재매수는 규칙에 없습니다."});
+    d:rebuy.map(n=>esc(n)).join(", ")+" — 같은 종목을 하루에 두 번 이상 샀습니다."});
   if(!out.length) out.push({ok:true,t:"기록된 위반이 없습니다.",d:"입력한 체결 기준입니다."});
   return out;
 }
 function renderCheck(){
   const el=document.getElementById("rv-check"); if(!el) return;
-  const rs=rows();
-  if(!rs.length){ el.innerHTML='<div class="pempty">체결을 입력하면 규칙과 대조합니다.</div>'; return; }
+  const rs=allTrades();
+  if(!rs.length){ el.innerHTML='<div class="pempty">보유 변경이나 체결이 있으면 규칙과 대조합니다.</div>'; return; }
   const ck=checks(), bad=ck.filter(x=>!x.ok).length;
   el.innerHTML=`<div class="pcard ${bad?"warn":"good"}"><h3>${bad?`확인 ${bad}건`:"전략 준수"}</h3>
     ${ck.map(x=>`<div style="padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px">
@@ -2181,7 +2210,7 @@ function renderCheck(){
   if(b) b.addEventListener("click",copyAsk);
 }
 function copyAsk(){
-  const rs=rows();
+  const rs=allTrades();
   const t=`오늘 데일리매매를 복기해줘.
 
 [전략]
@@ -2197,7 +2226,7 @@ ${REV?(REV.date+" "+(REV.market||"")+(REV.cooldown&&REV.cooldown.on?` · 쿨다�
 청산 신호: ${REV&&(REV.exits||[]).length?REV.exits.map(x=>x.name+"("+(x.reason||"")+")").join(", "):"없음"}
 
 [내 체결]
-${rs.length?rs.map(r=>`${r.side} ${r.name} ${f(r.px)}원 ${f(r.q)}주`).join("\n"):"없음"}
+${rs.length?rs.map(r=>`${r.side} ${r.name}${r.px?" "+f(r.px)+"원":""}${r.q?" "+f(r.q)+"주":""}${r.auto?" (보유 변경에서 자동)":""}`).join("\n"):"없음"}
 
 [요청]
 1) 전략에서 벗어난 부분

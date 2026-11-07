@@ -48,6 +48,20 @@ def main():
                "time": a.get("time"), "deep": a.get("deep")}
               for a in (live.get("alerts") or [])]
 
+    # 보유 변경(텔레그램 업데이트)에서 그날의 매매를 역산
+    ent_px = {e["code"]: e.get("price") for e in enters}
+    auto_buys, auto_sells = [], []
+    for h in (live.get("holdings_history") or []):
+        add = (h.get("add") or "")[:10]
+        rem = (h.get("remove") or "")[:10]
+        if add == date:
+            auto_buys.append({"code": h.get("code"), "name": h.get("name"),
+                              "at": (h.get("add") or "")[11:], "price": ent_px.get(h.get("code"))})
+        if rem == date:
+            auto_sells.append({"code": h.get("code"), "name": h.get("name"),
+                               "at": (h.get("remove") or "")[11:], "days": h.get("days"),
+                               "ref_ret": h.get("ref_ret"), "status": h.get("status")})
+
     payload = {
         "date": date,
         "asof": live.get("updated_at_kst"),
@@ -59,13 +73,16 @@ def main():
         "exits": exits,
         "alerts": alerts,
         "holdings": list((live.get("holdings") or {}).keys()),
+        "auto_buys": auto_buys,
+        "auto_sells": auto_sells,
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
     }
     tmp = OUT + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
     os.replace(tmp, OUT)
-    print(f"{date} 후보 {len(cands)} · 진입 {len(enters)} · 청산 {len(exits)} · 경고 {len(alerts)} → {OUT}")
+    print(f"{date} 후보 {len(cands)} · 진입 {len(enters)} · 청산 {len(exits)} · 경고 {len(alerts)}"
+          f" · 보유변경 매수 {len(auto_buys)} 매도 {len(auto_sells)} → {OUT}")
 
 
 if __name__ == "__main__":
