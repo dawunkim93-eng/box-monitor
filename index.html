@@ -2146,12 +2146,13 @@ function checks(){
   const rs=rows(), out=[];
   if(!REV) return out;
   const buys=rs.filter(r=>r.side==="매수"), sells=rs.filter(r=>r.side==="매도");
-  const cand=new Set((REV.candidates||[]).map(x=>x.name));
-  const candPx={}; (REV.candidates||[]).forEach(x=>{ candPx[x.name]=x.price; });
+  const sigName=new Set([...(REV.candidates||[]).map(x=>x.name),...(REV.enters||[]).map(x=>x.name)]);
+  const candPx={};
+  [...(REV.enters||[]),...(REV.candidates||[])].forEach(x=>{ if(x.price) candPx[x.name]=x.price; });
   if(REV.cooldown&&REV.cooldown.on)
     out.push({ok:buys.length===0,t:`쿨다운 날 매수 ${buys.length}건`,
               d:buys.length?"전일 급락으로 신규 진입을 쉬는 날입니다.":"매수를 쉬었습니다."});
-  const outside=buys.filter(b=>!cand.has(b.name));
+  const outside=buys.filter(b=>!sigName.has(b.name));
   if(outside.length) out.push({ok:false,t:`신호에 없던 매수 ${outside.length}건`,
     d:outside.map(b=>esc(b.name)).join(", ")+" — 후보 목록에 없는 종목입니다."});
   const chase=buys.filter(b=>candPx[b.name]&&b.px>candPx[b.name]*1.03);
