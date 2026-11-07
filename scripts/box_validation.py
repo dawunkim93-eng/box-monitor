@@ -68,6 +68,7 @@ MIN_AMT = 0.0          # 진입 시 20일 평균 거래대금 하한 (통화) �
 SLIP_MODE = "const"    # const | amt (거래대금 구간별 슬리피지)
 SLIP_TIERS = [(1e8, 0.0003), (2e7, 0.0010), (5e6, 0.0025), (0.0, 0.0050)]
 SELL_GAP = None        # 매도 간격 (비율) — None=매수 갭과 동일. 예: 0.0175
+SIZE_MULT = [0.6, 0.6, 0.9, 1.2, 1.8]  # 차수별 매수 배수(1차부터, 10만 기준) — 후방배분 1:1:1.5:2:3
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 COVER = 0.10           # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -7.8%)
@@ -344,7 +345,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             px = px * (1 - sp)
         for k in range(len(hst["held"])):
             if hst["held"][k]:
-                hst["net"] += (px - hst["levels"][k]) / hst["levels"][k] * UNIT
+                hst["net"] += ((px - hst["levels"][k]) / hst["levels"][k]
+                               * UNIT * hst["size"][k])
                 if k == 0 and hst["grid_n"] == 1:
                     hst["loss0"] = True
         done.append({"code": i, "entry_day": hst["entry_day"],
@@ -448,7 +450,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                         continue
                     if sameday == "close" and px < tgt:
                         continue
-                hst["net"] += sg_ * UNIT - FEE * UNIT
+                _sz = hst["size"][k]
+                hst["net"] += (sg_ * UNIT - FEE * UNIT) * _sz
                 held[k] = False
                 hst["cycles"] += 1
                 if k == 0 and hst["grid_n"] == 1:
@@ -460,7 +463,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     extra = int(rng_d // (2 * levels[k] * sg_))
                     extra = min(max(extra, 0), MAX_TRIPS)
                     if extra:
-                        hst["net"] += extra * (sg_ * UNIT - FEE * UNIT)
+                        hst["net"] += extra * (sg_ * UNIT - FEE * UNIT) * _sz
                         hst["cycles"] += extra
             if not any(held):      # 재눌림 → 재그리드/회전 (타입별 매수존 복귀)
                 if ROTATE in ("flat_first", "flat_first_excl") and hst.get("escape0"):
@@ -497,7 +500,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             held_cnt = sum(holdings[i]["held"])
             max_rungs = max(max_rungs, held_cnt)
         cap_daily.append(sum(
-            sum(h["held"]) for h in holdings.values()) * UNIT)
+            sum(h["held"][k] * h["size"][k] for k in range(len(h["held"])))
+            for h in holdings.values()) * UNIT)
         max_pos = max(max_pos, len(holdings))
         free = free_prev if SLOT_FREE_MODE == "prev_close" else K_ - len(holdings)
         if free > 0 and not (MKT_DN and int(D) in MKT_DN):
@@ -619,6 +623,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "levels": [px_e * (1 - gi) ** k
                                           for k in range(ng)],
                                "held": [False] * ng,
+                               "size": (SIZE_MULT + [SIZE_MULT[-1]] * 8)[:ng],
                                "slip": sl,
                                "grid_n": 1, "escape0": False, "loss0": False,
                                "cycles": 0, "net": 0.0}
@@ -808,7 +813,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP
+    global MIN_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -853,6 +858,8 @@ def main():
                     help="진입 시 20일 평균 거래대금 하한 (통화)")
     ap.add_argument("--sell-gap", type=float, default=0.0,
                     help="매도 간격(%%) — 0이면 매수 갭과 동일")
+    ap.add_argument("--size-mult", type=str, default="",
+                    help="차수별 매수 배수 (쉼표) — 예: 0.6,0.6,0.9,1.2,1.8")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
@@ -906,6 +913,8 @@ def main():
     SLIP = args.slip / 100.0
     MIN_AMT = args.min_amt
     SELL_GAP = (args.sell_gap / 100.0) if args.sell_gap else None
+    if args.size_mult:
+        SIZE_MULT = [float(x) for x in args.size_mult.split(",")]
     if args.mkt_csv and args.cool > 0:
         _m = pd.read_csv(args.mkt_csv, parse_dates=["Date"]).set_index("Date")
         _dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
