@@ -8,6 +8,7 @@ data/pen_brief.json 에 저장한다.
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -15,6 +16,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 OUT = "/home/lucky/box-monitor/data/pen_brief.json"
+HERMES = os.environ.get("HERMES_BIN") or shutil.which("hermes") or "/home/lucky/.local/bin/hermes"
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 KST = timezone(timedelta(hours=9))
 SYMS = [
@@ -83,7 +85,7 @@ def prompt_for(rows, asof):
 
 
 def ask_llm(prompt, timeout=240):
-    p = subprocess.run(["hermes", "-z", prompt], capture_output=True, text=True, timeout=timeout)
+    p = subprocess.run([HERMES, "-z", prompt], capture_output=True, text=True, timeout=timeout)
     out = (p.stdout or "").strip()
     if p.returncode != 0:
         raise RuntimeError(f"hermes exit {p.returncode}: {(p.stderr or '')[:200]}")
