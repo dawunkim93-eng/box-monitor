@@ -12,6 +12,7 @@
     --red:#e5484d; --blue:#3b82f6; --green:#22c55e; --amber:#f59e0b;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   body{margin:0;background:var(--bg);color:var(--txt);
        font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;
        font-size:13.5px;line-height:1.45;
@@ -21,7 +22,14 @@
   h1{font-size:18px;margin:6px 0 2px} .sub{color:var(--dim);font-size:11.5px}
   .head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px}
   .tabbar{margin:10px 0 6px}
-  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:640px;
+  .topnav{display:grid;grid-template-columns:1fr 1fr;max-width:640px;margin:0 0 6px;
+          border-bottom:1px solid var(--line)}
+  .topbtn{appearance:none;background:transparent;border:0;border-bottom:2px solid transparent;
+          margin-bottom:-1px;color:var(--dim);font-size:13px;font-weight:800;letter-spacing:.02em;
+          padding:7px 4px 6px;min-height:32px;cursor:pointer}
+  .topbtn.on{color:var(--txt);border-bottom-color:var(--blue)}
+  .topbtn:active{transform:translateY(1px)}
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:640px;
         background:#12151c;border:1px solid var(--line);border-radius:11px;padding:4px}
   .tab{appearance:none;background:transparent;border:0;color:var(--dim);
        border-radius:8px;padding:11px 6px;min-height:46px;font-size:14.5px;font-weight:700;
@@ -32,7 +40,8 @@
     .tabbar{position:sticky;top:0;z-index:20;background:var(--bg);
             margin:8px -8px 4px;padding:8px 8px 7px;border-bottom:1px solid var(--line)}
     .tabs{max-width:none}
-    .tab{font-size:15px;min-height:48px}
+    .tab{font-size:15px;min-height:44px}
+    .topbtn{min-height:30px;padding:5px 4px 5px;font-size:12.5px}
   }
   .stats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:8px;
@@ -169,11 +178,10 @@
   .rules-more summary{cursor:pointer;color:var(--blue);font-size:12.5px;margin:12px 0 2px}
   @media(max-width:640px){ .rules{max-width:100%;font-size:12px} .rulebox{padding:7px 9px} }
   /* ── 연금 탭 ── */
-  .psub{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:420px;
-        background:#12151c;border:1px solid var(--line);border-radius:9px;padding:3px;margin:8px 0 10px}
-  .psubb{appearance:none;background:transparent;border:0;color:var(--dim);border-radius:7px;
-         padding:9px 4px;min-height:40px;font-size:12.5px;font-weight:700;cursor:pointer}
-  .psubb.on{background:#1f2937;color:#fff;box-shadow:inset 0 0 0 1px var(--blue)}
+  .psubb{appearance:none;background:transparent;border:0;color:var(--dim);border-radius:8px;
+         padding:11px 6px;min-height:46px;font-size:14.5px;font-weight:700;letter-spacing:.02em;cursor:pointer}
+  .psubb.on{background:#2563eb;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .psubb:active{transform:translateY(1px)}
   .pcard{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin:8px 0}
   .pcard h3{margin:0 0 6px;font-size:13px}
   .pcard.good{border-color:rgba(34,197,94,.45)} .pcard.warn{border-color:rgba(245,158,11,.55)}
@@ -206,7 +214,7 @@
   #view-pen{max-width:900px}
   .ptblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
   @media(max-width:640px){
-    .pform{grid-template-columns:1fr} .psub{max-width:none}
+    .pform{grid-template-columns:1fr} .psubb{font-size:15px;min-height:48px}
     .pcard{padding:9px 10px} .prow2{grid-template-columns:50px 1fr 76px}
     .pstack thead{display:none}
     .tablewrap>.pstack{min-width:0!important}
@@ -232,11 +240,19 @@
     <div class="sub" id="stamp" aria-live="polite">로딩 중…</div>
   </div>
   <div class="tabbar">
-  <div class="tabs" role="tablist">
+  <div class="topnav" role="tablist" aria-label="대분류">
+    <button id="sv-daily" class="topbtn on" role="tab" aria-selected="true" aria-controls="view-live">데일리매매</button>
+    <button id="sv-pen" class="topbtn" role="tab" aria-selected="false" aria-controls="view-pen">연금</button>
+  </div>
+  <div class="tabs" id="daily-tabs" role="tablist">
     <button id="tb-live" class="tab on" data-t="live" role="tab" aria-selected="true" aria-controls="view-live">실시간</button>
     <button id="tb-valid" class="tab" data-t="valid" role="tab" aria-selected="false" aria-controls="view-valid">검증</button>
     <button id="tb-rules" class="tab" data-t="rules" role="tab" aria-selected="false" aria-controls="view-rules">전략</button>
-    <button id="tb-pen" class="tab" data-t="pen" role="tab" aria-selected="false" aria-controls="view-pen">연금</button>
+  </div>
+  <div class="tabs" id="pen-tabs" role="tablist" hidden>
+    <button class="psubb tab on" data-p="strategy" role="tab" aria-selected="true">전략</button>
+    <button class="psubb tab" data-p="hold" role="tab" aria-selected="false">보유분</button>
+    <button class="psubb tab" data-p="balance" role="tab" aria-selected="false">밸런싱</button>
   </div>
   </div>
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
@@ -445,13 +461,7 @@
       <div class="sub" id="rule-config"></div>
     </div>
   </div>
-  <div id="view-pen" hidden role="tabpanel" aria-labelledby="tb-pen">
-    <div class="psub" role="tablist">
-      <button class="psubb on" data-p="strategy" role="tab" aria-selected="true">전략</button>
-      <button class="psubb" data-p="hold" role="tab" aria-selected="false">보유분</button>
-      <button class="psubb" data-p="balance" role="tab" aria-selected="false">밸런싱</button>
-    </div>
-
+  <div id="view-pen" hidden role="tabpanel" aria-labelledby="sv-pen">
     <div id="pen-strategy">
       <h2 class="sec">🏦 연금 3계좌 전략</h2>
       <div class="pcard">
@@ -1217,22 +1227,49 @@ document.getElementById("btn-hold").addEventListener("click",async()=>{
   setTimeout(()=>{ if(HELD.size) btn.textContent="☑ 보유 목록 복사"; },1800);
 });
 async function jget(p){const r=await fetch(p+"?t="+Date.now()); if(!r.ok) throw new Error(r.status); return r.json();}
-function setTab(t){
-  const changed = (t!==CURRENT_TAB);
-  ["live","valid","rules","pen"].forEach(x=>{
+let SECTION="daily";
+function syncSectionUI(){
+  const d=SECTION==="daily";
+  const a=document.getElementById("sv-daily"), b=document.getElementById("sv-pen");
+  a.classList.toggle("on",d); b.classList.toggle("on",!d);
+  a.setAttribute("aria-selected",d?"true":"false");
+  b.setAttribute("aria-selected",d?"false":"true");
+  document.getElementById("daily-tabs").hidden=!d;
+  document.getElementById("pen-tabs").hidden=d;
+}
+function showDaily(t){
+  document.getElementById("view-pen").hidden=true;
+  ["live","valid","rules"].forEach(x=>{
     document.getElementById("view-"+x).hidden = t!==x;
     const b=document.getElementById("tb-"+x);
-    b.classList.toggle("on",t===x);
-    b.setAttribute("aria-selected",t===x?"true":"false");
+    if(b){ b.classList.toggle("on",t===x); b.setAttribute("aria-selected",t===x?"true":"false"); }
   });
   CURRENT_TAB=t;
-  if(changed) window.scrollTo(0,0);
   if(t==="valid") initValid();
   else if(t==="rules") initRules();
-  else if(t==="pen" && window.penInit) window.penInit();
 }
-document.querySelectorAll(".tab").forEach(b=>
+function setTab(t){
+  if(t==="pen"){ setSection("pen"); return; }
+  const changed=(t!==CURRENT_TAB)||SECTION!=="daily";
+  SECTION="daily"; syncSectionUI(); showDaily(t);
+  if(changed) window.scrollTo(0,0);
+}
+function setSection(s){
+  const changed=(s!==SECTION);
+  SECTION=s; syncSectionUI();
+  if(s==="daily"){
+    showDaily(CURRENT_TAB);
+  }else{
+    ["live","valid","rules"].forEach(x=>{ document.getElementById("view-"+x).hidden=true; });
+    document.getElementById("view-pen").hidden=false;
+    if(window.penInit) window.penInit();
+  }
+  if(changed) window.scrollTo(0,0);
+}
+document.querySelectorAll("#daily-tabs .tab").forEach(b=>
   b.addEventListener("click",()=>setTab(b.dataset.t)));
+document.getElementById("sv-daily").addEventListener("click",()=>setSection("daily"));
+document.getElementById("sv-pen").addEventListener("click",()=>setSection("pen"));
 // 모바일: 좌우 스와이프로 탭 전환 (세로 스크롤·표 가로스크롤과 충돌 방지)
 (function(){
   let x0=null, y0=null;
@@ -1247,7 +1284,14 @@ document.querySelectorAll(".tab").forEach(b=>
     x0=null;
     if(Math.abs(dx)<70||Math.abs(dy)>45) return;
     if(e.target.closest(".tablewrap,select,input,button")) return;
-    const order=["live","valid","rules","pen"];
+    if(SECTION==="pen"){
+      const po=["strategy","hold","balance"];
+      const on=document.querySelector(".psubb.on");
+      const j=po.indexOf(on?on.dataset.p:"strategy")+(dx<0?1:-1);
+      if(j>=0&&j<po.length&&window.penSetSub) window.penSetSub(po[j]);
+      return;
+    }
+    const order=["live","valid","rules"];
     const j=order.indexOf(CURRENT_TAB)+(dx<0?1:-1);
     if(j>=0&&j<order.length) setTab(order[j]);
   },{passive:true});
@@ -1600,6 +1644,7 @@ document.querySelectorAll("#pt-form input[data-k]").forEach(el=>{
     renderBal();
   });
 });
+window.penSetSub=penSetSub;
 window.penInit=function(){
   renderHold(); renderBal();
   const first=document.querySelector(".psubb.on");
