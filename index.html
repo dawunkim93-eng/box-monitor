@@ -31,6 +31,7 @@
   .topbtn:active{transform:translateY(1px)}
   .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:640px;
         background:#12151c;border:1px solid var(--line);border-radius:11px;padding:4px}
+  .tabs4{grid-template-columns:repeat(4,1fr)}
   .tab{appearance:none;background:transparent;border:0;color:var(--dim);
        border-radius:8px;padding:11px 6px;min-height:46px;font-size:14.5px;font-weight:700;
        letter-spacing:.02em;cursor:pointer}
@@ -268,10 +269,11 @@
     <button id="sv-daily" class="topbtn on" role="tab" aria-selected="true" aria-controls="view-live">데일리매매</button>
     <button id="sv-pen" class="topbtn" role="tab" aria-selected="false" aria-controls="view-pen">연금</button>
   </div>
-  <div class="tabs" id="daily-tabs" role="tablist">
+  <div class="tabs tabs4" id="daily-tabs" role="tablist">
     <button id="tb-live" class="tab on" data-t="live" role="tab" aria-selected="true" aria-controls="view-live">실시간</button>
     <button id="tb-valid" class="tab" data-t="valid" role="tab" aria-selected="false" aria-controls="view-valid">검증</button>
     <button id="tb-rules" class="tab" data-t="rules" role="tab" aria-selected="false" aria-controls="view-rules">전략</button>
+    <button id="tb-rev" class="tab" data-t="rev" role="tab" aria-selected="false" aria-controls="view-rev">복기</button>
   </div>
   <div class="tabs" id="pen-tabs" role="tablist" hidden>
     <button class="psubb tab on" data-p="strategy" role="tab" aria-selected="true">전략</button>
@@ -485,6 +487,37 @@
       <div class="sub" id="rule-config"></div>
     </div>
   </div>
+  <div id="view-rev" hidden role="tabpanel" aria-labelledby="tb-rev">
+    <h2 class="sec">🧾 오늘의 복기</h2>
+    <div class="pcard" id="rev-head"><div class="pmuted">복기 데이터 불러오는 중…</div></div>
+
+    <h2 class="sec">내 체결 입력</h2>
+    <div class="pcard">
+      <div class="pform compact">
+        <div><label for="rv-side">구분</label>
+          <select id="rv-side"><option>매수</option><option>매도</option></select></div>
+        <div><label for="rv-name">종목</label>
+          <input id="rv-name" list="rv-dl" placeholder="종목명" autocomplete="off">
+          <datalist id="rv-dl"></datalist></div>
+        <div><label for="rv-px">체결가</label>
+          <input id="rv-px" type="number" inputmode="numeric" step="any" placeholder="예: 16770"></div>
+        <div><label for="rv-qty">수량</label>
+          <input id="rv-qty" type="number" inputmode="numeric" step="any" placeholder="예: 10"></div>
+        <div class="full"><button class="pbtn" id="rv-add" type="button">＋ 체결 추가</button></div>
+      </div>
+      <div class="pmuted">실제로 체결된 것만 넣으세요. 입력은 이 브라우저에만 저장되고 날짜별로 남습니다.</div>
+    </div>
+
+    <h2 class="sec">체결 목록</h2>
+    <div id="rv-trades"><div class="pempty">입력한 체결이 없습니다.</div></div>
+
+    <h2 class="sec">전략 대조</h2>
+    <div id="rv-check"><div class="pempty">체결을 입력하면 규칙과 대조합니다.</div></div>
+
+    <h2 class="sec">오늘의 신호 (참고)</h2>
+    <div id="rv-sig" class="pcard"><div class="pmuted">불러오는 중…</div></div>
+  </div>
+
   <div id="view-pen" hidden role="tabpanel" aria-labelledby="sv-pen">
     <div id="pen-strategy">
       <h2 class="sec">🌅 오늘의 브리핑</h2>
@@ -1310,14 +1343,16 @@ function syncSectionUI(){
 }
 function showDaily(t){
   document.getElementById("view-pen").hidden=true;
-  ["live","valid","rules"].forEach(x=>{
-    document.getElementById("view-"+x).hidden = t!==x;
+  ["live","valid","rules","rev"].forEach(x=>{
+    const el=document.getElementById("view-"+x);
+    if(el) el.hidden = t!==x;
     const b=document.getElementById("tb-"+x);
     if(b){ b.classList.toggle("on",t===x); b.setAttribute("aria-selected",t===x?"true":"false"); }
   });
   CURRENT_TAB=t;
   if(t==="valid") initValid();
   else if(t==="rules") initRules();
+  else if(t==="rev" && window.revInit) window.revInit();
 }
 function setTab(t){
   if(t==="pen"){ setSection("pen"); return; }
@@ -1362,7 +1397,7 @@ document.getElementById("sv-pen").addEventListener("click",()=>setSection("pen")
       if(j>=0&&j<po.length&&window.penSetSub) window.penSetSub(po[j]);
       return;
     }
-    const order=["live","valid","rules"];
+    const order=["live","valid","rules","rev"];
     const j=order.indexOf(CURRENT_TAB)+(dx<0?1:-1);
     if(j>=0&&j<order.length) setTab(order[j]);
   },{passive:true});
@@ -2044,6 +2079,159 @@ setInterval(()=>{
     loadPrices(true).then(()=>{ renderHold(); renderBal(); });
   }
 },300000);
+})();
+/* ══════════ 복기 탭 ══════════ */
+(function(){
+const RK="boxrev_v1";
+let REV=null, RT={}, LOADED=false;
+const f=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+try{ const o=JSON.parse(localStorage.getItem(RK)||"{}"); if(o&&typeof o==="object") RT=o; }catch(e){ RT={}; }
+const save=()=>{ try{ localStorage.setItem(RK,JSON.stringify(RT)); }catch(e){} };
+const rows=()=>REV?(RT[REV.date]||[]):[];
+
+async function init(){
+  if(!LOADED){
+    try{
+      const r=await fetch("data/box_review.json?t="+Date.now(),{cache:"no-store"});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      REV=await r.json(); LOADED=true;
+    }catch(e){ REV=null; }
+  }
+  render();
+}
+function render(){
+  const head=document.getElementById("rev-head"); if(!head) return;
+  if(!REV){
+    head.innerHTML='<div class="pmuted">복기 파일을 불러오지 못했습니다. 평일 16:40에 갱신됩니다.</div>';
+    const s=document.getElementById("rv-sig"); if(s) s.innerHTML='<div class="pmuted">신호 없음</div>';
+    renderTrades(); renderCheck(); return;
+  }
+  const c=REV.cooldown||{};
+  head.innerHTML=`<h3>${REV.date} <span class="sub" style="font-weight:400">${esc(REV.asof)} 기준 · ${esc(REV.market||"")}</span></h3>
+    <div class="stats" style="margin:6px 0">
+      <div class="chip">박스 <b>${REV.live_count||0}</b>종</div>
+      <div class="chip">진입 후보 <b>${(REV.candidates||[]).length}</b></div>
+      <div class="chip">진입 기록 <b>${(REV.enters||[]).length}</b></div>
+      <div class="chip">청산 신호 <b>${(REV.exits||[]).length}</b></div>
+      <div class="chip">경고 <b>${(REV.alerts||[]).length}</b></div>
+    </div>
+    ${c.on?`<div class="cdbanner">⛔ 급락 쿨다운 — 전일 KOSPI ${c.pct}% (${esc(c.date)}). 이 날 신규 매수는 쉬는 것이 원칙입니다.</div>`:""}
+    ${(c.on&&(REV.enters||[]).length)?`<div class="pmuted" style="margin-top:4px;color:var(--amber)">쿨다운 날인데 시스템 진입 기록이 ${REV.enters.length}건 있습니다. 신호 기록일 뿐이니 이 날 매수는 쉬는 것이 맞습니다.</div>`:""}`;
+  const names=[...new Set([...(REV.candidates||[]).map(x=>x.name),...(REV.enters||[]).map(x=>x.name),
+                          ...(REV.exits||[]).map(x=>x.name),...(REV.alerts||[]).map(x=>x.name)])].slice(0,150);
+  const dl=document.getElementById("rv-dl");
+  if(dl) dl.innerHTML=names.map(n=>`<option value="${esc(n)}">`).join("");
+  const cands=(REV.candidates||[]).slice(0,8), ent=(REV.enters||[]).slice(0,8), ex=(REV.exits||[]).slice(0,8);
+  const sig=document.getElementById("rv-sig");
+  if(sig) sig.innerHTML=
+    `<div class="pmuted" style="margin-bottom:4px"><b style="color:var(--txt)">진입 후보</b> ${cands.length?cands.map(x=>esc(x.name)+"("+(x.score==null?"-":x.score)+"점)").join(", "):"없음"}</div>
+     <div class="pmuted" style="margin-bottom:4px"><b style="color:var(--txt)">시스템 진입 기록</b> ${ent.length?ent.map(x=>esc(x.name)).join(", "):"없음"}</div>
+     <div class="pmuted" style="margin-bottom:4px"><b style="color:var(--txt)">청산 신호</b> ${ex.length?ex.map(x=>esc(x.name)).join(", "):"없음"}</div>
+     <div class="pmuted"><b style="color:var(--txt)">경고</b> ${(REV.alerts||[]).length}건 — 실시간 탭에서 확인하세요.</div>`;
+  renderTrades(); renderCheck();
+}
+function renderTrades(){
+  const el=document.getElementById("rv-trades"); if(!el) return;
+  const rs=rows();
+  if(!rs.length){ el.innerHTML='<div class="pempty">입력한 체결이 없습니다.</div>'; return; }
+  el.innerHTML=rs.map((r,i)=>`<div class="pcardrow">
+      <div class="pcrow1"><span class="pcret ${r.side==="매수"?"up":"dn"}">${r.side}</span>
+        <span class="pcname">${esc(r.name)}</span>
+        <button class="pcx" data-rvdel="${i}" type="button" aria-label="삭제">✕</button></div>
+      <div class="pcrow2"><span>${f(r.px)}원</span><span>${f(r.q)}주</span><span>${f(r.px*r.q)}원</span></div>
+    </div>`).join("");
+}
+function checks(){
+  const rs=rows(), out=[];
+  if(!REV) return out;
+  const buys=rs.filter(r=>r.side==="매수"), sells=rs.filter(r=>r.side==="매도");
+  const cand=new Set((REV.candidates||[]).map(x=>x.name));
+  const candPx={}; (REV.candidates||[]).forEach(x=>{ candPx[x.name]=x.price; });
+  if(REV.cooldown&&REV.cooldown.on)
+    out.push({ok:buys.length===0,t:`쿨다운 날 매수 ${buys.length}건`,
+              d:buys.length?"전일 급락으로 신규 진입을 쉬는 날입니다.":"매수를 쉬었습니다."});
+  const outside=buys.filter(b=>!cand.has(b.name));
+  if(outside.length) out.push({ok:false,t:`신호에 없던 매수 ${outside.length}건`,
+    d:outside.map(b=>esc(b.name)).join(", ")+" — 후보 목록에 없는 종목입니다."});
+  const chase=buys.filter(b=>candPx[b.name]&&b.px>candPx[b.name]*1.03);
+  if(chase.length) out.push({ok:false,t:`추격 매수 ${chase.length}건`,
+    d:chase.map(b=>esc(b.name)).join(", ")+" — 신호가보다 3% 이상 높습니다."});
+  if(buys.length>7) out.push({ok:false,t:`슬롯 초과 (매수 ${buys.length}건)`,d:"7슬롯이 한도입니다."});
+  const rebuy=buys.filter(b=>sells.some(s=>s.name===b.name));
+  if(rebuy.length) out.push({ok:false,t:`당일 재매수 ${rebuy.length}건`,
+    d:rebuy.map(b=>esc(b.name)).join(", ")+" — 청산한 종목의 재매수는 규칙에 없습니다."});
+  if(!out.length) out.push({ok:true,t:"기록된 위반이 없습니다.",d:"입력한 체결 기준입니다."});
+  return out;
+}
+function renderCheck(){
+  const el=document.getElementById("rv-check"); if(!el) return;
+  const rs=rows();
+  if(!rs.length){ el.innerHTML='<div class="pempty">체결을 입력하면 규칙과 대조합니다.</div>'; return; }
+  const ck=checks(), bad=ck.filter(x=>!x.ok).length;
+  el.innerHTML=`<div class="pcard ${bad?"warn":"good"}"><h3>${bad?`확인 ${bad}건`:"전략 준수"}</h3>
+    ${ck.map(x=>`<div style="padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px">
+      <span class="pbadge ${x.ok?"ok":"warn"}">${x.ok?"통과":"확인"}</span>
+      <b style="margin-left:6px">${x.t}</b>
+      <div class="pmuted" style="margin-top:2px">${x.d}</div></div>`).join("")}
+    <div class="pbtnrow" style="margin-top:8px"><button class="pbtn ghost" id="rv-ask" type="button">에이전트에게 복기 요청</button></div>
+    <div class="pmuted" style="margin-top:4px">버튼을 누르면 오늘 신호와 내 체결이 담긴 질문이 복사됩니다. 채팅에 붙여넣으면 이어서 답합니다.</div></div>`;
+  const b=document.getElementById("rv-ask");
+  if(b) b.addEventListener("click",copyAsk);
+}
+function copyAsk(){
+  const rs=rows();
+  const t=`오늘 데일리매매를 복기해줘.
+
+[전략]
+주봉 13주 박스, 진입은 밴드 하위 절반과 경계 +6% 이상, 전일 음봉과 아래꼬리 1% 이상, 다음날 시가.
+사다리 5차 2% 갭(6·6·9·12·18만원), 장중 경계×1.02 터치 즉시 청산, 7슬롯, 급락 다음날 신규 진입 중단.
+
+[시장]
+${REV?(REV.date+" "+(REV.market||"")+(REV.cooldown&&REV.cooldown.on?` · 쿨다운(전일 ${REV.cooldown.pct}%)`:"")):"정보 없음"}
+
+[시스템 신호]
+진입 후보: ${REV&&(REV.candidates||[]).length?REV.candidates.map(x=>x.name+"("+x.score+"점)").join(", "):"없음"}
+진입 기록: ${REV&&(REV.enters||[]).length?REV.enters.map(x=>x.name).join(", "):"없음"}
+청산 신호: ${REV&&(REV.exits||[]).length?REV.exits.map(x=>x.name+"("+(x.reason||"")+")").join(", "):"없음"}
+
+[내 체결]
+${rs.length?rs.map(r=>`${r.side} ${r.name} ${f(r.px)}원 ${f(r.q)}주`).join("\n"):"없음"}
+
+[요청]
+1) 전략에서 벗어난 부분
+2) 다음날 주의할 점
+3) 같은 실수를 줄일 규칙 한 가지
+담백하게, 숫자 중심으로.`;
+  const done=()=>{ const b=document.getElementById("rv-ask"); if(b){ b.textContent="복사됨 ✓"; setTimeout(()=>{ b.textContent="에이전트에게 복기 요청"; },1500); } };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done).catch(()=>prompt("복사할 내용",t));
+  else prompt("복사할 내용",t);
+}
+document.getElementById("rv-add").addEventListener("click",()=>{
+  if(!REV) return;
+  const side=document.getElementById("rv-side").value;
+  const nm=document.getElementById("rv-name").value.trim();
+  const px=Number(document.getElementById("rv-px").value);
+  const q=Number(document.getElementById("rv-qty").value);
+  if(!nm){ document.getElementById("rv-name").focus(); return; }
+  if(!isFinite(px)||px<=0){ document.getElementById("rv-px").focus(); document.getElementById("rv-px").style.borderColor="var(--red)"; return; }
+  document.getElementById("rv-px").style.borderColor="";
+  if(!isFinite(q)||q<=0){ document.getElementById("rv-qty").focus(); document.getElementById("rv-qty").style.borderColor="var(--red)"; return; }
+  document.getElementById("rv-qty").style.borderColor="";
+  (RT[REV.date]=RT[REV.date]||[]).push({side:side,name:nm,px:px,q:q});
+  save();
+  document.getElementById("rv-name").value=""; document.getElementById("rv-px").value=""; document.getElementById("rv-qty").value="";
+  render();
+});
+["rv-name","rv-px","rv-qty"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); document.getElementById("rv-add").click(); } });
+});
+document.getElementById("rv-trades").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-rvdel]"); if(!b||!REV) return;
+  RT[REV.date].splice(Number(b.dataset.rvdel),1); save(); render();
+});
+window.revInit=init;
 })();
 </script>
 </body>
