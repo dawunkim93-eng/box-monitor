@@ -247,6 +247,10 @@
     #ph-tbl th,#ph-tbl td{padding:5px 3px;font-size:11px}
     #ph-tblwrap{display:none}
     #ph-cards{display:block}
+    #etf-tbl tr{padding:7px 10px}
+    #etf-tbl td:nth-child(1){font-size:10.5px;color:var(--dim)}
+    #etf-tbl td:nth-child(2){font-weight:700;font-size:12.5px;color:var(--txt)}
+    #etf-tbl td:nth-child(3),#etf-tbl td:nth-child(4){display:inline-block;width:auto;font-size:11px;color:var(--dim);margin-right:10px}
   }
 </style>
 </head>
@@ -506,6 +510,29 @@
         IRP 위험자산 한도는 70%입니다(완화는 법 개정 전). 3계좌 합산 테마 비중은 30%를 넘기지 않습니다.
       </div>
 
+      <h2 class="sec">지수 ETF 후보 (2026-11-08 확인)</h2>
+      <div class="pcard">
+        <div class="pmuted" style="margin-bottom:6px">같은 지수면 총보수와 순자산으로 고릅니다. 총보수 0.002%포인트 차이는 1억원에 연 2만원이라, 규모와 거래량이 더 중요합니다.</div>
+        <div class="ptblwrap">
+        <table class="ptbl pstack" id="etf-tbl">
+          <thead><tr><th>구분</th><th>종목</th><th>총보수</th><th>순자산</th></tr></thead>
+          <tbody>
+            <tr><td>해외 코어</td><td>KODEX 미국S&amp;P500 (379800)</td><td>0.0062%</td><td>10.6조</td></tr>
+            <tr><td>해외 코어</td><td>TIGER 미국S&amp;P500 (360750)</td><td>0.0068%</td><td>21.2조</td></tr>
+            <tr><td>해외 코어</td><td>ACE 미국S&amp;P500 (360200)</td><td>0.0047%</td><td>4.0조</td></tr>
+            <tr><td>해외 위성</td><td>TIGER 미국나스닥100 (133690)</td><td>0.0068%</td><td>11.4조</td></tr>
+            <tr><td>국내 코어</td><td>TIGER 200 (102110)</td><td>0.05%</td><td>8.6조</td></tr>
+            <tr><td>국내 코어</td><td>KODEX 200 (069500)</td><td>0.15%</td><td>20.9조</td></tr>
+            <tr><td>배당</td><td>TIGER 미국배당다우존스 (458730)</td><td>0.01%</td><td>4.7조</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="pmuted" style="margin-top:6px">
+          국내는 TIGER 200이 KODEX 200보다 0.1%포인트 저렴합니다(1억원에 연 10만원). 둘 다 규모가 충분합니다.
+          코스닥150은 최근 1년 -29%로 변동성이 커서 코어에 두지 않습니다. 총보수는 운용사 인하로 바뀔 수 있으니 가입 전에 확인하세요.
+        </div>
+      </div>
+
       <h2 class="sec">납입 순서와 세액공제</h2>
       <div class="pcard">
         <div class="pmuted">
@@ -621,6 +648,9 @@
 
       <h2 class="sec">리밸런싱 제안</h2>
       <div id="pb-actions"><div class="pempty">보유분을 먼저 입력하세요.</div></div>
+
+      <h2 class="sec">계좌별 현황</h2>
+      <div id="pb-accts"><div class="pempty">보유분을 먼저 입력하세요.</div></div>
 
       <h2 class="sec">점검</h2>
       <div id="pb-checks"></div>
@@ -1662,6 +1692,41 @@ function renderHold(){
   }
   const ck=document.getElementById("ph-check"); if(ck) ck.innerHTML=checksHTML();
 }
+const RULES={
+  "연금저축":[{"k":"코어","cls":["해외지수","국내지수"],"t":80},{"k":"테마","cls":["테마"],"t":20}],
+  "IRP":[{"k":"위험자산","cls":["해외지수","국내지수","테마"],"t":70},{"k":"안전자산","cls":["채권","현금"],"t":30}],
+  "ISA":[{"k":"코어","cls":["해외지수","국내지수"],"t":50},{"k":"테마","cls":["테마"],"t":30},{"k":"안전자산","cls":["채권","현금"],"t":20}]
+};
+function renderAcc(g){
+  const el=document.getElementById("pb-accts"); if(!el) return;
+  const list=ACCTS.filter(a=>g.a[a]>0);
+  if(!list.length){ el.innerHTML='<div class="pempty">보유분을 먼저 입력하세요.</div>'; return; }
+  el.innerHTML=list.map(a=>{
+    const tot=g.a[a];
+    const amt={}; CLS.forEach(k=>amt[k]=0);
+    P.h.filter(r=>r.acct===a).forEach(r=>{ amt[r.cls]+=amtOf(r); });
+    const rule=RULES[a]||[];
+    const rows=rule.map(x=>{
+      const cur=x.cls.reduce((s,k)=>s+amt[k],0);
+      const pct=tot?cur/tot*100:0;
+      return {"label":x.k,"pct":pct,"t":x.t,"diff":pct-x.t,"won":tot*(x.t-pct)/100};
+    });
+    const worst=rows.slice().sort((p,q)=>Math.abs(q.diff)-Math.abs(p.diff))[0];
+    const ok=!worst||Math.abs(worst.diff)<=5;
+    const ret=(()=>{ let c=0,co=0; P.h.filter(r=>r.acct===a).forEach(r=>{ c+=amtOf(r); co+=costOf(r); }); return co?(c/co-1)*100:null; })();
+    return `<div class="pcard ${ok?"good":"warn"}">
+      <h3>${a} <span class="sub" style="font-weight:400">${f(tot)}원 · 전체 ${f1(tot/g.sum*100)}%
+        ${ret!=null?`· 수익 ${ret>=0?"+":""}${ret.toFixed(1)}%`:""}</span>
+        <span class="pbadge ${ok?"ok":"warn"}" style="float:right">${ok?"규칙 안":"조정"}</span></h3>
+      ${rows.map(x=>`<div class="prow2"><span>${x.label}</span>
+        <div style="position:relative"><div class="pbar"><i class="${Math.abs(x.diff)>5?"over":""}" style="width:${Math.min(x.pct,100)}%"></i></div>
+        <span style="position:absolute;left:${Math.min(x.t,100)}%;top:-2px;width:2px;height:13px;background:#fff;opacity:.85"></span></div>
+        <span class="vv">${f1(x.pct)}% / ${x.t}%</span></div>`).join("")}
+      ${worst&&Math.abs(worst.diff)>5?`<div class="pmuted" style="margin-top:4px">계좌 안에서 <b>${worst.label}</b>
+        ${worst.won>0?"매수":"매도"} ${f(Math.abs(worst.won))}원</div>`:""}
+    </div>`;
+  }).join("")+`<div class="pmuted">계좌 규칙은 전략 탭 기준입니다. 연금저축 코어 80과 테마 20, IRP 위험 70과 안전 30, ISA 코어 50과 테마 30과 안전 20. ±5%포인트까지 허용합니다.</div>`;
+}
 function renderBal(){
   CLS.forEach(k=>{
     const el=document.getElementById("pt-"+k);
@@ -1670,6 +1735,7 @@ function renderBal(){
   const se=document.getElementById("pt-sum");
   if(se) se.value=CLS.reduce((s,k)=>s+P.t[k],0)+"%";
   const g=agg(), sum=g.sum;
+  renderAcc(g);
   const bars=document.getElementById("pb-bars"), acts=document.getElementById("pb-actions");
   if(!sum){
     if(bars) bars.innerHTML='<div class="pempty">보유분을 먼저 입력하세요. 보유분 탭에서 계좌, 구분, 수량, 평균단가를 넣으면 여기에 표시됩니다.</div>';
@@ -1729,6 +1795,7 @@ function guessCls(n){
 function pick(code){
   const x=PRICE[code]; if(!x) return;
   PICK={c:x.c,n:x.n};
+  CLS_TOUCHED=false;
   document.getElementById("ph-name").value=x.n;
   document.getElementById("ph-cls").value=guessCls(x.n);
   document.getElementById("ph-code").innerHTML=`<b>${x.c}</b> · 현재 ${f(x.p)}원 · ${x.r>0?"+":""}${x.r}%`;
@@ -1765,7 +1832,8 @@ function addHolding(){
   nmEl.focus();
   renderHold(); renderBal();
 }
-let EDIT=null;
+let EDIT=null, CLS_TOUCHED=false;
+document.getElementById("ph-cls").addEventListener("change",()=>{ CLS_TOUCHED=true; });
 function fillForm(r){
   document.getElementById("ph-acct").value=r.acct;
   document.getElementById("ph-cls").value=r.cls;
@@ -1781,7 +1849,7 @@ function fillForm(r){
 }
 function startEdit(i){
   const r=P.h[i]; if(!r) return;
-  EDIT=i; fillForm(r);
+  EDIT=i; CLS_TOUCHED=false; fillForm(r);
   document.getElementById("ph-add").textContent="수정 저장";
   document.getElementById("ph-cancel").hidden=false;
   const e=document.getElementById("ph-editinfo");
@@ -1791,7 +1859,7 @@ function startEdit(i){
   document.getElementById("ph-qty").focus();
 }
 function endEdit(){
-  EDIT=null; PICK=null;
+  EDIT=null; PICK=null; CLS_TOUCHED=false;
   document.getElementById("ph-name").value="";
   document.getElementById("ph-qty").value="";
   document.getElementById("ph-avg").value="";
@@ -1815,7 +1883,9 @@ function penSetSub(p){
 document.querySelectorAll(".psubb").forEach(b=>b.addEventListener("click",()=>penSetSub(b.dataset.p)));
 document.getElementById("ph-add").addEventListener("click",addHolding);
 document.getElementById("ph-name").addEventListener("input",e=>{
-  if(PICK && PICK.n!==e.target.value.trim()) PICK=null;
+  const v=e.target.value.trim();
+  if(PICK && PICK.n!==v) PICK=null;
+  if(!CLS_TOUCHED && v) document.getElementById("ph-cls").value=guessCls(v);
   showSug(e.target.value);
 });
 document.getElementById("ph-name").addEventListener("focus",e=>{ if(UNI.length) showSug(e.target.value); });
