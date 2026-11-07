@@ -21,7 +21,7 @@
   h1{font-size:18px;margin:6px 0 2px} .sub{color:var(--dim);font-size:11.5px}
   .head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px}
   .tabbar{margin:10px 0 6px}
-  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:540px;
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:640px;
         background:#12151c;border:1px solid var(--line);border-radius:11px;padding:4px}
   .tab{appearance:none;background:transparent;border:0;color:var(--dim);
        border-radius:8px;padding:11px 6px;min-height:46px;font-size:14.5px;font-weight:700;
@@ -168,6 +168,58 @@
   .rules ol.quick li{margin:3px 0;font-size:12.5px}
   .rules-more summary{cursor:pointer;color:var(--blue);font-size:12.5px;margin:12px 0 2px}
   @media(max-width:640px){ .rules{max-width:100%;font-size:12px} .rulebox{padding:7px 9px} }
+  /* ── 연금 탭 ── */
+  .psub{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:420px;
+        background:#12151c;border:1px solid var(--line);border-radius:9px;padding:3px;margin:8px 0 10px}
+  .psubb{appearance:none;background:transparent;border:0;color:var(--dim);border-radius:7px;
+         padding:9px 4px;min-height:40px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .psubb.on{background:#1f2937;color:#fff;box-shadow:inset 0 0 0 1px var(--blue)}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin:8px 0}
+  .pcard h3{margin:0 0 6px;font-size:13px}
+  .pcard.good{border-color:rgba(34,197,94,.45)} .pcard.warn{border-color:rgba(245,158,11,.55)}
+  .pmuted{color:var(--dim);font-size:11.5px;line-height:1.55}
+  .pform{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 8px}
+  .pform label{display:block;font-size:11px;color:var(--dim);margin-bottom:2px}
+  .pform input,.pform select{width:100%;background:#12151c;color:var(--txt);border:1px solid var(--line);
+                             border-radius:6px;padding:9px 8px;font-size:12.5px}
+  .pform .full{grid-column:1/-1}
+  .pbtn{background:var(--blue);color:#fff;border:0;border-radius:7px;padding:10px 12px;
+        font-size:12.5px;font-weight:700;cursor:pointer;min-height:42px}
+  .pbtn.ghost{background:var(--card);border:1px solid var(--line);color:var(--txt);font-weight:600}
+  .pbtn.danger{background:#3a1a1d;border:1px solid var(--red);color:#ffb4b4}
+  .pbtnrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .ptbl{width:100%;border-collapse:collapse;font-size:12px}
+  .ptbl th,.ptbl td{padding:6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  .ptbl th{color:var(--dim);font-weight:600;background:#1b1f28}
+  .ptbl th:first-child,.ptbl td:first-child,.ptbl td.nm,.ptbl th.nm{text-align:left}
+  .ptbl td.nm{white-space:normal}
+  .pbar{height:9px;background:#22262f;border-radius:5px;overflow:hidden}
+  .pbar i{display:block;height:100%;background:var(--blue)}
+  .pbar i.over{background:var(--red)}
+  .prow2{display:grid;grid-template-columns:58px 1fr 84px;align-items:center;gap:8px;margin:6px 0;font-size:12px}
+  .prow2 .vv{text-align:right;font-variant-numeric:tabular-nums}
+  .pbadge{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:4px;border:1px solid;margin-left:4px}
+  .pbadge.ok{color:var(--green);border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.08)}
+  .pbadge.warn{color:var(--amber);border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.08)}
+  .pbadge.bad{color:var(--red);border-color:rgba(229,72,77,.5);background:rgba(229,72,77,.10)}
+  .pempty{color:var(--dim);font-size:12px;padding:10px 2px}
+  #view-pen{max-width:900px}
+  .ptblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  @media(max-width:640px){
+    .pform{grid-template-columns:1fr} .psub{max-width:none}
+    .pcard{padding:9px 10px} .prow2{grid-template-columns:50px 1fr 76px}
+    .pstack thead{display:none}
+    .tablewrap>.pstack{min-width:0!important}
+    .pstack,.pstack tbody,.pstack tr,.pstack td{display:block;width:100%}
+    .pstack tr{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--card)}
+    .pstack td{border:0;padding:1px 0;text-align:left;white-space:normal}
+    .pstack td:first-child{font-weight:700}
+    .pstack td.nm{color:var(--dim);font-size:11.5px;margin-top:2px}
+    .pform.compact{grid-template-columns:1fr 1fr}
+    .tablewrap>#ph-tbl{min-width:0!important}
+    #ph-tbl td.nm{white-space:normal;max-width:118px;line-height:1.3}
+    #ph-tbl th,#ph-tbl td{padding:5px 3px;font-size:11px}
+  }
 </style>
 </head>
 <body>
@@ -184,6 +236,7 @@
     <button id="tb-live" class="tab on" data-t="live" role="tab" aria-selected="true" aria-controls="view-live">실시간</button>
     <button id="tb-valid" class="tab" data-t="valid" role="tab" aria-selected="false" aria-controls="view-valid">검증</button>
     <button id="tb-rules" class="tab" data-t="rules" role="tab" aria-selected="false" aria-controls="view-rules">전략</button>
+    <button id="tb-pen" class="tab" data-t="pen" role="tab" aria-selected="false" aria-controls="view-pen">연금</button>
   </div>
   </div>
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
@@ -392,6 +445,150 @@
       <div class="sub" id="rule-config"></div>
     </div>
   </div>
+  <div id="view-pen" hidden role="tabpanel" aria-labelledby="tb-pen">
+    <div class="psub" role="tablist">
+      <button class="psubb on" data-p="strategy" role="tab" aria-selected="true">전략</button>
+      <button class="psubb" data-p="hold" role="tab" aria-selected="false">보유분</button>
+      <button class="psubb" data-p="balance" role="tab" aria-selected="false">밸런싱</button>
+    </div>
+
+    <div id="pen-strategy">
+      <h2 class="sec">🏦 연금 3계좌 전략</h2>
+      <div class="pcard">
+        <h3>한 줄 요약</h3>
+        <div class="pmuted">
+          코어 70%는 지수, 위성은 테마 30% 이내. 세액공제 900만원을 먼저 채우고,
+          계좌는 세액공제용과 비과세용으로 나눕니다. 매매 타이밍보다 계좌 구조가 최종 연금액을 더 크게 바꿉니다.
+        </div>
+      </div>
+
+      <h2 class="sec">계좌별 배분</h2>
+      <table class="ptbl pstack">
+        <thead><tr><th>계좌</th><th>올해 납입</th><th class="nm">구성</th></tr></thead>
+        <tbody>
+          <tr><td>연금저축</td><td>600만원</td><td class="nm">코어 80%(미국 S&amp;P500, 선진국), 위성 20%(중국 AI 10% 이내, 방산 또는 AI 전력)</td></tr>
+          <tr><td>IRP</td><td>300만원</td><td class="nm">위험자산 70%(코어 지수 ETF), 안전자산 30%(CD금리, 단기채)</td></tr>
+          <tr><td>ISA</td><td>월 50만원</td><td class="nm">코어 50%, 테마 30%(2개 이내), 안전 20%</td></tr>
+        </tbody>
+      </table>
+      <div class="pmuted" style="margin-top:6px">
+        IRP 위험자산 한도는 70%입니다(완화는 법 개정 전). 3계좌 합산 테마 비중은 30%를 넘기지 않습니다.
+      </div>
+
+      <h2 class="sec">납입 순서와 세액공제</h2>
+      <div class="pcard">
+        <div class="pmuted">
+          ① 세액공제 900만원(연금저축 600, IRP 300) → ② ISA → ③ 비과세용 연금저축<br>
+          총급여 5,500만원 초과이므로 공제율 13.2%. 900만원이면 환급 118.8만원입니다.
+          이건 시장 수익률과 무관한 확정 수익이라 가장 먼저 채웁니다.
+        </div>
+      </div>
+      <div class="pcard">
+        <h3>ISA 3년 순환 숫자</h3>
+        <div class="pmuted">
+          월 50만원, 3년이면 전환 1,800만원, 추가공제 180만원, 환급 23.8만원.<br>
+          월 50만원, 5년이면 전환 3,000만원, 추가공제 300만원, 환급 39.6만원.<br>
+          월 84만원으로 올려 3년을 채우면 환급 39.6만원. 추가공제 300만원 한도를 다 쓰려면 전환액이 3,000만원은 되어야 합니다.
+        </div>
+      </div>
+
+      <h2 class="sec">2027년 분기 (조건부)</h2>
+      <div class="pcard warn">
+        <h3>청년 IRP 15% <span class="pbadge warn">국회 심사 중</span></h3>
+        <div class="pmuted">
+          1993년생이면 2027년에 만 34세 이하로 대상 가능성이 높습니다.
+          연금저축 600만원(13.2%)과 IRP 300만원을 나누면 118.8만원인데,
+          IRP 900만원 전액에 15%가 적용되면 135만원이 됩니다. 연 16.2만원 차이입니다.
+          다만 IRP는 위험자산 70% 한도와 중도인출 제한이 있고, 연금저축 비과세 재원이 비게 됩니다.
+          12월 본회의 결과를 보고 결정하세요.
+        </div>
+      </div>
+
+      <h2 class="sec">리스크 규칙</h2>
+      <div class="pcard">
+        <div class="pmuted">
+          ① 테마 합산 30% 상한. 테마 80%는 실측에서 수익 9.4%, 낙폭 -49.2%로 지수만 둔 것(14.0%, -46.6%)보다 나빴습니다.<br>
+          ② 리밸런싱은 연 1회, 목표에서 5%포인트 이상 벗어날 때만.<br>
+          ③ 은퇴 5년 전부터 안전자산을 늘립니다. 은퇴 첫해 -40%는 생활 유지 확률을 11.7%포인트 낮춥니다.
+        </div>
+      </div>
+
+      <div class="pcard warn">
+        <h3>주의</h3>
+        <div class="pmuted">
+          이 화면은 정리와 계산을 돕는 도구이며 투자 권유나 세무 자문이 아닙니다.
+          세율과 한도는 법 개정으로 바뀌므로 실제 납입과 인출 전에 국세청(126)과 증권사에서 확인하세요.
+        </div>
+      </div>
+    </div>
+
+    <div id="pen-hold" hidden>
+      <h2 class="sec">📋 보유분 입력</h2>
+      <div class="pcard">
+        <div class="pform">
+          <div><label for="ph-acct">계좌</label>
+            <select id="ph-acct"><option>연금저축</option><option>IRP</option><option>ISA</option><option>일반</option></select></div>
+          <div><label for="ph-cls">구분</label>
+            <select id="ph-cls"><option>해외지수</option><option>국내지수</option><option>테마</option><option>채권</option><option>현금</option></select></div>
+          <div><label for="ph-name">종목명</label>
+            <input id="ph-name" placeholder="예: TIGER 미국S&P500" autocomplete="off"></div>
+          <div><label for="ph-amt">평가금액(원)</label>
+            <input id="ph-amt" type="number" inputmode="numeric" min="0" step="10000" placeholder="예: 5000000"></div>
+          <div class="full"><button class="pbtn" id="ph-add" type="button">＋ 추가</button></div>
+        </div>
+        <div class="pmuted">입력한 내용은 이 브라우저에만 저장됩니다(서버 전송 없음). 금액은 평가금액 기준으로 넣으면 됩니다.</div>
+      </div>
+
+      <h2 class="sec">합계</h2>
+      <div class="stats" id="ph-summary"></div>
+
+      <h2 class="sec">보유 목록</h2>
+      <div class="pbtnrow">
+        <button class="pbtn ghost" id="ph-sample" type="button">예시 넣기</button>
+        <button class="pbtn danger" id="ph-clear" type="button">전체 삭제</button>
+      </div>
+      <div class="ptblwrap">
+      <table class="ptbl" id="ph-tbl">
+        <thead><tr><th>계좌</th><th>구분</th><th class="nm">종목</th><th>금액</th><th>비중</th><th></th></tr></thead>
+        <tbody id="ph-rows"><tr><td colspan="6" class="pempty">아직 입력한 보유분이 없습니다.</td></tr></tbody>
+      </table>
+      </div>
+      <div id="ph-check"></div>
+    </div>
+
+    <div id="pen-balance" hidden>
+      <h2 class="sec">⚖️ 목표 비중</h2>
+      <div class="pcard">
+        <div class="pform compact" id="pt-form">
+          <div><label for="pt-해외지수">해외지수 %</label><input id="pt-해외지수" data-k="해외지수" type="number" min="0" max="100" step="1"></div>
+          <div><label for="pt-국내지수">국내지수 %</label><input id="pt-국내지수" data-k="국내지수" type="number" min="0" max="100" step="1"></div>
+          <div><label for="pt-테마">테마 %</label><input id="pt-테마" data-k="테마" type="number" min="0" max="100" step="1"></div>
+          <div><label for="pt-채권">채권 %</label><input id="pt-채권" data-k="채권" type="number" min="0" max="100" step="1"></div>
+          <div><label for="pt-현금">현금 %</label><input id="pt-현금" data-k="현금" type="number" min="0" max="100" step="1"></div>
+          <div><label>합계</label><input id="pt-sum" readonly></div>
+        </div>
+        <div class="pmuted">합계가 100이 아니면 제안 금액이 어긋납니다. 테마는 30%를 넘기지 않는 편이 좋습니다.</div>
+      </div>
+
+      <h2 class="sec">현재 대비</h2>
+      <div id="pb-bars"><div class="pempty">보유분을 먼저 입력하세요.</div></div>
+
+      <h2 class="sec">리밸런싱 제안</h2>
+      <div id="pb-actions"><div class="pempty">보유분을 먼저 입력하세요.</div></div>
+
+      <h2 class="sec">점검</h2>
+      <div id="pb-checks"></div>
+
+      <div class="pcard">
+        <div class="pmuted">
+          제안은 계좌 구분 없이 전체 합계 기준입니다. 실제 주문은 계좌 안에서 먼저 맞추세요.
+          연금저축과 IRP는 과세이연이라 계좌 안 매매에 세금이 없고, ISA도 매매차익 비과세 한도 안이면 바로 팔 수 있습니다.
+          매도보다 다음 납입으로 채우는 쪽이 세금과 수수료를 아낍니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
   <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 장중 가격이 <b>하단×1.02</b> 터치 즉시 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~6%(여지 4% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
@@ -1022,7 +1219,7 @@ document.getElementById("btn-hold").addEventListener("click",async()=>{
 async function jget(p){const r=await fetch(p+"?t="+Date.now()); if(!r.ok) throw new Error(r.status); return r.json();}
 function setTab(t){
   const changed = (t!==CURRENT_TAB);
-  ["live","valid","rules"].forEach(x=>{
+  ["live","valid","rules","pen"].forEach(x=>{
     document.getElementById("view-"+x).hidden = t!==x;
     const b=document.getElementById("tb-"+x);
     b.classList.toggle("on",t===x);
@@ -1032,6 +1229,7 @@ function setTab(t){
   if(changed) window.scrollTo(0,0);
   if(t==="valid") initValid();
   else if(t==="rules") initRules();
+  else if(t==="pen" && window.penInit) window.penInit();
 }
 document.querySelectorAll(".tab").forEach(b=>
   b.addEventListener("click",()=>setTab(b.dataset.t)));
@@ -1049,7 +1247,7 @@ document.querySelectorAll(".tab").forEach(b=>
     x0=null;
     if(Math.abs(dx)<70||Math.abs(dy)>45) return;
     if(e.target.closest(".tablewrap,select,input,button")) return;
-    const order=["live","valid","rules"];
+    const order=["live","valid","rules","pen"];
     const j=order.indexOf(CURRENT_TAB)+(dx<0?1:-1);
     if(j>=0&&j<order.length) setTab(order[j]);
   },{passive:true});
@@ -1198,6 +1396,216 @@ function renderHist(){
       <td>${r.score}점</td><td>${fmt(r.price)}</td><td>${rk}</td><td>${ch}</td></tr>`;}).join("");
   updateScrollHints();
 }
+/* ══════════ 연금 탭 ══════════ */
+(function(){
+const KEY="pen_v1";
+const CLS=["해외지수","국내지수","테마","채권","현금"];
+const ACCTS=["연금저축","IRP","ISA","일반"];
+const DEF_T={"해외지수":45,"국내지수":20,"테마":25,"채권":10,"현금":0};
+const SAMPLE=[
+ {acct:"연금저축",c:"해외지수",n:"TIGER 미국S&P500",amt:8000000},
+ {acct:"연금저축",c:"해외지수",n:"TIGER 미국나스닥100",amt:2000000},
+ {acct:"연금저축",c:"테마",n:"중국 AI 테마",amt:2000000},
+ {acct:"IRP",c:"채권",n:"KODEX 국고채10년",amt:3000000},
+ {acct:"IRP",c:"해외지수",n:"TIGER 미국S&P500",amt:7000000},
+ {acct:"ISA",c:"테마",n:"양자컴퓨팅",amt:3600000},
+ {acct:"ISA",c:"테마",n:"미래기술",amt:3600000},
+ {acct:"ISA",c:"채권",n:"CD금리",amt:1800000}
+];
+let P=loadP();
+function loadP(){
+  try{
+    const o=JSON.parse(localStorage.getItem(KEY));
+    if(o&&Array.isArray(o.h)){
+      const t=Object.assign({},DEF_T);
+      if(o.t) CLS.forEach(k=>{ if(typeof o.t[k]==="number") t[k]=o.t[k]; });
+      return {h:o.h.filter(r=>r&&ACCTS.includes(r.acct)&&CLS.includes(r.c)&&isFinite(r.amt)), t:t};
+    }
+  }catch(e){}
+  return {h:[], t:Object.assign({},DEF_T)};
+}
+function saveP(){ try{ localStorage.setItem(KEY,JSON.stringify(P)); }catch(e){} }
+const f=n=>Math.round(n).toLocaleString("ko-KR");
+const f1=n=>(Math.round(n*10)/10).toFixed(1);
+
+function penSetSub(p){
+  ["strategy","hold","balance"].forEach(x=>{
+    const el=document.getElementById("pen-"+x); if(el) el.hidden = x!==p;
+  });
+  document.querySelectorAll(".psubb").forEach(b=>{
+    const on=b.dataset.p===p;
+    b.classList.toggle("on",on); b.setAttribute("aria-selected",on?"true":"false");
+  });
+  if(p==="hold") renderHold();
+  if(p==="balance") renderBal();
+  window.scrollTo(0,0);
+}
+function agg(){
+  const t={}, a={}; CLS.forEach(k=>t[k]=0); ACCTS.forEach(k=>a[k]=0);
+  P.h.forEach(r=>{ t[r.c]+=r.amt; a[r.acct]+=r.amt; });
+  const sum=CLS.reduce((s,k)=>s+t[k],0);
+  return {t,a,sum};
+}
+function checks(){
+  const {t,a,sum}=agg(); const out=[];
+  if(!sum) return out;
+  const risk=(a["IRP"]>0)?(P.h.filter(r=>r.acct==="IRP"&&r.c!=="채권"&&r.c!=="현금").reduce((s,r)=>s+r.amt,0)/a["IRP"]*100):null;
+  if(risk!=null) out.push({ok:risk<=70.01,warn:risk>65,
+    t:`IRP 위험자산 ${f1(risk)}% (한도 70%)`, d:"위험자산 70%를 넘으면 추가 매수만 중단하세요."});
+  const th=t["테마"]/sum*100;
+  out.push({ok:th<=30.01,warn:th>25,t:`테마 합산 ${f1(th)}% (권장 30% 이하)`,
+    d:"테마 80%는 실측 수익 9.4%, 낙폭 -49.2%였습니다. 지수만 둔 것보다 나빴습니다."});
+  const single={};
+  P.h.filter(r=>r.c==="테마").forEach(r=>single[r.n]=(single[r.n]||0)+r.amt);
+  const worst=Object.entries(single).sort((x,y)=>y[1]-x[1])[0];
+  if(worst) out.push({ok:worst[1]/sum*100<=10.01,warn:worst[1]/sum*100>8,
+    t:`최대 단일 테마 ${worst[0]} ${f1(worst[1]/sum*100)}% (권장 10% 이하)`,
+    d:"한 테마가 10%를 넘으면 그 테마의 사이클이 전체를 흔듭니다."});
+  if(a["IRP"]>0){
+    const safe=(t["채권"]+t["현금"]); // 전체 기준이 아니라 IRP 안에서 계산해야 정확
+    const irpSafe=P.h.filter(r=>r.acct==="IRP"&&(r.c==="채권"||r.c==="현금")).reduce((s,r)=>s+r.amt,0);
+    const pct=irpSafe/a["IRP"]*100;
+    out.push({ok:pct>=29.99,warn:pct<30,t:`IRP 안전자산 ${f1(pct)}% (권장 30%)`,
+      d:"IRP는 위험자산 70% 한도라 안전자산 30%가 강제됩니다. 이 구간이 하락 시 완충 역할을 합니다."});
+  }
+  return out;
+}
+function checksHTML(){
+  const c=checks();
+  if(!c.length) return "";
+  return c.map(x=>`<div class="pcard ${x.ok?"good":"warn"}" style="margin:6px 0">
+    <div style="font-size:12.5px"><span class="pbadge ${x.ok?"ok":"warn"}">${x.ok?"통과":"점검"}</span>
+    <b style="margin-left:6px">${x.t}</b></div>
+    <div class="pmuted" style="margin-top:3px">${x.d}</div></div>`).join("");
+}
+function renderHold(){
+  const {t,a,sum}=agg();
+  const sm=document.getElementById("ph-summary");
+  if(sm){
+    sm.innerHTML = `<div class="chip">총 <b>${f(sum)}</b>원</div>`
+      + ACCTS.filter(k=>a[k]>0).map(k=>`<div class="chip">${k} <b>${f(a[k])}</b>원
+        <span class="sub">${f1(a[k]/sum*100)}%</span></div>`).join("")
+      + CLS.filter(k=>t[k]>0).map(k=>`<div class="chip">${k} <b class="${k==="테마"&&t[k]/sum>0.3?"dn":""}">${f1(t[k]/sum*100)}%</b>
+        <span class="sub">${f(t[k])}원</span></div>`).join("");
+  }
+  const tb=document.getElementById("ph-rows");
+  if(tb){
+    if(!P.h.length){
+      tb.innerHTML='<tr><td colspan="6" class="pempty">아직 입력한 보유분이 없습니다.</td></tr>';
+    }else{
+      const ord=r=>ACCTS.indexOf(r.acct);
+      tb.innerHTML=P.h.map((r,i)=>({r,i}))
+        .sort((x,y)=>ord(x.r)-ord(y.r)||y.r.amt-x.r.amt)
+        .map(({r,i})=>`<tr><td>${r.acct}</td><td>${r.c}</td><td class="nm">${esc(r.n)}</td>
+          <td>${f(r.amt)}</td><td>${sum?f1(r.amt/sum*100):"0.0"}%</td>
+          <td><button class="tblbtn" data-del="${i}" type="button" aria-label="삭제">✕</button></td></tr>`).join("");
+    }
+  }
+  const ck=document.getElementById("ph-check"); if(ck) ck.innerHTML=checksHTML();
+  const ck2=document.getElementById("pb-checks"); if(ck2) ck2.innerHTML=checksHTML();
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function renderBal(){
+  CLS.forEach(k=>{
+    const el=document.getElementById("pt-"+k);
+    if(el && document.activeElement!==el) el.value=P.t[k];
+  });
+  const sumT=CLS.reduce((s,k)=>s+P.t[k],0);
+  const se=document.getElementById("pt-sum");
+  if(se) se.value=sumT+"%";
+  const {t,sum}=agg();
+  const bars=document.getElementById("pb-bars");
+  const acts=document.getElementById("pb-actions");
+  if(!sum){
+    if(bars) bars.innerHTML='<div class="pempty">보유분을 먼저 입력하세요. 보유분 탭에서 계좌, 구분, 금액을 넣으면 여기에 표시됩니다.</div>';
+    if(acts) acts.innerHTML='<div class="pempty">보유분을 입력하면 매수와 매도 금액이 계산됩니다.</div>';
+    return;
+  }
+  if(bars){
+    bars.innerHTML=`<div class="pcard">`+CLS.map(k=>{
+      const cur=t[k]/sum*100, tg=P.t[k];
+      return `<div class="prow2"><span>${k}</span>
+        <div style="position:relative">
+          <div class="pbar"><i class="${cur>tg+5?"over":""}" style="width:${Math.min(cur,100)}%"></i></div>
+          <span style="position:absolute;left:${Math.min(tg,100)}%;top:-2px;width:2px;height:13px;background:#fff;opacity:.85"></span>
+        </div>
+        <span class="vv">${f1(cur)}% / ${tg}%</span></div>`;
+    }).join("")+`<div class="pmuted" style="margin-top:6px">막대는 현재, 흰 선은 목표입니다. 막대가 흰 선보다 길면 초과, 짧으면 부족입니다.</div></div>`;
+  }
+  const rows=CLS.map(k=>{
+    const cur=t[k], tgt=sum*P.t[k]/100, diff=tgt-cur;
+    return {k,cur,tgt,diff,pct:cur/sum*100};
+  });
+  if(acts){
+    const minAmt=Math.max(10000,sum*0.003);
+    const todo=rows.filter(r=>Math.abs(r.diff)>=minAmt).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
+    let h=`<table class="ptbl"><thead><tr><th>구분</th><th>현재</th><th>목표</th><th>차이</th></tr></thead><tbody>`
+      + rows.map(r=>`<tr><td>${r.k}</td><td>${f1(r.pct)}%</td><td>${P.t[r.k]}%</td>
+        <td class="${r.diff>0?"up":"dn"}">${r.diff>0?"+":""}${f(r.diff)}원</td></tr>`).join("")
+      + `</tbody></table>`;
+    if(!todo.length){
+      h+=`<div class="pcard good" style="margin-top:8px"><b>지금은 조정이 필요 없습니다.</b>
+        <div class="pmuted">모든 구분이 목표에서 ${f1(minAmt)}원 이내입니다.</div></div>`;
+    }else{
+      h+=`<div class="pcard" style="margin-top:8px"><h3>실행 목록</h3>`+todo.map(r=>
+        `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px">
+          <span>${r.k}</span>
+          <span class="${r.diff>0?"up":"dn"}"><b>${r.diff>0?"매수":"매도"} ${f(Math.abs(r.diff))}원</b></span></div>`).join("")
+        +`<div class="pmuted" style="margin-top:6px">매도가 있으면 매도부터 하고, 매수는 그 대금으로 채우세요. 새 돈을 넣지 않아도 됩니다.</div></div>`;
+    }
+    acts.innerHTML=h;
+  }
+  const ck=document.getElementById("pb-checks"); if(ck) ck.innerHTML=checksHTML();
+}
+function addHolding(){
+  const acct=document.getElementById("ph-acct").value;
+  const c=document.getElementById("ph-cls").value;
+  const nmEl=document.getElementById("ph-name");
+  const amEl=document.getElementById("ph-amt");
+  const n=(nmEl.value||"").trim()||"(이름 없음)";
+  const amt=Math.round(Number(amEl.value));
+  if(!isFinite(amt)||amt<=0){ amEl.focus(); amEl.style.borderColor="var(--red)"; return; }
+  amEl.style.borderColor="";
+  P.h.push({acct,c,n,amt}); saveP();
+  nmEl.value=""; amEl.value=""; nmEl.focus();
+  renderHold(); renderBal();
+}
+document.querySelectorAll(".psubb").forEach(b=>b.addEventListener("click",()=>penSetSub(b.dataset.p)));
+document.getElementById("ph-add").addEventListener("click",addHolding);
+["ph-name","ph-amt"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addHolding(); } });
+});
+document.getElementById("ph-rows").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-del]"); if(!b) return;
+  P.h.splice(Number(b.dataset.del),1); saveP(); renderHold(); renderBal();
+});
+document.getElementById("ph-sample").addEventListener("click",()=>{
+  if(P.h.length && !confirm("현재 목록을 예시로 바꿀까요?")) return;
+  P.h=SAMPLE.map(x=>({...x})); saveP(); renderHold(); renderBal();
+});
+document.getElementById("ph-clear").addEventListener("click",()=>{
+  if(!P.h.length) return;
+  if(!confirm("보유분을 모두 지울까요?")) return;
+  P.h=[]; saveP(); renderHold(); renderBal();
+});
+document.querySelectorAll("#pt-form input[data-k]").forEach(el=>{
+  el.addEventListener("input",()=>{
+    const v=Number(el.value);
+    P.t[el.dataset.k]=isFinite(v)?Math.max(0,Math.min(100,v)):0;
+    saveP();
+    const se=document.getElementById("pt-sum");
+    if(se) se.value=CLS.reduce((s,k)=>s+P.t[k],0)+"%";
+    renderBal();
+  });
+});
+window.penInit=function(){
+  renderHold(); renderBal();
+  const first=document.querySelector(".psubb.on");
+  if(first) penSetSub(first.dataset.p);
+};
+})();
 </script>
 </body>
 </html>
