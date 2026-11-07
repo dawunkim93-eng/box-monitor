@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>📦 박스권 모니터</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%A6%3C/text%3E%3C/svg%3E">
-<meta name="description" content="국내 주식 박스권(주봉 13주 종가 밴드) 관찰 대시보드 — 사다리 5차·갭 2.5% 관찰용">
+<meta name="description" content="국내 주식 박스권(주봉 13주 종가 밴드) 관찰 대시보드 — 사다리 5차·갭 2% 관찰용">
 <style>
   :root{
     --bg:#0f1115; --card:#171a21; --line:#262b35; --txt:#e6e8ee; --dim:#8b93a3;
@@ -247,7 +247,7 @@
       <select id="snap-date" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px"></select>
     </div>
     <table id="snap-tbl"><thead><tr><th>순위</th><th class="nm">종목</th><th>점수</th><th>가격</th><th>순위변동</th><th>가격변동</th></tr></thead><tbody><tr><td colspan="6">로딩 중…</td></tr></tbody></table>
-    <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 100,000원/차수 · 그리드 사다리(±2.5% 되팔기) · 당일 다중 왕복 근사 · 순위 추적은 2026-10-24부터 축적</div>
+    <div class="stamp" id="v-note">과거 관리종목 식별 불가 — 무결성(±60%)·유동성 필터만 적용(참고용) · 100,000원/차수 · 그리드 사다리(±2% 되팔기) · 당일 다중 왕복 근사 · 순위 추적은 2026-10-24부터 축적</div>
   </div>
   <div id="view-rules" hidden role="tabpanel" aria-labelledby="tb-rules">
     <h2 class="sec">📘 실전 전략 — 박스권 그리드</h2>
@@ -257,7 +257,7 @@
         <ol class="quick">
           <li><b>무엇을</b> · 주봉 13주 종가 밴드 · 폭 ≤30% · 드리프트 ±15% · 거래대금 10억+</li>
           <li><b>언제 사나</b> · 밴드 하위 절반 + <b>경계 +6% 위</b> + 전일 음봉·아래꼬리 1% → 다음날 <b>시가</b></li>
-          <li><b>얼마나</b> · 10만/차 × 5차(최심 −9.6%) = 슬롯 50만 · 최대 <b>7슬롯</b>(350만, 무료 한도)</li>
+          <li><b>얼마나</b> · 10만/차 × 5차(최심 −7.8%) = 슬롯 50만 · 최대 <b>7슬롯</b>(350만, 무료 한도)</li>
           <li><b>어떤 순서로</b> · 자리가 없으면 <b>점수 높은 순</b>. 점수는 합격선이 아님 — 그날 최고가 3점이면 매수, 1~2점뿐이면 쉼</li>
           <li><b>언제 파나</b> · 장중 경계×1.02 터치 <b>즉시</b>(진입일 포함) · 다 팔리면 슬롯 종료(재그리드 없음)</li>
           <li><b>언제 쉬나</b> · 지수 −3% 마감 다음 1거래일 · 후보 없으면 현금 · 슬롯이 비면 다음날 시가부터</li>
@@ -308,8 +308,8 @@
       <h2 class="sec">그리드</h2>
       <div class="rulebox">
         <ul>
-          <li>진입가 앵커 · <b>2.5% 간격 5차수</b> (최심 −9.6%, 하단 약 12.5% 커버) — 15차는 박스 폭 밖</li>
-          <li>각 차수 도달 시 매수 · <b>+2.5%</b> 매도 · 같은 차수 재매수</li>
+          <li>진입가 앵커 · <b>2.0% 간격 5차수</b> (최심 −7.8%, 하단 약 10% 커버) — 15차는 박스 폭 밖</li>
+          <li>각 차수 도달 시 매수 · <b>+2.0%</b> 매도 · 같은 차수 재매수</li>
           <li>전량 매도 후 슬롯 유지 → 매수존 복귀 시 재그리드</li>
         </ul>
       </div>

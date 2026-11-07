@@ -48,7 +48,7 @@ MASTER = PIT / "master.pkl"
 
 UNIT, FEE = 100_000, 0.002
 K = 7                  # 동시 보유 슬롯 (무료 매직스플릿 7슬롯)
-GAP = 0.025            # 기본 갭 (gap-mode=fixed)
+GAP = 0.02             # 기본 갭 (gap-mode=fixed) — 2026-11 매수·매도 2.0% 채택
 GAP_MODE = "fixed"     # fixed | atr (atr: gap_i = clip(k × ATR14_i, min, max))
 ATR_K = 0.8            # atr 갭 계수
 GAP_MIN, GAP_MAX = 0.015, 0.050   # atr 갭 하한/상한
@@ -60,9 +60,17 @@ MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 경계×1.0
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
+MIN_WIDTH = 0.0        # 박스 폭 하한 (%) — 0=비활성
+ATR_LO = 0.0           # ATR 하한 (%) — 0=비활성
+ATR_HI = 99.0          # ATR 상한 (%) — 99=비활성
+SLIP = 0.0             # 슬리피지 (한쪽, 비율) — 진입 매수 +, 강제청산 매도 -
+MIN_AMT = 0.0          # 진입 시 20일 평균 거래대금 하한 (통화) — 0=비활성
+SLIP_MODE = "const"    # const | amt (거래대금 구간별 슬리피지)
+SLIP_TIERS = [(1e8, 0.0003), (2e7, 0.0010), (5e6, 0.0025), (0.0, 0.0050)]
+SELL_GAP = None        # 매도 간격 (비율) — None=매수 갭과 동일. 예: 0.0175
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
-COVER = 0.125          # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -9.6%)
+COVER = 0.10           # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -7.8%)
                        # 15차(-30%)는 박스 폭(22~30%) 밖: 5차 대비 순익 +6% · MDD +77% (2026-11-06 실측)
 POOL = "w"             # 박스 풀: w=주봉박스만(현행) · wa=주봉+상승저점 · a=상승저점만
 MAX_TRIPS = 5          # 당일 다중 왕복 상한 (sameday=multi — 같은 차수 재왕복 최대 횟수)
@@ -331,6 +339,9 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
 
     def close_position(done, holdings, curve, i, px, why, day):
         hst = holdings.pop(i)
+        sp = hst.get("slip", SLIP)
+        if sp:
+            px = px * (1 - sp)
         for k in range(len(hst["held"])):
             if hst["held"][k]:
                 hst["net"] += (px - hst["levels"][k]) / hst["levels"][k] * UNIT
@@ -428,7 +439,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             for k in range(len(held)):
                 if not held[k]:
                     continue
-                tgt = levels[k] * (1 + g_i)
+                sg_ = SELL_GAP if SELL_GAP else g_i
+                tgt = levels[k] * (1 + sg_)
                 if float(s["h"][j]) < tgt:
                     continue
                 if (k in bought) and sameday not in ("all", "multi"):
@@ -436,7 +448,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                         continue
                     if sameday == "close" and px < tgt:
                         continue
-                hst["net"] += g_i * UNIT - FEE * UNIT
+                hst["net"] += sg_ * UNIT - FEE * UNIT
                 held[k] = False
                 hst["cycles"] += 1
                 if k == 0 and hst["grid_n"] == 1:
@@ -445,10 +457,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 # (저가 매수→고가 매도→재매수→재매도 경로 가정 · 분봉 다중 체결 근사)
                 if sameday == "multi":
                     rng_d = float(s["h"][j]) - float(s["l"][j])
-                    extra = int(rng_d // (2 * levels[k] * g_i))
+                    extra = int(rng_d // (2 * levels[k] * sg_))
                     extra = min(max(extra, 0), MAX_TRIPS)
                     if extra:
-                        hst["net"] += extra * (g_i * UNIT - FEE * UNIT)
+                        hst["net"] += extra * (sg_ * UNIT - FEE * UNIT)
                         hst["cycles"] += extra
             if not any(held):      # 재눌림 → 재그리드/회전 (타입별 매수존 복귀)
                 if ROTATE in ("flat_first", "flat_first_excl") and hst.get("escape0"):
@@ -521,11 +533,27 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                             else float(s["o"][je]))
                 if not (px_e > 0):
                     continue
+                sl = SLIP
+                if SLIP_MODE == "amt":
+                    _a = float(s["amt20"][j])
+                    sl = next((v for th, v in SLIP_TIERS if _a >= th), SLIP_TIERS[-1][1])
+                if sl:
+                    px_e = px_e * (1 + sl)
                 if MIN_SCORE and -nsc < MIN_SCORE:
+                    continue
+                if MIN_AMT and float(s["amt20"][j]) < MIN_AMT:
                     continue
                 if MIN_ROOM > 0 and knd == "wbox":
                     _w0 = float(s["wlo"][je])
                     if _w0 > 0 and (px_e / (_w0 * 1.02) - 1) * 100 < MIN_ROOM:
+                        continue
+                if MIN_WIDTH or ATR_LO or ATR_HI < 99:
+                    _atr = float(s["atr"][j]) if not np.isnan(s["atr"][j]) else 0.0
+                    if ATR_LO and _atr * 100 < ATR_LO:
+                        continue
+                    if ATR_HI < 99 and _atr * 100 > ATR_HI:
+                        continue
+                    if MIN_WIDTH and knd == "wbox" and float(s["wwidth"][je]) * 100 < MIN_WIDTH:
                         continue
                 # 포지션별 갭 — ATR 모드: 신호일 ATR 기준(진입일 종가 미사용 = 룩어헤드 없음)
                 if GAP_MODE == "atr":
@@ -591,6 +619,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "levels": [px_e * (1 - gi) ** k
                                           for k in range(ng)],
                                "held": [False] * ng,
+                               "slip": sl,
                                "grid_n": 1, "escape0": False, "loss0": False,
                                "cycles": 0, "net": 0.0}
                 holdings[i]["held"][0] = True
@@ -779,6 +808,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
+    global MIN_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -813,6 +843,16 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--min-width", type=float, default=MIN_WIDTH,
+                    help="박스 폭 하한(%%) — 예: 24")
+    ap.add_argument("--atr-lo", type=float, default=ATR_LO, help="ATR 하한(%%)")
+    ap.add_argument("--atr-hi", type=float, default=ATR_HI, help="ATR 상한(%%)")
+    ap.add_argument("--slip", type=float, default=SLIP,
+                    help="슬리피지(한쪽, %%%) — 예: 0.3")
+    ap.add_argument("--min-amt", type=float, default=MIN_AMT,
+                    help="진입 시 20일 평균 거래대금 하한 (통화)")
+    ap.add_argument("--sell-gap", type=float, default=0.0,
+                    help="매도 간격(%%) — 0이면 매수 갭과 동일")
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
@@ -860,6 +900,12 @@ def main():
     ADAPT_RUNGS = args.adapt_rungs
     MIN_SCORE = args.min_score
     K = args.slots
+    MIN_WIDTH = args.min_width
+    ATR_LO = args.atr_lo
+    ATR_HI = args.atr_hi
+    SLIP = args.slip / 100.0
+    MIN_AMT = args.min_amt
+    SELL_GAP = (args.sell_gap / 100.0) if args.sell_gap else None
     if args.mkt_csv and args.cool > 0:
         _m = pd.read_csv(args.mkt_csv, parse_dates=["Date"]).set_index("Date")
         _dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
