@@ -487,6 +487,8 @@
   </div>
   <div id="view-pen" hidden role="tabpanel" aria-labelledby="sv-pen">
     <div id="pen-strategy">
+      <h2 class="sec">🌅 오늘의 브리핑</h2>
+      <div class="pcard" id="pen-brief"><div class="pmuted">브리핑 불러오는 중…</div></div>
       <h2 class="sec">🏦 연금 3계좌 전략</h2>
       <div class="pcard" id="pen-sched"></div>
       <div class="pcard">
@@ -651,6 +653,9 @@
 
       <h2 class="sec">계좌별 현황</h2>
       <div id="pb-accts"><div class="pempty">보유분을 먼저 입력하세요.</div></div>
+
+      <h2 class="sec">보유 진단</h2>
+      <div id="pb-diag"><div class="pempty">보유분을 먼저 입력하세요.</div></div>
 
       <h2 class="sec">점검</h2>
       <div id="pb-checks"></div>
@@ -1619,6 +1624,97 @@ function renderSched(){
         <span style="white-space:nowrap;text-align:right" class="${r.days<0?"dn":(r.days<=30?"warn":"sub")}">${r.d}<br>${r.days<0?"<b>확인 필요</b>":"D-"+r.days}</span>
       </div>`).join("");
 }
+let BRIEF=null;
+async function loadBrief(){
+  try{
+    const r=await fetch("data/pen_brief.json?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    BRIEF=await r.json();
+  }catch(e){ BRIEF=null; }
+  renderBrief();
+}
+function renderBrief(){
+  const el=document.getElementById("pen-brief"); if(!el) return;
+  if(!BRIEF){ el.innerHTML='<div class="pmuted">브리핑 파일을 불러오지 못했습니다. 평일 07:40에 갱신됩니다.</div>'; return; }
+  const t=BRIEF.text||{};
+  const chips=(BRIEF.market||[]).filter(x=>!x.err).map(x=>{
+    const d=x.d1, cls=d==null?"sub":(d>=0?"up":"dn");
+    return `<div class="chip">${x.k} <b>${Number(x.v).toLocaleString("ko-KR")}</b>
+      <span class="${cls}">${d==null?"-":(d>=0?"+":"")+Number(d).toFixed(2)+"%"}</span></div>`;
+  }).join("");
+  el.innerHTML=`<h3>${BRIEF.date} 시장 <span class="sub" style="font-weight:400">${BRIEF.asof} 갱신 · 자동 생성</span></h3>
+    <div class="stats" style="margin:6px 0 8px">${chips}</div>
+    ${t.domestic?`<div style="font-size:12.5px;margin:6px 0"><b>국내</b> ${esc(t.domestic)}</div>`:""}
+    ${t.global?`<div style="font-size:12.5px;margin:6px 0"><b>해외</b> ${esc(t.global)}</div>`:""}
+    ${(t.points&&t.points.length)?`<div class="pmuted" style="margin-top:6px"><b style="color:var(--txt)">확인할 것</b><ul style="margin:3px 0 0;padding-left:16px">${t.points.map(p=>"<li>"+esc(p)+"</li>").join("")}</ul></div>`:""}
+    ${t.caution?`<div class="pcard warn" style="margin-top:8px;font-size:12px">${esc(t.caution)}</div>`:""}
+    ${BRIEF.error?`<div class="pmuted" style="margin-top:6px;color:var(--amber)">요약 생성 오류: ${esc(BRIEF.error)}</div>`:""}`;
+}
+function devOf(a,g){
+  const rule=RULES[a]||[]; if(!rule.length||!g.a[a]) return null;
+  let worst=null, base=g.a[a], amt={};
+  CLS.forEach(k=>amt[k]=0);
+  P.h.filter(r=>r.acct===a).forEach(r=>{ amt[r.cls]+=amtOf(r); });
+  rule.forEach(x=>{
+    const cur=x.cls.reduce((s,k)=>s+amt[k],0);
+    const d=cur/base*100-x.t;
+    if(!worst||Math.abs(d)>Math.abs(worst.d)) worst={"label":x.k,"d":d,"won":base*(-d)/100};
+  });
+  return worst;
+}
+function renderDiag(g){
+  const el=document.getElementById("pb-diag"); if(!el) return;
+  if(!g.sum){ el.innerHTML='<div class="pempty">보유분을 먼저 입력하세요.</div>'; return; }
+  const pl=g.sum-g.cost, plr=g.cost?pl/g.cost*100:0;
+  const th=g.t["테마"]/g.sum*100;
+  const top=P.h.slice().sort((a,b)=>amtOf(b)-amtOf(a))[0];
+  const li=[];
+  li.push(`총 평가 ${f(g.sum)}원, 투입 ${f(g.cost)}원, 손익 ${pl>=0?"+":""}${f(pl)}원(${plr>=0?"+":""}${plr.toFixed(1)}%).`);
+  li.push(th>30?`테마 비중이 ${f1(th)}%로 권장 30%를 넘습니다. 오른 테마부터 덜어내는 순서가 맞습니다.`
+               :`테마 비중 ${f1(th)}%로 권장 범위 안입니다.`);
+  if(top) li.push(`가장 큰 종목은 ${esc(top.n)} ${f1(amtOf(top)/g.sum*100)}%입니다.`);
+  ACCTS.forEach(a=>{
+    const d=devOf(a,g);
+    if(d&&Math.abs(d.d)>5) li.push(`${a}에서 ${d.label} 비중이 목표보다 ${f1(Math.abs(d.d))}%포인트 ${d.d>0?"많습니다":"적습니다"}. ${d.d>0?"매도":"매수"} ${f(Math.abs(d.won))}원 규모입니다.`);
+  });
+  if(BRIEF&&BRIEF.market){
+    const k=BRIEF.market.find(x=>x.k==="코스피");
+    if(k&&k.d1!=null) li.push(`오늘 코스피는 ${k.d1>=0?"+":""}${Number(k.d1).toFixed(2)}%, 20일 기준 ${k.d20>=0?"+":""}${Number(k.d20).toFixed(2)}%입니다. 급한 매매보다 계획된 날짜에 맞추는 편이 낫습니다.`);
+  }
+  el.innerHTML=`<div class="pcard"><ul style="margin:0;padding-left:16px;font-size:12.5px;line-height:1.6">${li.map(x=>"<li>"+x+"</li>").join("")}</ul>
+    <div class="pbtnrow" style="margin-top:8px"><button class="pbtn ghost" id="pb-ask" type="button">에이전트에게 진단 요청</button></div>
+    <div class="pmuted" style="margin-top:4px">버튼을 누르면 보유분과 시장 요약이 담긴 질문이 복사됩니다. 채팅에 붙여넣으면 이 에이전트가 이어서 답합니다.</div></div>`;
+  const btn=document.getElementById("pb-ask");
+  if(btn) btn.addEventListener("click",()=>copyAsk(g));
+}
+function copyAsk(g){
+  const rows=P.h.map(r=>{
+    const pr=px(r.code);
+    return `- ${r.acct} ${r.cls} ${r.n} ${qtxt(r.q)}주, 평단 ${f(r.p)}, 현재 ${pr!=null?f(pr):"없음"}, 평가 ${f(amtOf(r))}`;
+  }).join("\n");
+  const mk=(BRIEF&&BRIEF.market||[]).filter(x=>!x.err)
+    .map(x=>`${x.k} ${x.v} (1일 ${x.d1}%, 5일 ${x.d5}%, 20일 ${x.d20}%)`).join("\n");
+  const txt=`연금 계좌 진단을 부탁해.
+
+[보유]
+${rows}
+
+[시장]
+${mk||"브리핑 없음"}
+
+[전략]
+코어 70, 테마 30 이내, IRP 위험자산 70 한도, 리밸런싱 연 1회, 5%포인트 이탈 시 조정.
+
+[요청]
+1) 지금 조정이 필요한지
+2) 매도와 매수 금액
+3) 세금과 계좌 규칙에서 주의할 점
+담백하게, 숫자 중심으로.`;
+  const done=()=>{ const b=document.getElementById("pb-ask"); if(b){ b.textContent="복사됨 ✓"; setTimeout(()=>{ b.textContent="에이전트에게 진단 요청"; },1500); } };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>{ prompt("복사할 내용", txt); });
+  }else{ prompt("복사할 내용", txt); }
+}
 async function loadPrices(force){
   if(!force && PMETA && Date.now()-PAT<5*60*1000) return;
   try{
@@ -1736,6 +1832,7 @@ function renderBal(){
   if(se) se.value=CLS.reduce((s,k)=>s+P.t[k],0)+"%";
   const g=agg(), sum=g.sum;
   renderAcc(g);
+  renderDiag(g);
   const bars=document.getElementById("pb-bars"), acts=document.getElementById("pb-actions");
   if(!sum){
     if(bars) bars.innerHTML='<div class="pempty">보유분을 먼저 입력하세요. 보유분 탭에서 계좌, 구분, 수량, 평균단가를 넣으면 여기에 표시됩니다.</div>';
@@ -1936,6 +2033,7 @@ document.querySelectorAll("#pt-form input[data-k]").forEach(el=>{
 window.penSetSub=penSetSub;
 window.penInit=function(){
   renderSched();
+  loadBrief().then(()=>{ renderBal(); });
   loadPrices(false).then(()=>{ renderHold(); renderBal(); });
   renderHold(); renderBal();
   const first=document.querySelector(".psubb.on");
