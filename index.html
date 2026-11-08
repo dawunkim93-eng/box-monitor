@@ -178,6 +178,7 @@
   .rules ol.quick li{margin:3px 0;font-size:12.5px}
   .rules-more summary{cursor:pointer;color:var(--blue);font-size:12.5px;margin:12px 0 2px}
   @media(max-width:640px){ .rules{max-width:100%;font-size:12px} .rulebox{padding:7px 9px} }
+  @media(max-width:360px){ #hsub{font-size:10.5px} }
   /* ── 연금 탭 ── */
   .psubb{appearance:none;background:transparent;border:0;color:var(--dim);border-radius:8px;
          padding:11px 6px;min-height:46px;font-size:14.5px;font-weight:700;letter-spacing:.02em;cursor:pointer}
@@ -260,7 +261,7 @@
   <div class="head">
     <div>
       <h1>📦 매매와 연금</h1>
-      <div class="sub" id="hsub">주봉박스 13주 종가 밴드, 2% 갭 5차, 7슬롯, 관찰 전용</div>
+      <div class="sub" id="hsub">주봉박스 2% 갭 5차, 7슬롯, 관찰 전용</div>
     </div>
     <div class="sub" id="stamp" aria-live="polite">로딩 중…</div>
   </div>
@@ -1345,8 +1346,8 @@ function syncSectionUI(){
   document.getElementById("pen-tabs").hidden=d;
   const hs=document.getElementById("hsub");
   if(hs) hs.textContent = d
-    ? "주봉박스 13주 종가 밴드, 2% 갭 5차, 7슬롯, 관찰 전용"
-    : "연금저축, IRP, ISA 세 계좌, 코어 70, 테마 30 이내, 세액공제 900만원";
+    ? "주봉박스 2% 갭 5차, 7슬롯, 관찰 전용"
+    : "연금 3계좌, 코어 70, 테마 30, 공제 900만원";
 }
 function showDaily(t){
   document.getElementById("view-pen").hidden=true;
