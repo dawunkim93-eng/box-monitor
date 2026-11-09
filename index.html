@@ -626,7 +626,7 @@
           <div><label for="ph-acct">계좌</label>
             <select id="ph-acct"><option>연금저축</option><option>IRP</option><option>ISA</option><option>일반</option></select></div>
           <div><label for="ph-cls">구분</label>
-            <select id="ph-cls"><option>해외지수</option><option>국내지수</option><option>테마</option><option>채권</option><option>현금</option></select></div>
+            <select id="ph-cls"><option>해외지수</option><option>국내지수</option><option>테마</option><option>원자재</option><option>채권</option><option>현금</option></select></div>
           <div class="full acwrap"><label for="ph-name">종목명 (ETF 자동완성)</label>
             <input id="ph-name" placeholder="예: TIGER 미국S&P500" autocomplete="off"
                    role="combobox" aria-expanded="false" aria-controls="ph-sug" aria-autocomplete="list">
@@ -675,6 +675,7 @@
           <div><label for="pt-해외지수">해외지수 %</label><input id="pt-해외지수" data-k="해외지수" type="number" min="0" max="100" step="1"></div>
           <div><label for="pt-국내지수">국내지수 %</label><input id="pt-국내지수" data-k="국내지수" type="number" min="0" max="100" step="1"></div>
           <div><label for="pt-테마">테마 %</label><input id="pt-테마" data-k="테마" type="number" min="0" max="100" step="1"></div>
+          <div><label for="pt-원자재">원자재 %</label><input id="pt-원자재" data-k="원자재" type="number" min="0" max="100" step="1"></div>
           <div><label for="pt-채권">채권 %</label><input id="pt-채권" data-k="채권" type="number" min="0" max="100" step="1"></div>
           <div><label for="pt-현금">현금 %</label><input id="pt-현금" data-k="현금" type="number" min="0" max="100" step="1"></div>
           <div><label>합계</label><input id="pt-sum" readonly></div>
@@ -1563,9 +1564,9 @@ function renderHist(){
 /* ══════════ 연금 탭 ══════════ */
 (function(){
 const KEY="pen_v2", OLDKEY="pen_v1";
-const CLS=["해외지수","국내지수","테마","채권","현금"];
+const CLS=["해외지수","국내지수","테마","원자재","채권","현금"];
 const ACCTS=["연금저축","IRP","ISA","일반"];
-const DEF_T={"해외지수":45,"국내지수":20,"테마":25,"채권":10,"현금":0};
+const DEF_T={"해외지수":45,"국내지수":20,"테마":25,"원자재":0,"채권":10,"현금":0};
 const BASE="2026-11-08";
 const SCHED=[
   {d:"2026-12-20",t:"국회 본회의 결과 확인",s:"청년 IRP 15%, 생산적금융 ISA, ISA 전환공제 한도"},
@@ -1838,9 +1839,9 @@ function renderHold(){
   const ck=document.getElementById("ph-check"); if(ck) ck.innerHTML=checksHTML();
 }
 const RULES={
-  "연금저축":[{"k":"코어","cls":["해외지수","국내지수"],"t":80},{"k":"테마","cls":["테마"],"t":20}],
-  "IRP":[{"k":"위험자산","cls":["해외지수","국내지수","테마"],"t":70},{"k":"안전자산","cls":["채권","현금"],"t":30}],
-  "ISA":[{"k":"코어","cls":["해외지수","국내지수"],"t":50},{"k":"테마","cls":["테마"],"t":30},{"k":"안전자산","cls":["채권","현금"],"t":20}]
+  "연금저축":[{"k":"코어","cls":["해외지수","국내지수"],"t":80},{"k":"위성","cls":["테마","원자재"],"t":20}],
+  "IRP":[{"k":"위험자산","cls":["해외지수","국내지수","테마","원자재"],"t":70},{"k":"안전자산","cls":["채권","현금"],"t":30}],
+  "ISA":[{"k":"코어","cls":["해외지수","국내지수"],"t":50},{"k":"위성","cls":["테마","원자재"],"t":30},{"k":"안전자산","cls":["채권","현금"],"t":20}]
 };
 function renderAcc(g){
   const el=document.getElementById("pb-accts"); if(!el) return;
@@ -1870,7 +1871,7 @@ function renderAcc(g){
       ${worst&&Math.abs(worst.diff)>5?`<div class="pmuted" style="margin-top:4px">계좌 안에서 <b>${worst.label}</b>
         ${worst.won>0?"매수":"매도"} ${f(Math.abs(worst.won))}원</div>`:""}
     </div>`;
-  }).join("")+`<div class="pmuted">계좌 규칙은 전략 탭 기준입니다. 연금저축 코어 80과 테마 20, IRP 위험 70과 안전 30, ISA 코어 50과 테마 30과 안전 20. ±5%포인트까지 허용합니다.</div>`;
+  }).join("")+`<div class="pmuted">계좌 규칙은 전략 탭 기준입니다. 연금저축 코어 80과 위성 20, IRP 위험 70과 안전 30, ISA 코어 50과 위성 30과 안전 20. 위성은 테마와 원자재를 합친 값입니다. ±5%포인트까지 허용합니다.</div>`;
 }
 function renderBal(){
   CLS.forEach(k=>{
@@ -1932,6 +1933,7 @@ function renderBal(){
   const ck=document.getElementById("pb-checks"); if(ck) ck.innerHTML=checksHTML();
 }
 function guessCls(n){
+  if(/금현물|골드|금선물|은선물|원유|구리|농산물|천연가스|원자재/.test(n)) return "원자재";
   if(/국고채|채권|CD금리|머니마켓|KOFR|단기|종합채권|국채|회사채|하이일드/.test(n)) return "채권";
   if(/전기차|2차전지|반도체|AI|로봇|방산|헬스|바이오|게임|엔터|화장품|여행|운송|은행|증권|보험|자동차|화학|철강|건설|태양광|수소|원자력|메타버스|클라우드|양자|우주|K-뉴딜|뉴딜/.test(n)) return "테마";
   if(/미국|S&P|나스닥|MSCI|선진|신흥|유로|일본|중국|인도|베트남|글로벌|전세계|차이나|항셍|니케이|독일|프랑스/.test(n)) return "해외지수";
