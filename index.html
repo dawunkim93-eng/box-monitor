@@ -306,7 +306,7 @@
     <button data-s="name">이름</button>
     <input id="q" aria-label="종목명 또는 코드 검색" placeholder="종목/코드 검색" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;width:150px">
     <select id="kindfilter" aria-label="박스 형태 필터" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:12px">
-      <option value="all">전체 형태</option><option value="wbox">주봉</option><option value="abox">상승</option>
+      <option value="all">전체 형태</option><option value="wbox">주봉</option>
     </select>
     <span class="sub" id="row-count"></span>
     <label style="margin-left:8px;font-size:12px;color:var(--dim)">
@@ -709,7 +709,7 @@
 
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) · <span class="btyp ba">상승</span>=상승저점(피벗 연속 상승)<br>청산 기준(13년 백테스트 최적): 장중 가격이 <b>하단×1.02</b> 터치 즉시 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~6%(여지 4% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(13주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 풀에서 제외<br>청산 기준(13년 백테스트 최적): 장중 가격이 <b>하단×1.02</b> 터치 즉시 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉·꼬리1%+ · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~6%(여지 4% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 7점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -945,6 +945,12 @@ function render(){
     pctlow:(x,y)=>(x.pct_low==null?999:x.pct_low)-(y.pct_low==null?999:y.pct_low),
     name:(x,y)=>x.name.localeCompare(y.name,"ko")};
   rows.sort(srt[SORT]||srt.prio);
+  const kfEl=$("#kindfilter");
+  if(kfEl){
+    const hasAbox=rows.some(r=>r.bkind==="abox");
+    kfEl.hidden=!hasAbox;
+    if(!hasAbox) kfEl.value="all";
+  }
   const q=$("#q").value.trim().toLowerCase(), kf=$("#kindfilter").value;
   const mainRows=rows.filter(r=>candonly?!!r.cand:true)
                    .filter(r=>kf==="all"||r.bkind===kf)
