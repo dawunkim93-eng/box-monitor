@@ -30,6 +30,7 @@
 """
 import argparse
 import json
+import os
 import subprocess
 import time as tmod
 from collections import Counter, defaultdict
@@ -71,6 +72,7 @@ SELL_GAP = None        # 매도 간격 (비율) — None=매수 갭과 동일. �
 SIZE_MULT = [0.6, 0.6, 0.9, 1.2, 1.8]  # 차수별 매수 배수(1차부터, 10만 기준) — 후방배분 1:1:1.5:2:3
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
+BAND_DAYS = int(os.environ.get("BAND_DAYS", "0"))  # >0이면 일봉 N일 밴드로 실험
 COVER = 0.10           # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -7.8%)
                        # 15차(-30%)는 박스 폭(22~30%) 밖: 5차 대비 순익 +6% · MDD +77% (2026-11-06 실측)
 POOL = "w"             # 박스 풀: w=주봉박스만(현행) · wa=주봉+상승저점 · a=상승저점만
@@ -166,6 +168,27 @@ def load_universe():
         wwidth = np.where(okw, wwidthw[np.clip(kk, 0, nw - 1)], 0.0)
         wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
                         (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
+        if BAND_DAYS > 0:
+            # 밴드를 주봉 13주 대신 일봉 N일 종가 밴드로 대체 (실험용)
+            N = BAND_DAYS
+            s_ = pd.Series(c)
+            rlo = s_.rolling(N).min().values
+            rhi = s_.rolling(N).max().values
+            ok = np.arange(len(c)) >= N - 1
+            wlo = np.where(ok, rlo, 0.0)
+            whi = np.where(ok, rhi, 0.0)
+            wwidth = np.where(ok, whi / np.maximum(wlo, 1e-9) - 1, 0.0)
+            base = np.where(ok, s_.shift(N - 1).values, c)
+            wdrift = np.where(ok, c / np.maximum(base, 1e-9) - 1, 0.0)
+            wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
+                            (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
+            okw = ok
+            wflag = ok & (wwidth <= 0.30) & (np.abs(wdrift) <= 0.15)
+            run_ = 0
+            wdur = np.zeros(len(c), dtype=np.int64)
+            for i_ in range(len(c)):
+                run_ = run_ + 1 if wflag[i_] else 0
+                wdur[i_] = run_
         okb = okw & (wwidth <= 0.30) & (np.abs(wdrift) <= 0.15)
         if WBREAK == "close":
             wvalid = wflag
@@ -828,6 +851,7 @@ def main():
     ap.add_argument("--gap-min", type=float, default=GAP_MIN)
     ap.add_argument("--gap-max", type=float, default=GAP_MAX)
     ap.add_argument("--rungs", type=int, default=0)
+    ap.add_argument("--band-days", type=int, default=BAND_DAYS)
     ap.add_argument("--near", type=float, default=2.0,
                     help="하단 경계 N%% 위 접근 시 조기 청산 (%%) · 0=이탈 완료 시만")
     ap.add_argument("--exit-mode", choices=["close", "intraday"], default=EXIT_MODE,
@@ -896,6 +920,7 @@ def main():
     ap.add_argument("--pool", choices=["w", "wa", "a"], default=POOL,
                     help="박스 풀 (w=주봉박스만(기본) · wa=주봉+상승저점 · a=상승저점만)")
     args = ap.parse_args()
+    globals()["BAND_DAYS"] = int(getattr(args, "band_days", 0) or 0)
     POOL = args.pool
     GAP_MODE = args.gap_mode
     ATR_K = args.atr_k
