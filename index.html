@@ -1759,7 +1759,7 @@ ${mk||"브리핑 없음"}
   }else{ prompt("복사할 내용", txt); }
 }
 async function loadPrices(force){
-  if(!force && PMETA && Date.now()-PAT<5*60*1000) return;
+  if(!force && PMETA && Date.now()-PAT<30*60*1000) return;
   try{
     const r=await fetch("data/pen_prices.json?t="+Date.now(),{cache:"no-store"});
     if(!r.ok) throw new Error("HTTP "+r.status);
@@ -1773,7 +1773,7 @@ function renderStamp(err){
   const el=document.getElementById("ph-pricestamp"); if(!el) return;
   if(err){ el.innerHTML='<span class="dn">가격 조회 실패: '+esc(err)+'</span>'; return; }
   if(!PMETA){ el.textContent="가격 불러오는 중…"; return; }
-  el.innerHTML="가격 "+PMETA.asof+" 기준 · ETF "+PMETA.count.toLocaleString()+"종목 · 10분마다 자동 갱신";
+  el.innerHTML="가격 "+PMETA.asof+" 기준 · ETF "+PMETA.count.toLocaleString()+"종목 · 장 마감 후 하루 1회 갱신";
 }
 function renderHold(){
   const g=agg(), sum=g.sum, cost=g.cost;
@@ -2086,7 +2086,7 @@ setInterval(()=>{
   if(typeof SECTION!=="undefined" && SECTION==="pen" && !document.hidden){
     loadPrices(true).then(()=>{ renderHold(); renderBal(); });
   }
-},300000);
+},1800000);
 })();
 /* ══════════ 복기 탭 ══════════ */
 (function(){
