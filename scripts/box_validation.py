@@ -70,6 +70,7 @@ SLIP_MODE = "const"    # const | amt (거래대금 구간별 슬리피지)
 SLIP_TIERS = [(1e8, 0.0003), (2e7, 0.0010), (5e6, 0.0025), (0.0, 0.0050)]
 SELL_GAP = None        # 매도 간격 (비율) — None=매수 갭과 동일. 예: 0.0175
 SIZE_MULT = [0.6, 0.6, 0.9, 1.2, 1.8]  # 차수별 매수 배수(1차부터, 10만 기준) — 후방배분 1:1:1.5:2:3
+SIZE_SCORE = []        # 점수별 슬롯 배수 (0~7점 순). 예: 0.5,0.5,0.5,0.75,0.75,1,1.25,1.5
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 BAND_DAYS = int(os.environ.get("BAND_DAYS", "0"))  # >0이면 일봉 N일 밴드로 실험
@@ -79,7 +80,7 @@ POOL = "w"             # 박스 풀: w=주봉박스만(현행) · wa=주봉+상�
 MAX_TRIPS = 5          # 당일 다중 왕복 상한 (sameday=multi — 같은 차수 재왕복 최대 횟수)
 ENTRY_MODE = "close"   # 진입 시점: close(신호일 종가) · next_open(다음날 시가) · next_close(다음날 종가)
 ENTRY_ZONE = False     # True면 진입 시점에도 매수존 조건 재확인
-CANDLE_MODE = "all"    # all | bear(음봉 신호만) | bear_tail(음봉+아래꼬리1%+)
+CANDLE_MODE = "bear"   # all | bear(음봉 신호만, 현행) | bear_tail(음봉+아래꼬리1%+)
 WBREAK = "close"       # 주봉박스 소멸 판정: close | confirm2(2연속) | buffer1(1% 버퍼)
 APOS = "far"           # A박스 위치 점수 방향: far(현행, 선에서 먼 쪽 가점) | near(가까운 쪽 가점)
 ROTATE = "flat_first_excl"  # 무료 앱: 1차탈출 후 슬롯 종료·당일 재진입 금지 | keep=유료(슬롯 유지+재그리드)
@@ -646,7 +647,9 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "levels": [px_e * (1 - gi) ** k
                                           for k in range(ng)],
                                "held": [False] * ng,
-                               "size": (SIZE_MULT + [SIZE_MULT[-1]] * 8)[:ng],
+                               "size": [x * (SIZE_SCORE[min(max(int(-nsc), 0), len(SIZE_SCORE) - 1)]
+                                             if SIZE_SCORE else 1.0)
+                                        for x in (SIZE_MULT + [SIZE_MULT[-1]] * 8)[:ng]],
                                "slip": sl,
                                "grid_n": 1, "escape0": False, "loss0": False,
                                "cycles": 0, "net": 0.0}
@@ -851,6 +854,8 @@ def main():
     ap.add_argument("--gap-min", type=float, default=GAP_MIN)
     ap.add_argument("--gap-max", type=float, default=GAP_MAX)
     ap.add_argument("--rungs", type=int, default=0)
+    ap.add_argument("--size-score", type=str, default="",
+                    help="점수별 슬롯 배수 0~7점 (쉼표 구분). 비우면 균등")
     ap.add_argument("--band-days", type=int, default=BAND_DAYS)
     ap.add_argument("--near", type=float, default=2.0,
                     help="하단 경계 N%% 위 접근 시 조기 청산 (%%) · 0=이탈 완료 시만")
@@ -908,7 +913,7 @@ def main():
                     default="close",
                     help="주봉박스 소멸 판정 (close=일봉 즉시 · confirm2=2연속 · buffer1=1% 버퍼)")
     ap.add_argument("--candle", choices=["all", "bear", "bear_tail"],
-                    default="bear_tail",
+                    default="bear",
                     help="신호일 캔들 필터 (bear=음봉만 · bear_tail=음봉+아래꼬리1%+)")
     ap.add_argument("--entry-zone", action=argparse.BooleanOptionalAction,
                     default=True,
@@ -921,6 +926,8 @@ def main():
                     help="박스 풀 (w=주봉박스만(기본) · wa=주봉+상승저점 · a=상승저점만)")
     args = ap.parse_args()
     globals()["BAND_DAYS"] = int(getattr(args, "band_days", 0) or 0)
+    globals()["SIZE_SCORE"] = ([float(x) for x in args.size_score.split(",")]
+                               if args.size_score.strip() else [])
     POOL = args.pool
     GAP_MODE = args.gap_mode
     ATR_K = args.atr_k
