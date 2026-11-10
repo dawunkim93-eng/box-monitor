@@ -76,6 +76,7 @@ AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 BAND_DAYS = int(os.environ.get("BAND_DAYS", "0"))  # >0이면 일봉 N일 밴드로 실험
 WEEKS = 6              # 주봉 밴드 길이(주) — 종가 6개 (2026-11-10 13주→6주)
+BAND_SRC = "close"     # 밴드 재료: close(종가만) · mix(하단=저가, 상단=종가) · full(저가/고가)
 COVER = 0.10           # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -7.8%)
                        # 15차(-30%)는 박스 폭(22~30%) 밖: 5차 대비 순익 +6% · MDD +77% (2026-11-06 실측)
 POOL = "w"             # 박스 풀: w=주봉박스만(현행) · wa=주봉+상승저점 · a=상승저점만
@@ -149,9 +150,17 @@ def load_universe():
         whi_w = np.zeros(nw)
         wdriftw = np.zeros(nw)      # 13주 순드리프트
         wwidthw = np.zeros(nw)      # 밴드 폭 (최고/최저 - 1)
+        wlow_a = (df["Low"].resample("W-FRI").min().reindex(wk.index)
+                  .to_numpy(float) if BAND_SRC != "close" else wclose)
+        whigh_a = (df["High"].resample("W-FRI").max().reindex(wk.index)
+                   .to_numpy(float) if BAND_SRC == "full" else wclose)
         for k in range(WEEKS - 1, nw):
             seg = wclose[k - WEEKS + 1:k + 1]
-            wlo_w[k], whi_w[k] = seg.min(), seg.max()
+            if BAND_SRC == "close":
+                wlo_w[k], whi_w[k] = seg.min(), seg.max()
+            else:
+                wlo_w[k] = np.nanmin(wlow_a[k - WEEKS + 1:k + 1])
+                whi_w[k] = np.nanmax(whigh_a[k - WEEKS + 1:k + 1])
             wdriftw[k] = seg[-1] / max(seg[0], 1e-9) - 1
             wwidthw[k] = seg.max() / max(seg.min(), 1e-9) - 1
             wflagw[k] = (wwidthw[k] <= 0.30 and abs(wdriftw[k]) <= 0.15)
@@ -837,7 +846,7 @@ def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
     global EXIT_MODE, ENTRY_EVAL, MKT_DN
-    global MIN_ROOM, EXIT_BUF
+    global MIN_ROOM, EXIT_BUF, BAND_SRC
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
@@ -873,6 +882,8 @@ def main():
     ap.add_argument("--cool-thr", type=float, default=3.0)
     ap.add_argument("--min-room", type=float, default=MIN_ROOM,
                     help="최소 진입 여지(%%) — 진입가→청산선 거리")
+    ap.add_argument("--band-src", choices=["close", "mix", "full"], default=BAND_SRC,
+                    help="밴드 재료: close=종가만(현행) · mix=하단 저가+상단 종가 · full=저가/고가")
     ap.add_argument("--exit-buf", type=float, default=EXIT_BUF,
                     help="청산선 위치(%%). +2=밴드하단 2%% 위(현행) · 0=하단 · -2=하단 2%% 아래")
     ap.add_argument("--adapt-rungs", action=argparse.BooleanOptionalAction,
@@ -933,6 +944,7 @@ def main():
     globals()["BAND_DAYS"] = int(getattr(args, "band_days", 0) or 0)
     globals()["WEEKS"] = int(getattr(args, "weeks", 6) or 6)
     globals()["EXIT_BUF"] = float(getattr(args, "exit_buf", 2.0))
+    globals()["BAND_SRC"] = getattr(args, "band_src", "close")
     globals()["SIZE_SCORE"] = ([float(x) for x in args.size_score.split(",")]
                                if args.size_score.strip() else [])
     POOL = args.pool
