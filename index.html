@@ -323,6 +323,42 @@
   </table>
   <div id="mobile-list" class="mob-list"><div class="sub" style="margin:8px 0">로딩 중…</div></div>
   <div id="alertsec"></div>
+  <style>
+    #lbox-det{margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
+    #lbox-det>summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--txt);
+      padding:4px 0;list-style:none}
+    #lbox-det>summary::-webkit-details-marker{display:none}
+    #lbox-det>summary::before{content:"▸ ";color:var(--dim)}
+    #lbox-det[open]>summary::before{content:"▾ "}
+    #lbox-mob{display:none}
+    @media(max-width:640px){
+      #lbox-tbl{display:none}
+      #lbox-mob{display:block}
+    }
+    .lpos{display:inline-block;width:44px;height:7px;background:#22262f;border-radius:4px;
+      vertical-align:middle;overflow:hidden}
+    .lpos i{display:block;height:100%}
+  </style>
+  <details id="lbox-det">
+    <summary>🗂 지지선 박스 관찰 <span class="sub" style="font-weight:400;font-size:12px">(<span id="lbox-cnt">0</span>종목 · 1년 주봉 지지선 · 매매 신호 아님)</span></summary>
+    <div class="sub" id="lbox-sub" style="margin:4px 0 8px;white-space:normal"></div>
+    <div class="toolbar" style="margin-bottom:6px">
+      <span class="sub">정렬</span>
+      <button data-ls="room" class="on">상단 여지 큰 순</button>
+      <button data-ls="touch">지지 많은 순</button>
+      <button data-ls="width">폭 좁은 순</button>
+      <button data-ls="pos">위치 낮은 순</button>
+      <button id="lbox-more" type="button">전체 보기</button>
+    </div>
+    <table id="lbox-tbl">
+      <thead><tr>
+        <th class="nm">종목</th><th>현재가</th><th class="hidem">당일</th><th>지지선</th>
+        <th class="hidem">저항</th><th>폭</th><th>위치</th><th>상단여지</th><th class="hidem">지지</th>
+      </tr></thead>
+      <tbody id="lbox-rows"><tr><td colspan="9">로딩 중…</td></tr></tbody>
+    </table>
+    <div id="lbox-mob"></div>
+  </details>
   </div>
   <div id="view-valid" hidden role="tabpanel" aria-labelledby="tb-valid">
     <h2 class="sec">📊 7슬롯 진입 시뮬레이션</h2>
@@ -2289,6 +2325,78 @@ document.getElementById("rv-trades").addEventListener("click",e=>{
   RT[REV.date].splice(Number(b.dataset.rvdel),1); save(); render();
 });
 window.revInit=init;
+})();
+</script>
+
+<script>
+(function(){
+  var LB={rows:[],sort:"room",all:false};
+  var LIMIT=30;
+  function fmt(n){return (n==null?"-":Number(n).toLocaleString("ko-KR"));}
+  function posColor(p){return p<33?"var(--blue)":(p>67?"var(--red)":"var(--amber)");}
+  function sorted(){
+    var r=LB.rows.slice();
+    var k=LB.sort;
+    r.sort(function(a,b){
+      if(k==="room")return b.room-a.room;
+      if(k==="touch")return b.touch-a.touch;
+      if(k==="width")return a.width-b.width;
+      if(k==="pos")return a.pos-b.pos;
+      return 0;
+    });
+    return r;
+  }
+  function renderLbox(){
+    var rows=sorted();
+    if(!LB.all)rows=rows.slice(0,LIMIT);
+    var tb=document.getElementById("lbox-rows");
+    var mb=document.getElementById("lbox-mob");
+    document.getElementById("lbox-cnt").textContent=LB.rows.length;
+    document.getElementById("lbox-more").textContent=LB.all?"접기":"전체 "+LB.rows.length+"개 보기";
+    var h="";
+    rows.forEach(function(r){
+      var chg=r.chg>0?"var(--red)":(r.chg<0?"var(--blue)":"var(--dim)");
+      h+='<tr><td class="nm">'+r.name+'</td><td>'+fmt(r.px)+'</td>'
+        +'<td class="hidem" style="color:'+chg+'">'+(r.chg>0?"+":"")+r.chg+'%</td>'
+        +'<td>'+fmt(r.s)+'</td><td class="hidem">'+fmt(r.r)+'</td>'
+        +'<td>'+r.width+'%</td>'
+        +'<td><span class="lpos"><i style="width:'+Math.max(2,Math.min(100,r.pos))+'%;background:'+posColor(r.pos)+'"></i></span> '+r.pos+'%</td>'
+        +'<td style="color:var(--green);font-weight:700">'+r.room+'%</td>'
+        +'<td class="hidem">'+r.touch+'</td></tr>';
+    });
+    tb.innerHTML=h||'<tr><td colspan="9">조건에 맞는 종목 없음</td></tr>';
+    var m="";
+    rows.forEach(function(r){
+      m+='<div class="mcard"><div class="mtop"><span class="mname">'+r.name+'</span>'
+        +'<span class="msub" style="margin-left:auto">'+fmt(r.px)+'원</span></div>'
+        +'<div class="msub">지지선 '+fmt(r.s)+' · 저항 '+fmt(r.r)+' · 폭 '+r.width+'% · 위치 '+r.pos+'%</div>'
+        +'<div class="msub">상단까지 <b style="color:var(--green)">'+r.room+'%</b> · 지지 '+r.touch+'회</div></div>';
+    });
+    mb.innerHTML=m||'<div class="sub">조건에 맞는 종목 없음</div>';
+  }
+  function loadLbox(){
+    fetch("data/box_lbox.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();})
+      .then(function(d){
+        LB.rows=d.rows||[];
+        var p=d.params||{};
+        document.getElementById("lbox-sub").textContent=
+          "1년(52주) 주봉에서 지지선을 "+p.min_touch+"회 이상 지키고 상단을 돌파하지 않은 종목. "
+          +"현재가가 지지선 위 "+p.entry_max+"% 이내 · 폭 "+p.w_lo+"~"+p.w_hi+"% · 갱신 "+d.updated_at_kst
+          +" · 매매 신호가 아니라 관찰 목록입니다. 진입은 기존 사다리 규칙을 따릅니다.";
+        renderLbox();
+      }).catch(function(){});
+  }
+  document.querySelectorAll("[data-ls]").forEach(function(b){
+    b.addEventListener("click",function(){
+      document.querySelectorAll("[data-ls]").forEach(function(x){x.classList.remove("on");});
+      b.classList.add("on");LB.sort=b.dataset.ls;renderLbox();
+    });
+  });
+  document.getElementById("lbox-more").addEventListener("click",function(){
+    LB.all=!LB.all;renderLbox();
+  });
+  loadLbox();
+  setInterval(loadLbox,1800000);
 })();
 </script>
 </body>
