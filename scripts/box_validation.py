@@ -62,7 +62,8 @@ EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
-MIN_WIDTH = 0.0        # 박스 폭 하한 (%) — 0=비활성
+MIN_WIDTH = 20.0       # 박스 폭 하한 (%) — 2026-11-10 20~30% 채택
+MAX_WIDTH = 30.0       # 박스 폭 상한 (%) — 기본 30%
 ATR_LO = 0.0           # ATR 하한 (%) — 0=비활성
 ATR_HI = 99.0          # ATR 상한 (%) — 99=비활성
 SLIP = 0.0             # 슬리피지 (한쪽, 비율) — 진입 매수 +, 강제청산 매도 -
@@ -163,7 +164,7 @@ def load_universe():
                 whi_w[k] = np.nanmax(whigh_a[k - WEEKS + 1:k + 1])
             wdriftw[k] = seg[-1] / max(seg[0], 1e-9) - 1
             wwidthw[k] = seg.max() / max(seg.min(), 1e-9) - 1
-            wflagw[k] = (wwidthw[k] <= 0.30 and abs(wdriftw[k]) <= 0.15)
+            wflagw[k] = (wwidthw[k] <= MAX_WIDTH / 100 and abs(wdriftw[k]) <= 0.15)
         # 주봉 기간 — 밴드 조건 연속 유지 주 수
         wrun = np.zeros(nw, dtype=np.int64)
         run_w = 0
@@ -195,13 +196,13 @@ def load_universe():
             wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
                             (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
             okw = ok
-            wflag = ok & (wwidth <= 0.30) & (np.abs(wdrift) <= 0.15)
+            wflag = ok & (wwidth <= MAX_WIDTH / 100) & (np.abs(wdrift) <= 0.15)
             run_ = 0
             wdur = np.zeros(len(c), dtype=np.int64)
             for i_ in range(len(c)):
                 run_ = run_ + 1 if wflag[i_] else 0
                 wdur[i_] = run_
-        okb = okw & (wwidth <= 0.30) & (np.abs(wdrift) <= 0.15)
+        okb = okw & (wwidth <= MAX_WIDTH / 100) & (np.abs(wdrift) <= 0.15)
         if WBREAK == "close":
             wvalid = wflag
         elif WBREAK == "confirm2":
@@ -850,7 +851,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -893,6 +894,8 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--max-width", type=float, default=MAX_WIDTH,
+                    help="박스 폭 상한(%%), 기본 30")
     ap.add_argument("--min-width", type=float, default=MIN_WIDTH,
                     help="박스 폭 하한(%%) — 예: 24")
     ap.add_argument("--atr-lo", type=float, default=ATR_LO, help="ATR 하한(%%)")
@@ -959,6 +962,7 @@ def main():
     MIN_SCORE = args.min_score
     K = args.slots
     MIN_WIDTH = args.min_width
+    MAX_WIDTH = args.max_width
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
     SLIP = args.slip / 100.0
@@ -1053,6 +1057,7 @@ def main():
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
                    "weeks": WEEKS,
+                   "min_width": MIN_WIDTH, "max_width": MAX_WIDTH,
                    "rotate": ROTATE,
                    "rotate_margin": ROT_MARGIN,
                    "pool": {"w": f"주봉박스({WEEKS}주 종가밴드)만",

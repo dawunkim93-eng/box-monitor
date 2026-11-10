@@ -387,7 +387,7 @@
       <div class="rulebox good">
         <b>실전 매매원칙 7줄</b>
         <ol class="quick">
-          <li><b>무엇을</b> · 주봉 6주 종가 밴드 · 폭 ≤30% · 드리프트 ±15% · 거래대금 10억+</li>
+          <li><b>무엇을</b> · 주봉 6주 종가 밴드 · 폭 20~30% · 드리프트 ±15% · 거래대금 10억+</li>
           <li><b>언제 사나</b> · 밴드 하위 절반 + <b>경계 +6% 위</b> + 전일 음봉 → 다음날 <b>시가</b></li>
           <li><b>얼마나</b> · 6·6·9·12·18만(1:1:1.5:2:3) = 슬롯 51만 · 최대 <b>7슬롯</b>(357만, 무료 한도)</li>
           <li><b>어떤 순서로</b> · 자리가 없으면 <b>점수 높은 순</b>. 점수는 합격선이 아님 — 그날 최고가 3점이면 매수, 1~2점뿐이면 쉼</li>
@@ -407,7 +407,7 @@
       <h2 class="sec">매수(진입)</h2>
       <div class="rulebox">
         <ul>
-          <li><b>주봉박스</b>: 최근 완료 6주 종가 밴드 · 폭 ≤30% · |순드리프트| ≤15% · 종가가 밴드 내</li>
+          <li><b>주봉박스</b>: 최근 완료 6주 종가 밴드 · 폭 20~30% · |순드리프트| ≤15% · 종가가 밴드 내</li>
           <li><b>상승저점</b>(현재 미사용): 피벗 저가 3개 연속 상승(v2&gt;v1×1.005 · v1&gt;v0×0.995) · 종가 ≥ 추세선×0.995</li>
           <li><b>매수존</b>: 밴드 위치 ≤50% · <b>경계 +6% 이상</b>(여지 4%)</li>
           <li><b>캔들 필터</b>: 신호일(전일) <b>음봉</b> (아래꼬리 조건은 2026-11-10 제거)</li>
@@ -1228,7 +1228,7 @@ function rowHTML(r){
     return `<tr${rc?` class="${rc}"`:""} data-code="${r.code}" tabindex="0" role="button" aria-expanded="${EXPANDED===r.code?"true":"false"}" aria-label="${r.name} 상세 보기">
       <td class="nm"><input type="checkbox" class="heldchk" data-c="${r.code}" ${chk?"checked":""} aria-label="보유 체크">
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
-        ${r.bkind==="wbox"?`<span class="btyp bw" title="주봉 박스 — 6주 종가 밴드 ±30% · 진입=밴드 하위 절반 · 청산=밴드 이탈">주봉</span>`
+        ${r.bkind==="wbox"?`<span class="btyp bw" title="주봉 박스 — 6주 종가 밴드 폭 20~30% · 진입=밴드 하위 절반 · 청산=밴드 이탈">주봉</span>`
           :`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`}
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}
         ${r.held?`<span class="wait" title="보유 종목 (진입 후보 제외)">📋 보유</span>`
