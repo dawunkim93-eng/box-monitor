@@ -74,6 +74,7 @@ SIZE_SCORE = []        # 점수별 슬롯 배수 (0~7점 순). 예: 0.5,0.5,0.5,
 AMT_MIN = 1e9
 START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 BAND_DAYS = int(os.environ.get("BAND_DAYS", "0"))  # >0이면 일봉 N일 밴드로 실험
+WEEKS = 6              # 주봉 밴드 길이(주) — 종가 6개 (2026-11-10 13주→6주)
 COVER = 0.10           # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -7.8%)
                        # 15차(-30%)는 박스 폭(22~30%) 밖: 5차 대비 순익 +6% · MDD +77% (2026-11-06 실측)
 POOL = "w"             # 박스 풀: w=주봉박스만(현행) · wa=주봉+상승저점 · a=상승저점만
@@ -147,8 +148,8 @@ def load_universe():
         whi_w = np.zeros(nw)
         wdriftw = np.zeros(nw)      # 13주 순드리프트
         wwidthw = np.zeros(nw)      # 밴드 폭 (최고/최저 - 1)
-        for k in range(12, nw):
-            seg = wclose[k - 12:k + 1]
+        for k in range(WEEKS - 1, nw):
+            seg = wclose[k - WEEKS + 1:k + 1]
             wlo_w[k], whi_w[k] = seg.min(), seg.max()
             wdriftw[k] = seg[-1] / max(seg[0], 1e-9) - 1
             wwidthw[k] = seg.max() / max(seg.min(), 1e-9) - 1
@@ -160,7 +161,7 @@ def load_universe():
             run_w = run_w + 1 if wflagw[k] else 0
             wrun[k] = run_w
         kk = np.searchsorted(wend, dn) - 1
-        okw = kk >= 12
+        okw = kk >= WEEKS - 1
         wdur = np.where(okw, wrun[np.clip(kk, 0, nw - 1)], 0).astype(np.int64)
         wflag = np.where(okw, wflagw[np.clip(kk, 0, nw - 1)], False)
         wlo = np.where(okw, wlo_w[np.clip(kk, 0, nw - 1)], 0.0)
@@ -857,6 +858,7 @@ def main():
     ap.add_argument("--size-score", type=str, default="",
                     help="점수별 슬롯 배수 0~7점 (쉼표 구분). 비우면 균등")
     ap.add_argument("--band-days", type=int, default=BAND_DAYS)
+    ap.add_argument("--weeks", type=int, default=WEEKS, help="주봉 밴드 길이(주), 기본 6")
     ap.add_argument("--near", type=float, default=2.0,
                     help="하단 경계 N%% 위 접근 시 조기 청산 (%%) · 0=이탈 완료 시만")
     ap.add_argument("--exit-mode", choices=["close", "intraday"], default=EXIT_MODE,
@@ -926,6 +928,7 @@ def main():
                     help="박스 풀 (w=주봉박스만(기본) · wa=주봉+상승저점 · a=상승저점만)")
     args = ap.parse_args()
     globals()["BAND_DAYS"] = int(getattr(args, "band_days", 0) or 0)
+    globals()["WEEKS"] = int(getattr(args, "weeks", 6) or 6)
     globals()["SIZE_SCORE"] = ([float(x) for x in args.size_score.split(",")]
                                if args.size_score.strip() else [])
     POOL = args.pool
@@ -1033,9 +1036,10 @@ def main():
                                 "주봉: 밴드 하위 절반 · 상승: 추세선 근접 ≤5%"),
                    "unit": f"{UNIT//10000}만/차",
                    "gap": f"{args.gap*100:g}% 고정",
+                   "weeks": WEEKS,
                    "rotate": ROTATE,
                    "rotate_margin": ROT_MARGIN,
-                   "pool": {"w": "주봉박스(13주 종가밴드)만",
+                   "pool": {"w": f"주봉박스({WEEKS}주 종가밴드)만",
                             "wa": "주봉박스+상승저점",
                             "a": "상승저점만"}[POOL],
                    "start": str(s["start_year"]),
