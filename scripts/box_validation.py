@@ -54,7 +54,7 @@ GAP_MODE = "fixed"     # fixed | atr (atr: gap_i = clip(k × ATR14_i, min, max))
 ATR_K = 0.8            # atr 갭 계수
 GAP_MIN, GAP_MAX = 0.015, 0.050   # atr 갭 하한/상한
 NEAR_OF_GAP = 0.8      # atr 모드 근접청산(%) = 0.8 × 갭 → 1차 체결 전 청산 방지
-EXIT_MODE = "intraday"  # close(종가 판정) | intraday(경계 터치 시 장중 청산) — 2026-11 채택
+EXIT_MODE = "close"     # close(종가 판정, 2026-11-10 채택) | intraday(경계 터치 시 장중 청산)
 ENTRY_EVAL = True       # 진입일 당일에도 청산 판정 (미적용 시 MDD 과소: -422k vs -649k)
 MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
 MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 4% (경계 +6%)
