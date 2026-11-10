@@ -57,7 +57,8 @@ NEAR_OF_GAP = 0.8      # atr 모드 근접청산(%) = 0.8 × 갭 → 1차 체결
 EXIT_MODE = "intraday"  # close(종가 판정) | intraday(경계 터치 시 장중 청산) — 2026-11 채택
 ENTRY_EVAL = True       # 진입일 당일에도 청산 판정 (미적용 시 MDD 과소: -422k vs -649k)
 MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
-MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 경계×1.02까지. 채택값 4% (경계 +6%)
+MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 4% (경계 +6%)
+EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
@@ -426,7 +427,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             B_ = (wlo if knd == "wbox" else tlv)
             B_ = B_ if B_ > 0 else None
             if B_ is not None:
-                lvl = B_ * (1 + n_i / 100)
+                lvl = B_ * (1 + EXIT_BUF / 100)
                 if EXIT_MODE == "intraday":
                     o_j = float(s["o"][j])
                     fill = (o_j if (o_j > 0 and o_j < lvl)
@@ -517,7 +518,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     if ADAPT_RUNGS and knd == "wbox":
                         _b = float(s["wlo"][j])
                         if _b > 0:
-                            _rm = (px / (_b * 1.02) - 1) * 100
+                            _rm = (px / (_b * (1 + EXIT_BUF / 100)) - 1) * 100
                             nr = int(min(max(int(_rm // (g_i * 100)) + 1, 1), rungs))
                     hst["levels"] = [px * (1 - g_i) ** k for k in range(nr)]
                     hst["held"] = [False] * nr
@@ -574,7 +575,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     continue
                 if MIN_ROOM > 0 and knd == "wbox":
                     _w0 = float(s["wlo"][je])
-                    if _w0 > 0 and (px_e / (_w0 * 1.02) - 1) * 100 < MIN_ROOM:
+                    if _w0 > 0 and (px_e / (_w0 * (1 + EXIT_BUF / 100)) - 1) * 100 < MIN_ROOM:
                         continue
                 if MIN_WIDTH or ATR_LO or ATR_HI < 99:
                     _atr = float(s["atr"][j]) if not np.isnan(s["atr"][j]) else 0.0
@@ -617,7 +618,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 if ADAPT_RUNGS and knd == "wbox":
                     _w0b = float(s["wlo"][je])
                     if _w0b > 0:
-                        _rm = (px_e / (_w0b * 1.02) - 1) * 100
+                        _rm = (px_e / (_w0b * (1 + EXIT_BUF / 100)) - 1) * 100
                         ng = int(min(max(int(_rm // (gi * 100)) + 1, 1), rungs))
                 holdings[i] = {"j": je, "j_entry": je,
                                "entry_day": int(dn_s[je]),
@@ -836,7 +837,7 @@ def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
     global EXIT_MODE, ENTRY_EVAL, MKT_DN
-    global MIN_ROOM
+    global MIN_ROOM, EXIT_BUF
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
@@ -871,7 +872,9 @@ def main():
                     help="지수 -cool-thr%% 이하 마감 후 신규 진입 중단 일수")
     ap.add_argument("--cool-thr", type=float, default=3.0)
     ap.add_argument("--min-room", type=float, default=MIN_ROOM,
-                    help="최소 진입 여지(%%) — 진입가→경계×1.02 거리")
+                    help="최소 진입 여지(%%) — 진입가→청산선 거리")
+    ap.add_argument("--exit-buf", type=float, default=EXIT_BUF,
+                    help="청산선 위치(%%). +2=밴드하단 2%% 위(현행) · 0=하단 · -2=하단 2%% 아래")
     ap.add_argument("--adapt-rungs", action=argparse.BooleanOptionalAction,
                     default=ADAPT_RUNGS,
                     help="차수를 room에 맞춰 축소 (floor(room/gap)+1, 최대 5)")
@@ -929,6 +932,7 @@ def main():
     args = ap.parse_args()
     globals()["BAND_DAYS"] = int(getattr(args, "band_days", 0) or 0)
     globals()["WEEKS"] = int(getattr(args, "weeks", 6) or 6)
+    globals()["EXIT_BUF"] = float(getattr(args, "exit_buf", 2.0))
     globals()["SIZE_SCORE"] = ([float(x) for x in args.size_score.split(",")]
                                if args.size_score.strip() else [])
     POOL = args.pool
