@@ -316,7 +316,7 @@
   <table id="main-tbl">
     <thead><tr>
       <th class="nm">☑ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
-      <th>위치</th><th>하단대비</th>
+      <th>위치</th><th>하단대비</th><th>지정가</th>
       <th class="hidem">갭</th>
     </tr></thead>
     <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
@@ -1138,6 +1138,7 @@ function mobileRowHTML(r){
       ${strong}<b class="mname">${r.name}</b>${tag}${risk}${status}${scoreBadge}</div>
     <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
     <div class="mrow">하단 ${pl} · ${atr} · ${esc}</div>
+    ${r.cand&&r.limit?`<div class="mrow" style="color:var(--blue)">🎯 진입 지정가 <b>${fmt(r.limit)}원</b> <span class="sub">(전일 종가 · 미체결 시 다음날)</span></div>`:""}
     <details class="mdet" data-c="${r.code}">
       <summary>점수 상세 · 이력</summary>
       <div class="mexp">${scoreLine}</div>
@@ -1243,6 +1244,7 @@ function rowHTML(r){
       <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
       <td>${pbar}${r.pos==null?"":`<span class="sub" style="margin-left:4px">${r.pos<=0?"이탈":r.pos.toFixed(0)+"%"}</span>`}</td>
       <td><span title="${r.bname||"경계"} 기준">${lowpct}</span><span class="sub" style="font-size:9.5px">·${r.bname||""}</span></td>
+      <td>${r.cand&&r.limit?`<b style="color:var(--blue)">${fmt(r.limit)}</b>`:"-"}</td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
     </tr>`;
 }
