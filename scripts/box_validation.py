@@ -60,6 +60,7 @@ MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
 MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 4% (경계 +6%)
 EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
 PB_MODE = False        # 눌림+박스 유지 진입 허용 (20일선 지지 · 60일선 위 상승)
+PB_EXIT_LINE = "band"  # 눌림 포지션 청산선: band(밴드 하단) | ma20(진입 시점 20일선)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
@@ -316,7 +317,7 @@ def load_universe():
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
-                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day})
+                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_})
     return U
 
 
@@ -446,7 +447,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             g_i, n_i = hst.get("gap", gap), hst.get("near", near)
             # 1) 하단 near% 위 근접 청산 — wbox=밴드 하단 · abox=추세선
             #    near는 포지션별: 고정모드=near · ATR모드=NEAR_OF_GAP×갭
-            B_ = (wlo if knd == "wbox" else tlv)
+            B_ = (hst.get("pb_line") or (wlo if knd == "wbox" else tlv))
             B_ = B_ if B_ > 0 else None
             if B_ is not None:
                 lvl = B_ * (1 + EXIT_BUF / 100)
@@ -643,9 +644,12 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     if _w0b > 0:
                         _rm = (px_e / (_w0b * (1 + EXIT_BUF / 100)) - 1) * 100
                         ng = int(min(max(int(_rm // (gi * 100)) + 1, 1), rungs))
+                _pb_line = (float(s["ma20"][je])
+                            if (pb_ok and PB_EXIT_LINE == "ma20"
+                                and not np.isnan(s["ma20"][je])) else None)
                 holdings[i] = {"j": je, "j_entry": je,
                                "entry_day": int(dn_s[je]),
-                               "entry": px_e, "score": -nsc,
+                               "entry": px_e, "score": -nsc, "pb_line": _pb_line,
                                "gap": gi, "near": n_i, "kind": knd,
                                "dur": (int(s["wdur"][je]) if knd == "wbox"
                                        else int(s["adur"][je]) if knd == "abox"
@@ -864,7 +868,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -907,6 +911,8 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--pb-exit", choices=["band", "ma20"], default=PB_EXIT_LINE,
+                    help="눌림 포지션 청산선: band=밴드 하단 · ma20=진입 시점 20일선")
     ap.add_argument("--pb", action="store_true",
                     help="눌림+박스 유지 진입 허용 (20일선 지지·60일선 위)")
     ap.add_argument("--max-width", type=float, default=MAX_WIDTH,
@@ -979,6 +985,7 @@ def main():
     MIN_WIDTH = args.min_width
     MAX_WIDTH = args.max_width
     PB_MODE = bool(args.pb)
+    PB_EXIT_LINE = args.pb_exit
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
     SLIP = args.slip / 100.0
