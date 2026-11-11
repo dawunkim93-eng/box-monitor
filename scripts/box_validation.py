@@ -59,6 +59,7 @@ ENTRY_EVAL = True       # 진입일 당일에도 청산 판정 (미적용 시 MD
 MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
 MIN_ROOM = 4.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 4% (경계 +6%)
 EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
+PB_MODE = False        # 눌림+박스 유지 진입 허용 (20일선 지지 · 60일선 위 상승)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
@@ -213,9 +214,20 @@ def load_universe():
             inb = okw & (c >= wlo * 0.99) & (c <= whi * 1.01)
             wvalid = okb & inb
         liq = np.nan_to_num(amt20) >= AMT_MIN
+        # ── 눌림+박스 유지: 60일선 위 상승 추세 + 20일선 지지(저가 터치·종가 위) + 박스 유효
+        ma20_ = pd.Series(c).rolling(20).mean().to_numpy()
+        ma60_ = pd.Series(c).rolling(60).mean().to_numpy()
+        _ma60_prev = np.concatenate([np.full(20, np.nan), ma60_[:-20]]) \
+            if len(ma60_) > 20 else np.full(n, np.nan)
+        pb_day = ((c > ma60_) & (ma60_ > _ma60_prev) & (ma20_ > 0)
+                  & (l <= ma20_ * 1.01) & (c >= ma20_ * 0.99) & (c > o)
+                  & wflag & (wwidth >= MIN_WIDTH / 100) & liq & (dn >= START))
         wdays = np.where(wflag & (wpos <= 0.5) & liq & (dn >= START))[0]
         if POOL in ("wa", "w"):
             for j in wdays:
+                kind_map.setdefault(int(j), "wbox")
+        if PB_MODE:
+            for j in np.where(pb_day)[0]:
                 kind_map.setdefault(int(j), "wbox")
         # ── A-box (상승 저점 추세선): 피벗 저가 3개 연속 상승 + 종가 ≥ 선×0.995
         #    진입: 추세선 근접(종가 ≤ 선×1.05) · 청산: 하단근접(선+2%) 또는 구조 붕괴
@@ -304,7 +316,7 @@ def load_universe():
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
-                  "trig": ti, "kinds": kinds_arr, "sc": sc})
+                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day})
     return U
 
 
@@ -550,6 +562,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     continue
                 s = U[i]
                 dn_s = s["dn"]
+                pb_ok = PB_MODE and bool(s["pb"][j])
                 if ENTRY_MODE in ("limit_signal", "limit_line"):
                     je = j + 1
                     if je >= len(dn_s):
@@ -583,7 +596,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     continue
                 if MIN_AMT and float(s["amt20"][j]) < MIN_AMT:
                     continue
-                if MIN_ROOM > 0 and knd == "wbox":
+                if MIN_ROOM > 0 and knd == "wbox" and not pb_ok:
                     _w0 = float(s["wlo"][je])
                     if _w0 > 0 and (px_e / (_w0 * (1 + EXIT_BUF / 100)) - 1) * 100 < MIN_ROOM:
                         continue
@@ -603,13 +616,13 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     n_i = NEAR_OF_GAP * gi * 100
                 else:
                     gi, n_i = gap, near
-                if CANDLE_MODE != "all":        # 신호일 캔들 필터
+                if CANDLE_MODE != "all" and not pb_ok:   # 눌림 신호는 양봉 확인으로 대체
                     if not (float(s["c"][j]) < float(s["o"][j])):
                         continue
                     if CANDLE_MODE == "bear_tail" \
                             and float(s["lower_sh"][j]) < 1.0:
                         continue
-                if ENTRY_ZONE:          # 진입 시점 매수존 재확인 (추격 금지)
+                if ENTRY_ZONE and not pb_ok:   # 눌림 신호는 존 재확인 생략
                     if knd == "wbox":
                         w0, w1 = float(s["wlo"][je]), float(s["whi"][je])
                         if not (w1 > w0 > 0):
@@ -851,7 +864,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -894,6 +907,8 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--pb", action="store_true",
+                    help="눌림+박스 유지 진입 허용 (20일선 지지·60일선 위)")
     ap.add_argument("--max-width", type=float, default=MAX_WIDTH,
                     help="박스 폭 상한(%%), 기본 30")
     ap.add_argument("--min-width", type=float, default=MIN_WIDTH,
@@ -963,6 +978,7 @@ def main():
     K = args.slots
     MIN_WIDTH = args.min_width
     MAX_WIDTH = args.max_width
+    PB_MODE = bool(args.pb)
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
     SLIP = args.slip / 100.0
