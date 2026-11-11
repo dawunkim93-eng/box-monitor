@@ -109,7 +109,7 @@ def main():
     load_env()
     if send(msg):
         print(f"[INFO] 텔레그램 전송 · {len(new)}종목")
-        if not test:
+        if not test and "--sample" not in args:
             st["sent"] = sorted(sent | {r["code"] for r in new})
             st["date"] = today
             STATE.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
