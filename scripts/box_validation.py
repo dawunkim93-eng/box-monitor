@@ -64,6 +64,7 @@ PB_EXIT_LINE = "band"  # 눌림 포지션 청산선: band(밴드 하단) | ma20(
 PB_SLOTS = 0           # 눌림 전용 슬롯 수 (0=구분 없음 · 주봉은 K_-PB_SLOTS 사용)
 RV_MODE = False        # 반전 돌파 진입 (장기 하락 + 바닥 + 거래량 폭발 + 하락 추세 돌파)
 RV_SLOTS = 0           # 반전 전용 슬롯 수 (0=구분 없음)
+AB_PIN = False         # A박스 추세선을 진입 시점 값으로 고정
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
@@ -469,6 +470,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             # 1) 하단 near% 위 근접 청산 — wbox=밴드 하단 · abox=추세선
             #    near는 포지션별: 고정모드=near · ATR모드=NEAR_OF_GAP×갭
             B_ = (hst.get("rv_line") or hst.get("pb_line")
+                  or hst.get("ab_line")
                   or (wlo if knd == "wbox" else tlv))
             B_ = B_ if B_ > 0 else None
             if B_ is not None:
@@ -685,6 +687,9 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "entry_day": int(dn_s[je]),
                                "entry": px_e, "score": -nsc, "pb": pb_ok, "rv": rv_ok,
                                "rv_line": _rv_line,
+                               "ab_line": (float(s["tlv"][je])
+                                           if (AB_PIN and knd == "abox"
+                                               and not np.isnan(s["tlv"][je])) else None),
                                "pb_line": _pb_line,
                                "gap": gi, "near": n_i, "kind": knd,
                                "dur": (int(s["wdur"][je]) if knd == "wbox"
@@ -904,7 +909,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -947,6 +952,8 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--ab-pin", action="store_true",
+                    help="A박스 추세선을 진입 시점 값으로 고정 (일별 재계산 대신)")
     ap.add_argument("--rv", action="store_true",
                     help="반전 돌파 진입 허용 (장기 하락 + 바닥 + 거래량 3배 + 20일 고점 돌파)")
     ap.add_argument("--rv-slots", type=int, default=RV_SLOTS,
@@ -1031,6 +1038,7 @@ def main():
     PB_SLOTS = max(0, int(args.pb_slots))
     RV_MODE = bool(args.rv)
     RV_SLOTS = max(0, int(args.rv_slots))
+    AB_PIN = bool(args.ab_pin)
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
     SLIP = args.slip / 100.0
