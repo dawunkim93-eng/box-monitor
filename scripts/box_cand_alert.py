@@ -85,11 +85,17 @@ def main():
         except Exception:
             st = {}
     if st.get("date") != today:
-        st = {"date": today, "sent": []}
-    sent = set(st.get("sent", []))
-    new = rows if test else [r for r in rows if r["code"] not in sent]
+        st = {"date": today, "active": []}
+    # 직전 확인 때 '진입 가능'이던 종목 — 빠졌다가 다시 뜨면 새 알림으로 본다
+    active = set(st.get("active", st.get("sent", [])))
+    new = rows if test else [r for r in rows if r["code"] not in active]
     if not new:
-        print(f"[INFO] 새 진입 가능 0건 (이미 알림 {len(sent)}건)")
+        print(f"[INFO] 새 진입 가능 0건 (직전 확인 {len(active)}종목 유지)")
+        # 현재 목록으로 상태 갱신 (빠진 종목 추적)
+        if not test:
+            STATE.write_text(json.dumps(
+                {"date": today, "active": sorted({r["code"] for r in rows})},
+                ensure_ascii=False), encoding="utf-8")
         return
     head = ("🧪 <b>[테스트] 알림 형식 예시</b>\n\n" if "--sample" in args else "")
     lines = [f"🎯 <b>진입 가능 {len(new)}종목</b> {now:%m-%d %H:%M}",
@@ -113,9 +119,9 @@ def main():
     if send(msg):
         print(f"[INFO] 텔레그램 전송 · {len(new)}종목")
         if not test and "--sample" not in args:
-            st["sent"] = sorted(sent | {r["code"] for r in new})
-            st["date"] = today
-            STATE.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
+            STATE.write_text(json.dumps(
+                {"date": today, "active": sorted({r["code"] for r in rows})},
+                ensure_ascii=False), encoding="utf-8")
 
 
 if __name__ == "__main__":
