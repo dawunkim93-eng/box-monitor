@@ -98,7 +98,10 @@ def main():
         lines.append(
             f"· <b>{r['name']}</b> {fmt(r.get('price'))}원 · 지정가 <b>{fmt(r.get('limit'))}</b>"
             f"\n   하단대비 {r.get('pct_low')}% · 폭 {(r.get('height') or 0)*100:.0f}%"
-            f" · 점수 {r.get('score')}")
+            f" · 점수 {r.get('score')}"
+            + (f"\n   🟢 매물대 위 ×2 · 사다리 {('·'.join(str(x) for x in r['amts']))}만원"
+               if r.get("boost") == 2 and r.get("amts")
+               else f"\n   사다리 {('·'.join(str(x) for x in r.get('amts') or [6,6,9,12,18]))}만원"))
     if len(new) > 20:
         lines.append(f"… 외 {len(new)-20}종목")
     lines += ["", "※ 관찰 알림이며 매수 권장이 아닙니다."]

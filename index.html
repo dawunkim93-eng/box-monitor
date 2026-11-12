@@ -107,6 +107,7 @@
   .btyp{display:inline-block;margin-left:4px;padding:0 4px;border-radius:4px;
         font-size:9.5px;vertical-align:middle;line-height:1.55;cursor:default}
   .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
+  .bvp{color:var(--green);border:1px solid rgba(16,185,129,.55);font-weight:700}
   .bcand{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .broom{color:var(--amber);border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
   .ba{color:var(--green);border:1px solid rgba(34,197,94,.45)}
@@ -411,6 +412,7 @@
           <li><b>상승저점</b>(현재 미사용): 피벗 저가 3개 연속 상승(v2&gt;v1×1.005 · v1&gt;v0×0.995) · 종가 ≥ 추세선×0.995</li>
           <li><b>매수존</b>: 밴드 위치 ≤50% · <b>경계 +6% 이상</b>(여지 4%)</li>
           <li><b>캔들 필터</b>: 신호일(전일) <b>음봉</b> (아래꼬리 조건은 2026-11-10 제거)</li>
+          <li><b>매물대 배분</b>: 박스 하단이 250일 거래대금 가중평균가(VWAP) <b>위</b>면 사다리 금액 <b>2배</b>(12·12·18·24·36만) · 아래면 기본(6·6·9·12·18만). 13년 검증에서 순익 +29%, 낙폭 +12%, 순익/낙폭 101.5 → 117.1</li>
           <li>보유 종목 제외 · 상위 7슬롯 · 1차수 <b>60,000원</b> (2차 6만 · 3차 9만 · 4차 12만 · 5차 18만)</li>
         </ul>
       </div>
@@ -747,7 +749,7 @@
 
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(6주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 풀에서 제외<br>청산 기준(13년 백테스트 최적): <b>종가</b>가 <b>하단×1.02</b> 아래면 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉 · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~6%(여지 4% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(6주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 풀에서 제외<br>청산 기준(13년 백테스트 최적): <b>종가</b>가 <b>하단×1.02</b> 아래면 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · 진입=매수존+전일 음봉 · <span style="color:var(--green)">×2</span>=박스 하단이 250일 매물대 위(금액 2배) · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~6%(여지 4% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 7점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -1139,6 +1141,7 @@ function mobileRowHTML(r){
     <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
     <div class="mrow">하단 ${pl} · ${atr} · ${esc}</div>
     ${r.cand&&r.limit?`<div class="mrow" style="color:var(--blue)">🎯 진입 지정가 <b>${fmt(r.limit)}원</b> <span class="sub">(전일 종가 · 미체결 시 다음날)</span></div>`:""}
+    ${r.amts?`<div class="mrow" style="color:${r.boost===2?"var(--green)":"var(--dim)"}">${r.boost===2?"🟢 매물대 위 ×2":"매물대 아래"} · 사다리 ${r.amts.join("·")}만원</div>`:""}
     <details class="mdet" data-c="${r.code}">
       <summary>점수 상세 · 이력</summary>
       <div class="mexp">${scoreLine}</div>
@@ -1231,6 +1234,7 @@ function rowHTML(r){
         ${r.strong?`<span class="tag">🟢</span>`:""}<b>${r.name}</b>
         ${r.bkind==="wbox"?`<span class="btyp bw" title="주봉 박스 — 6주 종가 밴드 폭 20~30% · 진입=밴드 하위 절반 · 청산=밴드 이탈">주봉</span>`
           :`<span class="btyp ba" title="상승 저점 박스 — 피벗 저가 3개 연속 상승 · 진입=추세선 근접 · 청산=선 이탈">상승</span>`}
+        ${r.boost===2?`<span class="btyp bvp" title="박스 하단이 250일 매물대(VWAP) 위 — 금액 2배: ${(r.amts||[]).join('·')}만원">×2</span>`:""}
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}
         ${r.held?`<span class="wait" title="보유 종목 (진입 후보 제외)">📋 보유</span>`
           :(r.cand?`<span class="btyp bcand" title="매수존 + 전일 음봉·꼬리 + 여지 4% 조건 충족">✅ 진입</span>`

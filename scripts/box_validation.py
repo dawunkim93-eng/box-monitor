@@ -65,6 +65,8 @@ PB_SLOTS = 0           # 눌림 전용 슬롯 수 (0=구분 없음 · 주봉은 
 RV_MODE = False        # 반전 돌파 진입 (장기 하락 + 바닥 + 거래량 폭발 + 하락 추세 돌파)
 RV_SLOTS = 0           # 반전 전용 슬롯 수 (0=구분 없음)
 AB_PIN = False         # A박스 추세선을 진입 시점 값으로 고정
+VP_MODE = "off"        # 매물대 필터: off | below(하단<매물대중심) | above | near(±3%)
+VP_BOOST = 1.0         # 박스 하단이 매물대 위일 때 슬롯 금액 배수
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
@@ -219,6 +221,9 @@ def load_universe():
             inb = okw & (c >= wlo * 0.99) & (c <= whi * 1.01)
             wvalid = okb & inb
         liq = np.nan_to_num(amt20) >= AMT_MIN
+        _amt_w = pd.Series(c * v).rolling(250, min_periods=60).sum().to_numpy()
+        _vol_s = pd.Series(v).rolling(250, min_periods=60).sum().to_numpy()
+        vwap250 = np.where(_vol_s > 0, _amt_w / np.maximum(_vol_s, 1e-9), np.nan)
         # ── 눌림+박스 유지: 60일선 위 상승 추세 + 20일선 지지(저가 터치·종가 위) + 박스 유효
         ma20_ = pd.Series(c).rolling(20).mean().to_numpy()
         ma60_ = pd.Series(c).rolling(60).mean().to_numpy()
@@ -339,7 +344,7 @@ def load_universe():
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
-                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day})
+                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day, "vwap": vwap250})
     return U
 
 
@@ -636,6 +641,20 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     _w0 = float(s["wlo"][je])
                     if _w0 > 0 and (px_e / (_w0 * (1 + EXIT_BUF / 100)) - 1) * 100 < MIN_ROOM:
                         continue
+                if VP_MODE != "off" and knd == "wbox":
+                    _vp = float(s["vwap"][j]) if not np.isnan(s["vwap"][j]) else 0.0
+                    if _vp <= 0:
+                        continue
+                    _wlo_j = float(s["wlo"][je])
+                    if not (_wlo_j > 0):
+                        continue
+                    _r = _wlo_j / _vp - 1
+                    if VP_MODE == "below" and not (_r < 0):
+                        continue
+                    if VP_MODE == "above" and not (_r > 0):
+                        continue
+                    if VP_MODE == "near" and not (abs(_r) <= 0.03):
+                        continue
                 if MIN_WIDTH or ATR_LO or ATR_HI < 99:
                     _atr = float(s["atr"][j]) if not np.isnan(s["atr"][j]) else 0.0
                     if ATR_LO and _atr * 100 < ATR_LO:
@@ -680,6 +699,12 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                         _rm = (px_e / (_w0b * (1 + EXIT_BUF / 100)) - 1) * 100
                         ng = int(min(max(int(_rm // (gi * 100)) + 1, 1), rungs))
                 _rv_line = (float(s["l"][j]) * 0.99 if rv_ok else None)
+                _vp_boost = 1.0
+                if VP_BOOST != 1.0 and knd == "wbox":
+                    _vp_v = float(s["vwap"][j]) if not np.isnan(s["vwap"][j]) else 0.0
+                    _wlo_e = float(s["wlo"][je])
+                    if _vp_v > 0 and _wlo_e > _vp_v:
+                        _vp_boost = VP_BOOST
                 _pb_line = (float(s["ma20"][je])
                             if (pb_ok and PB_EXIT_LINE == "ma20"
                                 and not np.isnan(s["ma20"][je])) else None)
@@ -719,6 +744,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                "held": [False] * ng,
                                "size": [x * (SIZE_SCORE[min(max(int(-nsc), 0), len(SIZE_SCORE) - 1)]
                                              if SIZE_SCORE else 1.0)
+                                        * _vp_boost
                                         for x in (SIZE_MULT + [SIZE_MULT[-1]] * 8)[:ng]],
                                "slip": sl,
                                "grid_n": 1, "escape0": False, "loss0": False,
@@ -909,7 +935,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -952,6 +978,10 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--vp-boost", type=float, default=VP_BOOST,
+                    help="박스 하단이 매물대(250일 VWAP) 위일 때 슬롯 금액 배수")
+    ap.add_argument("--vp", choices=["off", "below", "above", "near"], default=VP_MODE,
+                    help="매물대 필터: below=박스하단이 250일 VWAP 아래 · above=위 · near=±3%%")
     ap.add_argument("--ab-pin", action="store_true",
                     help="A박스 추세선을 진입 시점 값으로 고정 (일별 재계산 대신)")
     ap.add_argument("--rv", action="store_true",
@@ -1039,6 +1069,8 @@ def main():
     RV_MODE = bool(args.rv)
     RV_SLOTS = max(0, int(args.rv_slots))
     AB_PIN = bool(args.ab_pin)
+    VP_MODE = args.vp
+    VP_BOOST = float(args.vp_boost)
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
     SLIP = args.slip / 100.0
