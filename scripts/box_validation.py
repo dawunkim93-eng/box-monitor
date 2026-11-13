@@ -501,7 +501,9 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                * UNIT * hst["size"][k])
                 if k == 0 and hst["grid_n"] == 1:
                     hst["loss0"] = True
-        done.append({"code": i, "entry_day": hst["entry_day"],
+        done.append({"code": i, "symbol": hst.get("symbol"),
+                     "name": hst.get("name"),
+                     "entry_day": hst["entry_day"],
                      "exit_day": int(day), "score": hst["score"],
                      "escape0": hst["escape0"], "loss0": hst["loss0"],
                      "cycles": hst["cycles"], "net": hst["net"],
@@ -515,7 +517,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                      "wrsi_lo12": hst.get("wrsi_lo12")})
         if COMP_DUMP is not None:
             COMP_DUMP.append({
-                "code": i, "exit_day": int(day),
+                "code": i, "symbol": hst.get("symbol"), "name": hst.get("name"),
+                "exit_day": int(day),
                 "entry_day": hst["entry_day"], "kind": hst.get("kind", "std"),
                 "pos": hst.get("cpos"), "atr": hst.get("catr"),
                 "trend": hst.get("ctrend"), "height": hst.get("cheight"),
@@ -826,7 +829,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 _pb_line = (float(s["ma20"][je])
                             if (pb_ok and PB_EXIT_LINE == "ma20"
                                 and not np.isnan(s["ma20"][je])) else None)
-                holdings[i] = {"j": je, "j_entry": je,
+                holdings[i] = {"symbol": s.get("code"), "name": s.get("name"),
+                               "j": je, "j_entry": je,
                                "entry_day": int(dn_s[je]),
                                "entry": px_e, "score": -nsc, "pb": pb_ok, "rv": rv_ok,
                                "rv_line": _rv_line,
@@ -894,7 +898,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                             fill = c_e if c_e < lvl_e else None
                         if fill is not None:
                             close_position(done, holdings, curve, i, fill,
-                                           "하단근접(당일)", D)
+                                           "하단근접(당일)", int(dn_s[je]))
                             free += 1
                             continue
     for i in list(holdings):
