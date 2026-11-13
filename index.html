@@ -1156,7 +1156,7 @@ function mobileRowHTML(r){
     <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
     <div class="mrow">하단 ${pl} · ${atr} · ${esc}</div>
     ${(r.held&&r.rungs_left!=null)?`<div class="mrow" style="color:${r.rungs_left<=1?"var(--red)":"var(--dim)"}">📏 청산선 ${fmt(r.exit_line)}원 · 남은 차수 <b>${r.rungs_left}개</b>${r.rungs_left<=1?" — 추가 매수 금지(청산선 바로 위)":""}</div>`:(r.holdoff?`<div class="mrow" style="color:var(--red)">⚠ 하단 15% 이내 — 추가 차수 보류 (13년 이 자리 당일붕괴 163건 전부 손실 · 건당 -7,052원)</div>`:"")}
-    ${r.cand&&r.limit?`<div class="mrow" style="color:${r.price<=r.limit?"var(--green)":"var(--amber)"}">🎯 지정가 <b>${fmt(r.limit)}원</b> ${r.price<=r.limit?"✅ 지금 지정가 이하":"⛔ 현재가가 지정가 위 — 추격 금지"}</div>`:""}
+    ${r.cand&&r.limit?`<div class="mrow" style="color:${r.price<=r.limit?"var(--green)":"var(--amber)"}">🎯 지정가 <b>${fmt(r.limit)}원</b>${r.limit_date?` <span class="sub">(${r.limit_date} 종가)</span>`:""} ${r.price<=r.limit?"✅ 지금 지정가 이하":"⛔ 현재가가 지정가 위 — 추격 금지"}</div>`:""}
     ${r.amts?`<div class="mrow" style="color:${r.boost===2?"var(--green)":"var(--dim)"}">${r.boost===2?"🟢 매물대 위 ×2":"매물대 아래"} · 사다리 ${r.amts.join("·")}만원</div>`:""}
     <details class="mdet" data-c="${r.code}">
       <summary>점수 상세 · 이력</summary>
@@ -1269,7 +1269,7 @@ function rowHTML(r){
       <td class="hidem">${r.atr!=null?(r.atr*100).toFixed(1):"-"}</td>
       <td>${pbar}${r.pos==null?"":`<span class="sub" style="margin-left:4px">${r.pos<=0?"이탈":r.pos.toFixed(0)+"%"}</span>`}${r.holdoff?'<span class="deep" title="하단 15% 이내 — 추가 차수 보류 (13년 당일붕괴 163건 전부 손실)">⚠</span>':""}</td>
       <td><span title="${r.bname||"경계"} 기준">${lowpct}</span><span class="sub" style="font-size:9.5px">·${r.bname||""}</span></td>
-      <td>${r.cand&&r.limit?`<b style="color:${r.price<=r.limit?"var(--green)":"var(--amber)"}">${fmt(r.limit)}</b>`:``}</td>
+      <td>${r.cand&&r.limit?`<b style="color:${r.price<=r.limit?"var(--green)":"var(--amber)"}">${fmt(r.limit)}</b>${r.limit_date?`<div class="sub">${r.limit_date.slice(5).replace("-","/")} 종가</div>`:""}`:``}</td>
       <td class="hidem">${r.gap!=null?r.gap:"-"}</td>
     </tr>`;
 }
