@@ -273,6 +273,7 @@ def load_universe():
         _amt_w = pd.Series(c * v).rolling(VP_WIN, min_periods=max(20, VP_WIN // 4)).sum().to_numpy()
         _vol_s = pd.Series(v).rolling(VP_WIN, min_periods=max(20, VP_WIN // 4)).sum().to_numpy()
         vwap250 = np.where(_vol_s > 0, _amt_w / np.maximum(_vol_s, 1e-9), np.nan)
+        low52 = pd.Series(c).rolling(250, min_periods=60).min().to_numpy()
         # ── 눌림+박스 유지: 60일선 위 상승 추세 + 20일선 지지(저가 터치·종가 위) + 박스 유효
         ma20_ = pd.Series(c).rolling(20).mean().to_numpy()
         ma60_ = pd.Series(c).rolling(60).mean().to_numpy()
@@ -398,7 +399,7 @@ def load_universe():
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
-                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day, "vwap": vwap250, "v": v})
+                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day, "vwap": vwap250, "v": v, "low52": low52})
     return U
 
 
@@ -488,7 +489,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                      "dur": hst.get("dur", 0),
                      "cbull": hst.get("cbull"),
                      "cbody": hst.get("cbody"),
-                     "clower": hst.get("clower"), "vdist": hst.get("vdist")})
+                     "clower": hst.get("clower"), "vdist": hst.get("vdist"),
+                     "lo52d": hst.get("lo52d")})
         if COMP_DUMP is not None:
             COMP_DUMP.append({
                 "code": i, "exit_day": int(day),
@@ -499,7 +501,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 "loss0": hst["loss0"], "net": round(hst["net"]),
                 "days": hst["j"] - hst["j_entry"], "cycles": hst["cycles"],
                 "exit": why, "cbull": hst.get("cbull"),
-                "cbody": hst.get("cbody"), "clower": hst.get("clower"), "vdist": hst.get("vdist")})
+                "cbody": hst.get("cbody"), "clower": hst.get("clower"), "vdist": hst.get("vdist"),
+                     "lo52d": hst.get("lo52d")})
         curve.append((int(day), hst["net"]))
 
     for D in all_days:
@@ -812,6 +815,9 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                               if knd == "abox"
                                               and not np.isnan(s["adist"][je])
                                               else None)),
+                               "lo52d": ((px_e / float(s["low52"][je]) - 1)
+                                         if (not np.isnan(s["low52"][je])
+                                             and s["low52"][je] > 0) else None),
                                "vdist": ((float(s["wlo"][je]) / float(s["vwap"][j]) - 1)
                                         if (not np.isnan(s["vwap"][j])
                                             and s["vwap"][j] > 0
