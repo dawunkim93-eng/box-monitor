@@ -109,7 +109,7 @@ def main():
             f" · 점수 {r.get('score')}"
             + (f"\n   🟢 매물대 위 ×2 · 사다리 {('·'.join(str(x) for x in r['amts']))}만원"
                if r.get("boost") == 2 and r.get("amts")
-               else f"\n   사다리 {('·'.join(str(x) for x in r.get('amts') or [6,6,9,12,18]))}만원"))
+               else f"\n   사다리 {('·'.join(str(x) for x in r.get('amts') or [6,6,9,12,18,18,18]))}만원"))
     if len(new) > 20:
         lines.append(f"… 외 {len(new)-20}종목")
     lines += ["", "※ 관찰 알림이며 매수 권장이 아닙니다."]

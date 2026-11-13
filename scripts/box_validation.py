@@ -49,7 +49,7 @@ MASTER = PIT / "master.pkl"
 
 UNIT, FEE = 100_000, 0.002
 K = 7                  # 동시 보유 슬롯 (무료 매직스플릿 7슬롯)
-GAP = 0.02             # 기본 갭 (gap-mode=fixed) — 2026-11 매수·매도 2.0% 채택
+GAP = 0.015            # 기본 갭 (gap-mode=fixed) — 2026-11-13 1.5% 채택 (탈출률 79%, 순익 +20%)
 GAP_MODE = "fixed"     # fixed | atr (atr: gap_i = clip(k × ATR14_i, min, max))
 ATR_K = 0.8            # atr 갭 계수
 GAP_MIN, GAP_MAX = 0.015, 0.050   # atr 갭 하한/상한
@@ -57,6 +57,12 @@ NEAR_OF_GAP = 0.8      # atr 모드 근접청산(%) = 0.8 × 갭 → 1차 체결
 EXIT_MODE = "close"     # close(종가 판정, 2026-11-10 채택) | intraday(경계 터치 시 장중 청산)
 ENTRY_EVAL = True       # 진입일 당일에도 청산 판정 (미적용 시 MDD 과소: -422k vs -649k)
 MKT_DN = set()         # 신규 진입 차단일 (지수 급락 쿨다운)
+POS_MAX = 50.0         # 진입 시 밴드 위치 상한(%) — 낮을수록 박스 하단 근처에서만
+BOX_DUR = 0            # 박스 최소 유지 주 수 (0=제한 없음)
+TIME_STOP = 0          # 보유 최대 거래일 (0=제한 없음)
+VOL_MAX = 0.0          # 신호일 거래량 / 20일 평균 상한 (0=제한 없음)
+HARD_STOP = 15.0       # 경계 대비 하드스톱 (%)
+SIZE_MULT_OVR = []     # --size-mult 지정 시 차수별 배수 덮어쓰기
 MIN_ROOM = 6.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 6% (경계 +8%, 2026-11-13)
 EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
 PB_MODE = False        # 눌림+박스 유지 진입 허용 (20일선 지지 · 60일선 위 상승)
@@ -91,7 +97,7 @@ START = 20140901       # 스캔 시작일 (fdr 과거 상한 2014-08)
 BAND_DAYS = int(os.environ.get("BAND_DAYS", "0"))  # >0이면 일봉 N일 밴드로 실험
 WEEKS = 6              # 주봉 밴드 길이(주) — 종가 6개 (2026-11-10 13주→6주)
 BAND_SRC = "close"     # 밴드 재료: close(종가만) · mix(하단=저가, 상단=종가) · full(저가/고가)
-COVER = 0.10           # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 5차(최심 -7.8%)
+COVER = 0.10           # 사다리 커버 → rungs = max(4, round(COVER/gap)) = 7차(갭 1.5%, 최심 -9.1%)
                        # 15차(-30%)는 박스 폭(22~30%) 밖: 5차 대비 순익 +6% · MDD +77% (2026-11-06 실측)
 POOL = "w"             # 박스 풀: w=주봉박스만(현행) · wa=주봉+상승저점 · a=상승저점만
 MAX_TRIPS = 5          # 당일 다중 왕복 상한 (sameday=multi — 같은 차수 재왕복 최대 횟수)
@@ -390,7 +396,7 @@ def load_universe():
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
-                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day, "vwap": vwap250})
+                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day, "vwap": vwap250, "v": v})
     return U
 
 
@@ -537,6 +543,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 elif px < lvl:
                     close_position(done, holdings, curve, i, px, "하단근접 청산", D)
                     continue
+            # 1-b) 보유 기간 상한
+            if TIME_STOP and (j - hst["j_entry"]) >= TIME_STOP:
+                close_position(done, holdings, curve, i, px, "기간종료", D)
+                continue
             # 2) 소멸 — wbox: 밴드 유지·상방 / abox: 구조 붕괴
             if knd == "wbox":
                 if WBREAK == "close":
@@ -551,7 +561,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 continue
             hst["j"] = j
             # 3) 하드스톱 백스톱 (-15%) — 타입 경계 기준
-            stop_px = (B_ * 0.85) if B_ is not None else None
+            stop_px = (B_ * (1 - HARD_STOP / 100)) if B_ is not None else None
             if stop_px is not None and lw <= stop_px:
                 close_position(done, holdings, curve, i, stop_px, "손절-15%", D)
                 continue
@@ -723,6 +733,18 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     if CANDLE_MODE == "bear_tail" \
                             and float(s["lower_sh"][j]) < 1.0:
                         continue
+                if BOX_DUR and knd == "wbox":
+                    if float(s["wdur"][je]) < BOX_DUR:
+                        continue
+                if VOL_MAX > 0:
+                    _v20 = float(s["amt20"][j]) / max(float(s["c"][j]), 1e-9)
+                    if _v20 > 0 and (float(s["v"][j]) if "v" in s else 0) / _v20 > VOL_MAX:
+                        continue
+                if POS_MAX < 50 and knd == "wbox" and not (pb_ok or rv_ok):
+                    _w0p, _w1p = float(s["wlo"][je]), float(s["whi"][je])
+                    if _w1p > _w0p > 0:
+                        if (px_e - _w0p) / (_w1p - _w0p) * 100 > POS_MAX:
+                            continue
                 if ENTRY_ZONE and not (pb_ok or rv_ok):   # 눌림/반전 신호는 존 재확인 생략
                     if knd == "wbox":
                         w0, w1 = float(s["wlo"][je]), float(s["whi"][je])
@@ -991,7 +1013,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN, VP_SCORE, VP_TIER, BOX_SRC, VA_PCT
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN, VP_SCORE, VP_TIER, BOX_SRC, VA_PCT, POS_MAX, BOX_DUR, TIME_STOP, VOL_MAX, HARD_STOP, SIZE_MULT_OVR
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -1034,6 +1056,16 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--hard-stop", type=float, default=HARD_STOP,
+                    help="경계 대비 하드스톱 %% (기본 15)")
+    ap.add_argument("--box-dur", type=int, default=BOX_DUR,
+                    help="박스 최소 유지 주 수")
+    ap.add_argument("--time-stop", type=int, default=TIME_STOP,
+                    help="보유 최대 거래일 (0=없음)")
+    ap.add_argument("--vol-max", type=float, default=VOL_MAX,
+                    help="신호일 거래량/20일평균 상한 (0=없음)")
+    ap.add_argument("--pos-max", type=float, default=POS_MAX,
+                    help="진입 시 밴드 위치 상한(%%)")
     ap.add_argument("--box-src", choices=["band", "va"], default=BOX_SRC,
                     help="박스 정의: band=주봉 6주(현행) · va=1년 거래대금 90%% 혼잡 구간")
     ap.add_argument("--va-pct", type=float, default=VA_PCT,
@@ -1067,7 +1099,7 @@ def main():
     ap.add_argument("--atr-lo", type=float, default=ATR_LO, help="ATR 하한(%%)")
     ap.add_argument("--atr-hi", type=float, default=ATR_HI, help="ATR 상한(%%)")
     ap.add_argument("--slip", type=float, default=SLIP,
-                    help="슬리피지(한쪽, %%%) — 예: 0.3")
+                    help="슬리피지(한쪽, %%) — 예: 0.3")
     ap.add_argument("--min-amt", type=float, default=MIN_AMT,
                     help="진입 시 20일 평균 거래대금 하한 (통화)")
     ap.add_argument("--sell-gap", type=float, default=0.0,
@@ -1096,10 +1128,10 @@ def main():
                     help="flat_first_score 점수 우위 기준 (기본 2점)")
     ap.add_argument("--wbreak", choices=["close", "confirm2", "buffer1"],
                     default="close",
-                    help="주봉박스 소멸 판정 (close=일봉 즉시 · confirm2=2연속 · buffer1=1% 버퍼)")
+                    help="주봉박스 소멸 판정 (close=일봉 즉시 · confirm2=2연속 · buffer1=1%% 버퍼)")
     ap.add_argument("--candle", choices=["all", "bear", "bear_tail"],
                     default="bear",
-                    help="신호일 캔들 필터 (bear=음봉만 · bear_tail=음봉+아래꼬리1%+)")
+                    help="신호일 캔들 필터 (bear=음봉만 · bear_tail=음봉+아래꼬리1%%+)")
     ap.add_argument("--entry-zone", action=argparse.BooleanOptionalAction,
                     default=True,
                     help="진입 시점에도 매수존 조건 재확인 (기본 on · --no-entry-zone으로 해제)")
@@ -1140,6 +1172,14 @@ def main():
     VP_WIN = max(20, int(args.vp_win))
     VP_SCORE = bool(args.vp_score)
     BOX_SRC = args.box_src
+    POS_MAX = float(args.pos_max)
+    BOX_DUR = max(0, int(args.box_dur))
+    TIME_STOP = max(0, int(args.time_stop))
+    VOL_MAX = float(args.vol_max)
+    HARD_STOP = float(args.hard_stop)
+    if args.size_mult.strip():
+        SIZE_MULT_OVR = [float(x) for x in args.size_mult.split(",")]
+        SIZE_MULT[:] = SIZE_MULT_OVR
     VA_PCT = float(args.va_pct)
     VP_TIER = bool(args.vp_tier)
     ATR_LO = args.atr_lo
