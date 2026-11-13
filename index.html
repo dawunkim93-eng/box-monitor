@@ -390,14 +390,14 @@
         <ul>
           <li><b>살 때</b>: 전일 종가 기준 신호 + 현재가가 <b>지정가 이하</b>일 때만 (지정가 위면 추격 금지)</li>
           <li><b>팔 때</b>: <b>종가</b>가 밴드 하단×1.02 아래 (장중 흔들림으로 팔지 않음)</li>
-          <li><b>기록</b>: 16:40 복기에서 규칙 위반 여부 확인 · 2026-11-06~13 복기 결과 손실 6건이 모두 여지 4% 미달 진입</li>
+          <li><b>기록</b>: 16:40 복기에서 규칙 위반 여부 확인 · 2026-11-06~13 복기 결과 손실 6건이 모두 여지 6% 미달 진입</li>
         </ul>
       </div>
       <div class="rulebox good">
         <b>실전 매매원칙 7줄</b>
         <ol class="quick">
-          <li><b>무엇을</b> · 주봉 6주 종가 밴드 · 폭 20~30% · 드리프트 ±15% · 거래대금 10억+</li>
-          <li><b>언제 사나</b> · 밴드 하위 절반 + <b>경계 +6% 위</b> + 전일 음봉 → 다음날 <b>시가</b></li>
+          <li><b>무엇을</b> · 주봉 6주 종가 밴드 · 폭 20~30% · 드리프트 ±15% · 거래대금 10억+ · 경계 +8%</li>
+          <li><b>언제 사나</b> · 밴드 하위 절반 + <b>경계 +8% 위</b> + 전일 음봉 → 다음날 <b>시가</b></li>
           <li><b>얼마나</b> · 6·6·9·12·18만(1:1:1.5:2:3) = 슬롯 51만 · 최대 <b>7슬롯</b>(357만, 무료 한도)</li>
           <li><b>어떤 순서로</b> · 자리가 없으면 <b>점수 높은 순</b>. 점수는 합격선이 아님 — 그날 최고가 3점이면 매수, 1~2점뿐이면 쉼</li>
           <li><b>언제 파나</b> · <b>종가</b>가 경계×1.02 아래면 청산(진입일 포함) · 다 팔리면 슬롯 종료(재그리드 없음)</li>
@@ -418,7 +418,7 @@
         <ul>
           <li><b>주봉박스</b>: 최근 완료 6주 종가 밴드 · 폭 20~30% · |순드리프트| ≤15% · 종가가 밴드 내</li>
           <li><b>상승저점</b>(현재 미사용): 피벗 저가 3개 연속 상승(v2&gt;v1×1.005 · v1&gt;v0×0.995) · 종가 ≥ 추세선×0.995</li>
-          <li><b>매수존</b>: 밴드 위치 ≤50% · <b>경계 +6% 이상</b>(여지 4%)</li>
+          <li><b>매수존</b>: 밴드 위치 ≤50% · <b>경계 +8% 이상</b>(여지 6%)</li>
           <li><b>캔들 필터</b>: 신호일(전일) <b>음봉</b> (아래꼬리 조건은 2026-11-10 제거)</li>
           <li><b>매물대 배분</b>: 박스 하단이 250일 거래대금 가중평균가(VWAP) <b>위</b>면 사다리 금액 <b>2배</b>(12·12·18·24·36만) · 아래면 기본(6·6·9·12·18만). 13년 검증에서 순익 +29%, 낙폭 +12%, 순익/낙폭 101.5 → 117.1</li>
           <li>보유 종목 제외 · 상위 7슬롯 · 1차수 <b>60,000원</b> (2차 6만 · 3차 9만 · 4차 12만 · 5차 18만)</li>
@@ -757,7 +757,7 @@
 
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~6% = 관찰 · <b>+6% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(6주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 풀에서 제외<br>청산 기준(13년 백테스트 최적): <b>종가</b>가 <b>하단×1.02</b> 아래면 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · <b>✅ 진입</b>=전일 종가 기준 신호 성립 · <b>지정가</b>=초록이면 지금 그 가격 이하(주문 가능), 주황이면 지정가 위(추격 금지) · <span style="color:var(--green)">×2</span>=박스 하단이 250일 매물대 위(금액 2배) · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~6%(여지 4% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~8% = 관찰 · <b>+8% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(6주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 풀에서 제외<br>청산 기준(13년 백테스트 최적): <b>종가</b>가 <b>하단×1.02</b> 아래면 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · <b>✅ 진입</b>=전일 종가 기준 신호 성립 · <b>지정가</b>=초록이면 지금 그 가격 이하(주문 가능), 주황이면 지정가 위(추격 금지) · <span style="color:var(--green)">×2</span>=박스 하단이 250일 매물대 위(금액 2배) · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~8%(여지 6% 미만, 매수 제외) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 7점 만점(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -1113,9 +1113,9 @@ function render(){
   updateScrollHints();
 }
 function roomShort(r){
-  // 조건은 다 맞는데 경계 +2~6%(여지 4% 미만)라 후보에서 빠진 경우
+  // 조건은 다 맞는데 경계 +2~8%(여지 6% 미만)라 후보에서 빠진 경우
   return !r.cand && !r.held && r.bkind==="wbox" && r.pct_low!=null
-    && r.pct_low>=2 && r.pct_low<6 && r.bull===false
+    && r.pct_low>=2 && r.pct_low<8 && r.bull===false
     && r.pos!=null && r.pos<=50;
 }
 function mobileRowHTML(r){
@@ -1127,7 +1127,7 @@ function mobileRowHTML(r){
   const risk = r.risk?'<span class="deep" title="부채&gt;150%+영업적자">⚠재무</span>':"";
   const status = r.held?'<span class="wait">📋 보유</span>'
     :(r.cand?'<span class="btyp bcand">✅ 진입</span>'
-      :(roomShort(r)?'<span class="btyp broom" title="경계 +2~6% — 여지 4% 미만이라 진입 제외">🕒 여지부족</span>'
+      :(roomShort(r)?'<span class="btyp broom" title="경계 +2~6% — 여지 6% 미만이라 진입 제외">🕒 여지부족</span>'
         :'<span class="wait">⏳ 대기</span>'));
   const scoreTxt = (r.score==null)?"-":
     `${r.score}점`+((r.score_m!=null&&r.score>r.score_m)?'<span class="up">▲</span>'
@@ -1245,8 +1245,8 @@ function rowHTML(r){
         ${r.boost===2?`<span class="btyp bvp" title="박스 하단이 250일 매물대(VWAP) 위 — 금액 2배: ${(r.amts||[]).join('·')}만원">×2</span>`:""}
         ${r.risk?`<span class="deep" style="cursor:default" title="부채>150%+영업적자">⚠재무</span>`:""}
         ${r.held?`<span class="wait" title="보유 종목 (진입 후보 제외)">📋 보유</span>`
-          :(r.cand?`<span class="btyp bcand" title="매수존 + 전일 음봉·꼬리 + 여지 4% 조건 충족">✅ 진입</span>`
-          :(roomShort(r)?`<span class="btyp broom" title="경계 +2~6% — 여지 4% 미만이라 진입 제외">🕒 여지부족</span>`
+          :(r.cand?`<span class="btyp bcand" title="매수존 + 전일 음봉·꼬리 + 여지 6% 조건 충족">✅ 진입</span>`
+          :(roomShort(r)?`<span class="btyp broom" title="경계 +2~6% — 여지 6% 미만이라 진입 제외">🕒 여지부족</span>`
           :`<span class="wait" title="매수존/캔들 조건 미충족 — 지켜보기">⏳ 대기</span>`))}</td>
       <td>${sCell}</td>
       <td>${escCell}</td>
@@ -2291,7 +2291,7 @@ function copyAsk(){
   const t=`오늘 데일리매매를 복기해줘.
 
 [전략]
-주봉 6주 박스, 진입은 밴드 하위 절반과 경계 +6% 이상, 전일 음봉, 다음날 시가.
+주봉 6주 박스, 진입은 밴드 하위 절반과 경계 +8% 이상, 전일 음봉, 다음날 시가.
 사다리 5차 2% 갭(6·6·9·12·18만원), 종가가 경계×1.02 아래일 때 청산, 7슬롯, 급락 다음날 신규 진입 중단.
 
 [시장]
