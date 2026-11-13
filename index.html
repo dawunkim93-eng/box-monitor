@@ -1058,9 +1058,13 @@ function render(){
         ncls=(nstat==="유지")?"up":(nstat==="이탈"?"deep":"");
       }
       const fileOnly=(!checked&&h)?' <span class="sub">· 보유파일만</span>':"";
-      const detailLine=pendingFlag
+      const rl=(r&&r.rungs_left!=null)?r.rungs_left:null;
+      const rline=(h&&rl!=null)
+        ?`<br><span style="color:${rl<=1?"var(--red)":"var(--dim)"}">📏 청산선 ${fmt(r.exit_line)}원 · 남은 차수 <b>${rl}개</b>${rl<=1?" — 추가 매수 금지":""}</span>`
+        :"";
+      const detailLine=(pendingFlag
         ?'<br><span class="sub">체크됨 · 복사·전송 대기</span>'
-        :(h&&h.detail?`<br><span class="sub">${h.detail}</span>`:"");
+        :(h&&h.detail?`<br><span class="sub">${h.detail}</span>`:""))+rline;
       return `<tr><td><input type="checkbox" class="heldchk" data-c="${code}" ${checked?"checked":""} aria-label="보유 체크"></td>`
         +`<td class="nm"><b>${name}</b>${fileOnly}${detailLine}</td>`
         +`<td class="nm ${dcls}" title="${dtip}">${dstat}</td>`
