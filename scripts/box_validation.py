@@ -63,6 +63,7 @@ TIME_STOP = 0          # 보유 최대 거래일 (0=제한 없음)
 VOL_MAX = 0.0          # 신호일 거래량 / 20일 평균 상한 (0=제한 없음)
 HARD_STOP = 15.0       # 경계 대비 하드스톱 (%)
 SIZE_MULT_OVR = []     # --size-mult 지정 시 차수별 배수 덮어쓰기
+RUNG_FILL = [0] * 12   # 차수별 체결 횟수 (진단용)
 MIN_ROOM = 6.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 6% (경계 +8%, 2026-11-13)
 EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
 PB_MODE = False        # 눌림+박스 유지 진입 허용 (20일선 지지 · 60일선 위 상승)
@@ -572,6 +573,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 if not held[k] and lw <= levels[k]:
                     held[k] = True
                     bought.add(k)
+                    if k < len(RUNG_FILL):
+                        RUNG_FILL[k] += 1
             for k in range(len(held)):
                 if not held[k]:
                     continue
@@ -986,6 +989,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
         "score_escape": score_escape,
         "dur_escape": dur_escape,
         "dur_score_x": dur_score_x,
+        "rung_fill": RUNG_FILL[:8],
         "candle_escape": candle_escape,
         "candle_yearly": candle_yearly,
         "capital": {"avg": round(av_cap), "peak": round(pk_cap),
@@ -1308,7 +1312,7 @@ def main():
         "sensitivity": {m: {"sameday_ko": SAMEDAY_KO[m], **v} for m, v in sens.items()},
         **{kk: r[kk] for kk in ("summary", "yearly", "exit_kinds", "score_escape",
                                 "dur_escape", "dur_score_x", "candle_escape",
-                                "candle_yearly",
+                                "candle_yearly", "rung_fill",
                                 "capital", "recent_positions", "stock_history")},
     }
     print(f"[INFO] 포지션 {s['positions']:,} ({s['start_year']}~{s['end_year']}"
