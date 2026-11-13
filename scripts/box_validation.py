@@ -68,6 +68,8 @@ AB_PIN = False         # A박스 추세선을 진입 시점 값으로 고정
 VP_MODE = "off"        # 매물대 필터: off | below(하단<매물대중심) | above | near(±3%)
 VP_BOOST = 1.0         # 박스 하단이 매물대 위일 때 슬롯 금액 배수
 VP_WIN = 250           # 매물대(VWAP) 기간(거래일)
+VP_SCORE = False       # 매물대 거리로 점수 가감 (+2/+1/0/-1)
+VP_TIER = False        # 매물대 거리로 금액 차등 (×1/×1.5/×2/×0.8)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
@@ -338,6 +340,11 @@ def load_universe():
             return (None, None, None, None)
         sc = np.array([score_new(knd, *_comp(j, knd))
                        for j, knd in zip(ti, kinds_arr)], dtype=np.int64)
+        if VP_SCORE and len(ti):
+            _d = (wlo[ti] / np.maximum(vwap250[ti], 1e-9) - 1)
+            _add = np.where(_d >= 0.15, 2, np.where(_d >= 0.05, 1,
+                           np.where(_d >= -0.05, 0, -1)))
+            sc = np.clip(sc + _add.astype(np.int64), 0, 7)
         U.append({"code": code, "name": name, "dn": dn, "o": o, "h": h, "l": l,
                   "c": c, "atr": atr, "amt20": amt20,
                   "bull": bull, "body": body, "lower_sh": lower_sh,
@@ -701,11 +708,17 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                         ng = int(min(max(int(_rm // (gi * 100)) + 1, 1), rungs))
                 _rv_line = (float(s["l"][j]) * 0.99 if rv_ok else None)
                 _vp_boost = 1.0
-                if VP_BOOST != 1.0 and knd == "wbox":
+                if knd == "wbox":
                     _vp_v = float(s["vwap"][j]) if not np.isnan(s["vwap"][j]) else 0.0
                     _wlo_e = float(s["wlo"][je])
-                    if _vp_v > 0 and _wlo_e > _vp_v:
-                        _vp_boost = VP_BOOST
+                    if _vp_v > 0:
+                        _d_e = _wlo_e / _vp_v - 1
+                        if VP_TIER:
+                            _vp_boost = (2.0 if _d_e >= 0.15 else
+                                         1.5 if _d_e >= 0.05 else
+                                         0.8 if _d_e < -0.05 else 1.0)
+                        elif VP_BOOST != 1.0 and _wlo_e > _vp_v:
+                            _vp_boost = VP_BOOST
                 _pb_line = (float(s["ma20"][je])
                             if (pb_ok and PB_EXIT_LINE == "ma20"
                                 and not np.isnan(s["ma20"][je])) else None)
@@ -936,7 +949,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN, VP_SCORE, VP_TIER
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -979,6 +992,10 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--vp-score", action="store_true",
+                    help="매물대 거리로 점수 가감 (0.15↑ +2 · 0.05↑ +1 · -0.05↓ -1)")
+    ap.add_argument("--vp-tier", action="store_true",
+                    help="매물대 거리로 금액 차등 (0.15↑ ×2 · 0.05↑ ×1.5 · -0.05↓ ×0.8)")
     ap.add_argument("--vp-win", type=int, default=VP_WIN,
                     help="매물대 VWAP 기간(거래일), 기본 250")
     ap.add_argument("--vp-boost", type=float, default=VP_BOOST,
@@ -1075,6 +1092,8 @@ def main():
     VP_MODE = args.vp
     VP_BOOST = float(args.vp_boost)
     VP_WIN = max(20, int(args.vp_win))
+    VP_SCORE = bool(args.vp_score)
+    VP_TIER = bool(args.vp_tier)
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
     SLIP = args.slip / 100.0
