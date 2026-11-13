@@ -66,7 +66,7 @@ RV_MODE = False        # 반전 돌파 진입 (장기 하락 + 바닥 + 거래�
 RV_SLOTS = 0           # 반전 전용 슬롯 수 (0=구분 없음)
 AB_PIN = False         # A박스 추세선을 진입 시점 값으로 고정
 VP_MODE = "off"        # 매물대 필터: off | below(하단<매물대중심) | above | near(±3%)
-VP_BOOST = 1.0         # 박스 하단이 매물대 위일 때 슬롯 금액 배수
+VP_BOOST = 2.0         # 박스 하단이 매물대 위일 때 슬롯 금액 배수 (2026-11-12 채택)
 VP_WIN = 250           # 매물대(VWAP) 기간(거래일)
 BOX_SRC = "band"      # 박스 정의: band(주봉 6주) | va(1년 거래대금 90% 혼잡 구간)
 VA_PCT = 0.90          # 혼잡 구간 비율
@@ -1237,6 +1237,7 @@ def main():
                    "gap": f"{args.gap*100:g}% 고정",
                    "weeks": WEEKS,
                    "min_width": MIN_WIDTH, "max_width": MAX_WIDTH,
+                   "vp_boost": VP_BOOST, "vp_win": VP_WIN, "box_src": BOX_SRC,
                    "rotate": ROTATE,
                    "rotate_margin": ROT_MARGIN,
                    "pool": {"w": f"주봉박스({WEEKS}주 종가밴드)만",
