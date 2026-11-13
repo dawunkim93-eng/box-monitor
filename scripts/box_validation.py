@@ -66,6 +66,7 @@ SIZE_MULT_OVR = []     # --size-mult 지정 시 차수별 배수 덮어쓰기
 RUNG_FILL = [0] * 12   # 차수별 체결 횟수 (진단용)
 MIN_ROOM = 6.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 6% (경계 +8%, 2026-11-13)
 EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
+EXIT_AT = "close"      # 청산 체결: close(당일 종가) | next_open(다음날 시가)
 PB_MODE = False        # 눌림+박스 유지 진입 허용 (20일선 지지 · 60일선 위 상승)
 PB_EXIT_LINE = "band"  # 눌림 포지션 청산선: band(밴드 하단) | ma20(진입 시점 20일선)
 PB_SLOTS = 0           # 눌림 전용 슬롯 수 (0=구분 없음 · 주봉은 K_-PB_SLOTS 사용)
@@ -505,11 +506,17 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
         if D < START:
             continue
         rotated_today = set()
+        pending_exit = []
         free_prev = K_ - len(holdings)   # 당일 시작(전일 종가) 시점의 빈 슬롯
         for i in list(holdings):
             hst, s = holdings[i], U[i]
             dn = s["dn"]
             j = int(np.searchsorted(dn, D))
+            if hst.get("exit_pending"):
+                _px = float(s["o"][j]) if j < len(dn) else float(s["c"][hst["j"]])
+                if _px > 0:
+                    close_position(done, holdings, curve, i, _px, "하단근접(다음날시가)", D)
+                    continue
             if j >= len(dn) or dn[j] != D:
                 close_position(done, holdings, curve, i,
                                float(s["c"][hst["j"]]), "데이터갭", D)
@@ -542,7 +549,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                        "하단근접(장중)", D)
                         continue
                 elif px < lvl:
-                    close_position(done, holdings, curve, i, px, "하단근접 청산", D)
+                    if EXIT_AT == "next_open":
+                        hst["exit_pending"] = True
+                    else:
+                        close_position(done, holdings, curve, i, px, "하단근접 청산", D)
                     continue
             # 1-b) 보유 기간 상한
             if TIME_STOP and (j - hst["j_entry"]) >= TIME_STOP:
@@ -1013,7 +1023,7 @@ def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
     global EXIT_MODE, ENTRY_EVAL, MKT_DN
-    global MIN_ROOM, EXIT_BUF, BAND_SRC
+    global MIN_ROOM, EXIT_BUF, BAND_SRC, EXIT_AT
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
@@ -1051,6 +1061,8 @@ def main():
                     help="최소 진입 여지(%%) — 진입가→청산선 거리")
     ap.add_argument("--band-src", choices=["close", "mix", "full"], default=BAND_SRC,
                     help="밴드 재료: close=종가만(현행) · mix=하단 저가+상단 종가 · full=저가/고가")
+    ap.add_argument("--exit-at", choices=["close", "next_open"], default=EXIT_AT,
+                    help="청산 체결 시점: close=당일 종가 · next_open=다음날 시가")
     ap.add_argument("--exit-buf", type=float, default=EXIT_BUF,
                     help="청산선 위치(%%). +2=밴드하단 2%% 위(현행) · 0=하단 · -2=하단 2%% 아래")
     ap.add_argument("--adapt-rungs", action=argparse.BooleanOptionalAction,
@@ -1149,6 +1161,7 @@ def main():
     globals()["BAND_DAYS"] = int(getattr(args, "band_days", 0) or 0)
     globals()["WEEKS"] = int(getattr(args, "weeks", 6) or 6)
     globals()["EXIT_BUF"] = float(getattr(args, "exit_buf", 2.0))
+    globals()["EXIT_AT"] = getattr(args, "exit_at", "close")
     globals()["BAND_SRC"] = getattr(args, "band_src", "close")
     globals()["SIZE_SCORE"] = ([float(x) for x in args.size_score.split(",")]
                                if args.size_score.strip() else [])
