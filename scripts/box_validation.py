@@ -1072,8 +1072,8 @@ def main():
     global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN, VP_SCORE, VP_TIER, BOX_SRC, VA_PCT, POS_MAX, BOX_DUR, TIME_STOP, VOL_MAX, HARD_STOP, SIZE_MULT_OVR
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
-                    default="multi",
-                    help="당일 체결 가정 (기본 multi=분봉 다중 왕복 근사)")
+                    default="all",
+                    help="당일 체결 가정 (기본 all=저가체결·고가매도 · 분봉 실측 1.12배) · multi는 과대(1.88배)")
     ap.add_argument("--gap", type=float, default=GAP)
     ap.add_argument("--gap-mode", choices=["fixed", "atr"], default=GAP_MODE,
                     help="갭 설정 (fixed=고정 · atr=k×ATR14 종목별)")
