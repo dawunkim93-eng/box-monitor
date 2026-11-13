@@ -65,6 +65,7 @@ HARD_STOP = 15.0       # 경계 대비 하드스톱 (%)
 SIZE_MULT_OVR = []     # --size-mult 지정 시 차수별 배수 덮어쓰기
 RUNG_FILL = [0] * 12   # 차수별 체결 횟수 (진단용)
 MIN_ROOM = 6.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 6% (경계 +8%, 2026-11-13)
+LO52_MIN = 0.0         # 52주 저가 대비 최소 거리(%) — 이보다 가까우면 제외
 EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
 EXIT_AT = "close"      # 청산 체결: close(당일 종가) | next_open(다음날 시가)
 PB_MODE = False        # 눌림+박스 유지 진입 허용 (20일선 지지 · 60일선 위 상승)
@@ -713,6 +714,11 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     _w0 = float(s["wlo"][je])
                     if _w0 > 0 and (px_e / (_w0 * (1 + EXIT_BUF / 100)) - 1) * 100 < MIN_ROOM:
                         continue
+                if LO52_MIN > 0:
+                    _l52 = float(s["low52"][je])
+                    if not np.isnan(_l52) and _l52 > 0 and \
+                            (px_e / _l52 - 1) * 100 < LO52_MIN:
+                        continue
                 if VP_MODE != "off" and knd == "wbox":
                     _vp = float(s["vwap"][j]) if not np.isnan(s["vwap"][j]) else 0.0
                     if _vp <= 0:
@@ -1029,7 +1035,7 @@ def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
     global EXIT_MODE, ENTRY_EVAL, MKT_DN
-    global MIN_ROOM, EXIT_BUF, BAND_SRC, EXIT_AT
+    global MIN_ROOM, EXIT_BUF, BAND_SRC, EXIT_AT, LO52_MIN
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
@@ -1063,6 +1069,8 @@ def main():
     ap.add_argument("--cool", type=int, default=0,
                     help="지수 -cool-thr%% 이하 마감 후 신규 진입 중단 일수")
     ap.add_argument("--cool-thr", type=float, default=3.0)
+    ap.add_argument("--lo52-min", type=float, default=LO52_MIN,
+                    help="52주 저가 대비 최소 거리 %% — 이보다 가까우면 진입 제외 (기본 0)")
     ap.add_argument("--min-room", type=float, default=MIN_ROOM,
                     help="최소 진입 여지(%%) — 진입가→청산선 거리")
     ap.add_argument("--band-src", choices=["close", "mix", "full"], default=BAND_SRC,
@@ -1179,6 +1187,7 @@ def main():
     EXIT_MODE = args.exit_mode
     ENTRY_EVAL = args.entry_eval
     MIN_ROOM = args.min_room
+    LO52_MIN = float(getattr(args, "lo52_min", 0.0))
     ADAPT_RUNGS = args.adapt_rungs
     MIN_SCORE = args.min_score
     K = args.slots
