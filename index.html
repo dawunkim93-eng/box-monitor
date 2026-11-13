@@ -1202,6 +1202,10 @@ function mobileHoldHTML(code,h,r){
     ncls=(nstat==="유지")?"up":(nstat==="이탈")?"deep":"";
   }
   const detail=pending?"체크됨 · 복사·전송 대기":(h&&h.detail?h.detail:"");
+  const rl2=(r&&r.rungs_left!=null)?r.rungs_left:null;
+  const rline2=(h&&rl2!=null)
+    ?`<div class="mrow" style="color:${rl2<=1?"var(--red)":"var(--dim)"}">📏 청산선 ${fmt(r.exit_line)}원 · 남은 차수 <b>${rl2}개</b>${rl2<=1?" — 추가 매수 금지":""}</div>`
+    :"";
   return `<div class="mcard${(h&&h.pct_low!=null&&h.pct_low<0)?" brk":""}">
     <div class="mtop"><input type="checkbox" class="heldchk" data-c="${code}" ${checked?"checked":""} aria-label="보유 체크">
       <b class="mname">${name}</b>${badge}</div>
@@ -1209,6 +1213,7 @@ function mobileHoldHTML(code,h,r){
     <div class="mrow">위치 ${posBar} ${posTxt}</div>
     <div class="mrow">전일 <span class="${dcls}">${dstat}</span> · 현재 <span class="${ncls}">${nstat}</span> · ${band}</div>
     ${detail?`<div class="msub">${detail}</div>`:""}
+    ${rline2}
   </div>`;
 }
 function bindMobileDetails(){
