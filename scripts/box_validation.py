@@ -67,6 +67,7 @@ RV_SLOTS = 0           # 반전 전용 슬롯 수 (0=구분 없음)
 AB_PIN = False         # A박스 추세선을 진입 시점 값으로 고정
 VP_MODE = "off"        # 매물대 필터: off | below(하단<매물대중심) | above | near(±3%)
 VP_BOOST = 1.0         # 박스 하단이 매물대 위일 때 슬롯 금액 배수
+VP_WIN = 250           # 매물대(VWAP) 기간(거래일)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
 MIN_SCORE = 0          # 최소 진입 점수 (0=비활성)
 SLOT_FREE_MODE = "prev_close"  # prev_close(보수·채택) | after_close(당일 청산이 당일 시가 슬롯을 비움)
@@ -221,8 +222,8 @@ def load_universe():
             inb = okw & (c >= wlo * 0.99) & (c <= whi * 1.01)
             wvalid = okb & inb
         liq = np.nan_to_num(amt20) >= AMT_MIN
-        _amt_w = pd.Series(c * v).rolling(250, min_periods=60).sum().to_numpy()
-        _vol_s = pd.Series(v).rolling(250, min_periods=60).sum().to_numpy()
+        _amt_w = pd.Series(c * v).rolling(VP_WIN, min_periods=max(20, VP_WIN // 4)).sum().to_numpy()
+        _vol_s = pd.Series(v).rolling(VP_WIN, min_periods=max(20, VP_WIN // 4)).sum().to_numpy()
         vwap250 = np.where(_vol_s > 0, _amt_w / np.maximum(_vol_s, 1e-9), np.nan)
         # ── 눌림+박스 유지: 60일선 위 상승 추세 + 20일선 지지(저가 터치·종가 위) + 박스 유효
         ma20_ = pd.Series(c).rolling(20).mean().to_numpy()
@@ -935,7 +936,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -978,6 +979,8 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--vp-win", type=int, default=VP_WIN,
+                    help="매물대 VWAP 기간(거래일), 기본 250")
     ap.add_argument("--vp-boost", type=float, default=VP_BOOST,
                     help="박스 하단이 매물대(250일 VWAP) 위일 때 슬롯 금액 배수")
     ap.add_argument("--vp", choices=["off", "below", "above", "near"], default=VP_MODE,
@@ -1071,6 +1074,7 @@ def main():
     AB_PIN = bool(args.ab_pin)
     VP_MODE = args.vp
     VP_BOOST = float(args.vp_boost)
+    VP_WIN = max(20, int(args.vp_win))
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
     SLIP = args.slip / 100.0
