@@ -442,7 +442,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                      "dur": hst.get("dur", 0),
                      "cbull": hst.get("cbull"),
                      "cbody": hst.get("cbody"),
-                     "clower": hst.get("clower")})
+                     "clower": hst.get("clower"), "vdist": hst.get("vdist")})
         if COMP_DUMP is not None:
             COMP_DUMP.append({
                 "code": i, "exit_day": int(day),
@@ -453,7 +453,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 "loss0": hst["loss0"], "net": round(hst["net"]),
                 "days": hst["j"] - hst["j_entry"], "cycles": hst["cycles"],
                 "exit": why, "cbull": hst.get("cbull"),
-                "cbody": hst.get("cbody"), "clower": hst.get("clower")})
+                "cbody": hst.get("cbody"), "clower": hst.get("clower"), "vdist": hst.get("vdist")})
         curve.append((int(day), hst["net"]))
 
     for D in all_days:
@@ -739,6 +739,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                               if knd == "abox"
                                               and not np.isnan(s["adist"][je])
                                               else None)),
+                               "vdist": ((float(s["wlo"][je]) / float(s["vwap"][j]) - 1)
+                                        if (not np.isnan(s["vwap"][j])
+                                            and s["vwap"][j] > 0
+                                            and float(s["wlo"][je]) > 0) else None),
                                "catr": (float(s["atr"][je])
                                         if not np.isnan(s["atr"][je]) else None),
                                "ctrend": (float(s["wdrift"][je]) if knd == "wbox"
