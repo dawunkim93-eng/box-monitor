@@ -67,7 +67,9 @@ def main():
     d = json.loads(LIVE.read_text(encoding="utf-8"))
     now = datetime.now(ZoneInfo("Asia/Seoul"))
     today = now.strftime("%Y-%m-%d")
-    rows = [r for r in d.get("rows", []) if r.get("cand")]
+    # 신호(전일 종가 기준) + 현재가가 지정가 이하 = 지금 주문 가능한 순간만 알린다
+    rows = [r for r in d.get("rows", [])
+            if r.get("cand") and r.get("limit") and (r.get("price") or 0) <= r["limit"]]
     cd = d.get("cooldown") or {}
     if cd.get("on") and not test:
         print(f"[INFO] 급락 쿨다운 중(전일 {cd.get('pct')}%) — 신규 진입 알림 생략")
@@ -98,8 +100,8 @@ def main():
                 ensure_ascii=False), encoding="utf-8")
         return
     head = ("🧪 <b>[테스트] 알림 형식 예시</b>\n\n" if "--sample" in args else "")
-    lines = [f"🎯 <b>진입 가능 {len(new)}종목</b> {now:%m-%d %H:%M}",
-             "다음 거래일 지정가 주문 · 시가가 낮으면 시가 체결, 높으면 스킵", ""]
+    lines = [f"🎯 <b>지정가 도달 {len(new)}종목</b> {now:%m-%d %H:%M}",
+             "신호 성립 + 현재가가 지정가 이하 — 지금 주문 가능한 자리입니다.", ""]
     for r in new[:20]:
         lines.append(
             f"· <b>{r['name']}</b> {fmt(r.get('price'))}원 · 지정가 <b>{fmt(r.get('limit'))}</b>"
