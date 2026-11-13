@@ -68,6 +68,8 @@ AB_PIN = False         # A박스 추세선을 진입 시점 값으로 고정
 VP_MODE = "off"        # 매물대 필터: off | below(하단<매물대중심) | above | near(±3%)
 VP_BOOST = 1.0         # 박스 하단이 매물대 위일 때 슬롯 금액 배수
 VP_WIN = 250           # 매물대(VWAP) 기간(거래일)
+BOX_SRC = "band"      # 박스 정의: band(주봉 6주) | va(1년 거래대금 90% 혼잡 구간)
+VA_PCT = 0.90          # 혼잡 구간 비율
 VP_SCORE = False       # 매물대 거리로 점수 가감 (+2/+1/0/-1)
 VP_TIER = False        # 매물대 거리로 금액 차등 (×1/×1.5/×2/×0.8)
 ADAPT_RUNGS = False    # 차수를 room에 맞춰 자동 축소 (floor(room/gap)+1, 최대 5)
@@ -192,6 +194,42 @@ def load_universe():
         wwidth = np.where(okw, wwidthw[np.clip(kk, 0, nw - 1)], 0.0)
         wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
                         (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
+        if BOX_SRC == "va":
+            # ── 1년 거래대금 90% 혼잡 구간을 박스로 사용 (5일 간격 계산 후 채움)
+            N_ = 250
+            step = 5
+            vlo_a = np.full(n, np.nan)
+            vhi_a = np.full(n, np.nan)
+            amt_ = c * v
+            for e_ in range(N_ - 1, n, step):
+                cs = c[e_ - N_ + 1:e_ + 1]
+                ws = amt_[e_ - N_ + 1:e_ + 1]
+                order = np.argsort(cs)
+                csum = np.cumsum(ws[order])
+                tot = csum[-1] if len(csum) else 0
+                if tot <= 0:
+                    continue
+                lo_i = int(np.searchsorted(csum, tot * (1 - VA_PCT) / 2))
+                hi_i = int(np.searchsorted(csum, tot * (1 + VA_PCT) / 2))
+                vlo_a[e_] = cs[order][min(lo_i, N_ - 1)]
+                vhi_a[e_] = cs[order][min(hi_i, N_ - 1)]
+            # 앞으로 채우기
+            last_lo = last_hi = np.nan
+            for i_ in range(n):
+                if not np.isnan(vlo_a[i_]):
+                    last_lo, last_hi = vlo_a[i_], vhi_a[i_]
+                else:
+                    vlo_a[i_], vhi_a[i_] = last_lo, last_hi
+            ok_v = ~np.isnan(vlo_a) & (vhi_a > vlo_a)
+            wlo = np.where(ok_v, vlo_a, 0.0)
+            whi = np.where(ok_v, vhi_a, 0.0)
+            wwidth = np.where(ok_v, whi / np.maximum(wlo, 1e-9) - 1, 0.0)
+            _ctr = (whi + wlo) / 2
+            wdrift = np.where(ok_v, c / np.maximum(_ctr, 1e-9) - 1, 0.0)
+            wflag = (ok_v & (wwidth >= MIN_WIDTH / 100) & (wwidth <= MAX_WIDTH / 100)
+                     & (np.abs(wdrift) <= 0.25))
+            wpos = np.where(np.maximum(whi - wlo, 1e-9) > 0,
+                            (c - wlo) / np.maximum(whi - wlo, 1e-9), 1.0)
         if BAND_DAYS > 0:
             # 밴드를 주봉 13주 대신 일봉 N일 종가 밴드로 대체 (실험용)
             N = BAND_DAYS
@@ -953,7 +991,7 @@ def main():
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
-    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN, VP_SCORE, VP_TIER
+    global MIN_WIDTH, MAX_WIDTH, ATR_LO, ATR_HI, SLIP, MIN_AMT, SELL_GAP, SIZE_MULT, PB_MODE, PB_EXIT_LINE, PB_SLOTS, RV_MODE, RV_SLOTS, AB_PIN, VP_MODE, VP_BOOST, VP_WIN, VP_SCORE, VP_TIER, BOX_SRC, VA_PCT
     ap = argparse.ArgumentParser(description="박스 Top-20 검증 시뮬레이션 (W/A 풀 · 하단근접 청산)")
     ap.add_argument("--sameday", choices=["close", "none", "all", "multi"],
                     default="multi",
@@ -996,6 +1034,10 @@ def main():
                     help="최소 진입 점수 (0=비활성)")
     ap.add_argument("--slots", type=int, default=K,
                     help="동시 보유 슬롯 (기본 20 · 무료 매직스플릿 7)")
+    ap.add_argument("--box-src", choices=["band", "va"], default=BOX_SRC,
+                    help="박스 정의: band=주봉 6주(현행) · va=1년 거래대금 90%% 혼잡 구간")
+    ap.add_argument("--va-pct", type=float, default=VA_PCT,
+                    help="혼잡 구간 비율 (기본 0.90)")
     ap.add_argument("--vp-score", action="store_true",
                     help="매물대 거리로 점수 가감 (0.15↑ +2 · 0.05↑ +1 · -0.05↓ -1)")
     ap.add_argument("--vp-tier", action="store_true",
@@ -1097,6 +1139,8 @@ def main():
     VP_BOOST = float(args.vp_boost)
     VP_WIN = max(20, int(args.vp_win))
     VP_SCORE = bool(args.vp_score)
+    BOX_SRC = args.box_src
+    VA_PCT = float(args.va_pct)
     VP_TIER = bool(args.vp_tier)
     ATR_LO = args.atr_lo
     ATR_HI = args.atr_hi
