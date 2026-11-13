@@ -66,6 +66,7 @@ SIZE_MULT_OVR = []     # --size-mult 지정 시 차수별 배수 덮어쓰기
 RUNG_FILL = [0] * 12   # 차수별 체결 횟수 (진단용)
 MIN_ROOM = 6.0         # 최소 진입 여지(%) — 진입가에서 청산선까지. 채택값 6% (경계 +8%, 2026-11-13)
 LO52_MIN = 0.0         # 52주 저가 대비 최소 거리(%) — 이보다 가까우면 제외
+RANK = "score"         # 같은 날 후보 정렬: score(높은 점수 먼저) | pos(밴드 하단에 가까운 순)
 EXIT_BUF = 2.0         # 청산선 = 밴드하단×(1+EXIT_BUF/100). +2=하단 2% 위 · -2=하단 2% 아래
 EXIT_AT = "close"      # 청산 체결: close(당일 종가) | next_open(다음날 시가)
 PB_MODE = False        # 눌림+박스 유지 진입 허용 (20일선 지지 · 60일선 위 상승)
@@ -165,6 +166,12 @@ def load_universe():
         #    진입: 주봉박스 하단부(밴드 하위 절반) · 소멸: 종가가 밴드 이탈
         wk = pd.Series(c, index=df.index).resample("W-FRI").last().dropna()
         wclose = wk.values.astype(float)
+        # 주봉 RSI14 (Wilder) — 박스 형성 이전의 과매도 여부 확인용
+        _wd = np.diff(wclose, prepend=wclose[0])
+        _up = pd.Series(np.where(_wd > 0, _wd, 0.0)).ewm(alpha=1/14, adjust=False).mean()
+        _dn = pd.Series(np.where(_wd < 0, -_wd, 0.0)).ewm(alpha=1/14, adjust=False).mean()
+        wrsi = (100 - 100 / (1 + _up / np.maximum(_dn, 1e-9))).to_numpy()
+        wrsi_lo12_w = pd.Series(wrsi).rolling(12, min_periods=4).min().to_numpy()
         wend = np.array([int(d.strftime("%Y%m%d")) for d in wk.index],
                         dtype=np.int64)
         nw = len(wclose)
@@ -379,13 +386,14 @@ def load_universe():
             if knd == "wbox":
                 return (float(wpos[j]),
                         float(atr[j]) if not np.isnan(atr[j]) else None,
-                        float(wdrift[j]), float(wwidth[j]))
+                        float(wdrift[j]), float(wwidth[j]),
+                        float(wrsi[np.clip(kk[j], 0, len(wrsi) - 1)]))
             if knd == "abox":
                 return (float(adist[j]) if not np.isnan(adist[j]) else None,
                         float(atr[j]) if not np.isnan(atr[j]) else None,
                         float(aslope[j]) if not np.isnan(aslope[j]) else None,
-                        float(aheight[j]))
-            return (None, None, None, None)
+                        float(aheight[j]), None)
+            return (None, None, None, None, None)
         sc = np.array([score_new(knd, *_comp(j, knd))
                        for j, knd in zip(ti, kinds_arr)], dtype=np.int64)
         if VP_SCORE and len(ti):
@@ -400,14 +408,16 @@ def load_universe():
                   "wdur": wdur, "adur": adur, "wdrift": wdrift, "wwidth": wwidth,
                   "adist": adist, "aslope": aslope, "aheight": aheight,
                   "abox_ok": abox_ok, "abox_rise": abox_rise, "tlv": tlv,
-                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day, "vwap": vwap250, "v": v, "low52": low52})
+                  "trig": ti, "kinds": kinds_arr, "sc": sc, "pb": pb_day, "ma20": ma20_, "rv": rv_day, "vwap": vwap250, "v": v, "low52": low52,
+                "wrsi": wrsi[np.clip(kk, 0, nw - 1)],
+                "wrsi_lo12": wrsi_lo12_w[np.clip(kk, 0, nw - 1)]})
     return U
 
 
-SCHEME = "S2c"  # 점수안: S2c (ATR 3~7 +1 · 폭 2단, 만점 7) · S2b · S1 · S2 · S3
+SCHEME = "S4"   # 점수안: S4(수익 기준, 만점 7) · S2c(구) · S2b · S1 · S2 · S3
 
 
-def score_new(kind, pos, atr, trend, height):
+def score_new(kind, pos, atr, trend, height, rsi=None):
     """W/A 점수 개편안 (2026-11-02 13년 실측 버킷 기준 · 만점 6).
     W: 위치(<20% 0 · ~35% 1 · ~50% 2) / 추세(<0 0 · ~5% 1 · 5%+ 2)
        / ATR(4~7% 1, 역U) / 높이(밴드폭 22%+ 1)
@@ -432,6 +442,16 @@ def score_new(kind, pos, atr, trend, height):
             if trend is not None and trend < -0.05:
                 s -= 1
             return s
+        if SCHEME == "S4":       # 수익 기준 (2026-11-13) — 위치 0~4 · ATR 0~2 · RSI +1 · 폭 +1 (만점 8)
+            pp = (4 if (pos is not None and pos <= 0.24) else
+                  3 if (pos is not None and pos <= 0.30) else
+                  2 if (pos is not None and pos <= 0.35) else
+                  1 if (pos is not None and pos <= 0.40) else 0)
+            aa = 2 if (atr is not None and atr >= 0.07) else (
+                 1 if (atr is not None and atr >= 0.055) else 0)
+            rr = 1 if (rsi is not None and rsi >= 50) else 0
+            hh = 1 if (height is not None and height >= 0.28) else 0
+            return pp + aa + rr + hh
         if SCHEME == "S3":       # ATR우선
             a = 0 if atr is None or atr < 0.04 else (1 if atr < 0.05 else (2 if atr < 0.07 else 3))
             t = 0 if trend is None or trend < 0.05 else 1
@@ -491,7 +511,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                      "cbull": hst.get("cbull"),
                      "cbody": hst.get("cbody"),
                      "clower": hst.get("clower"), "vdist": hst.get("vdist"),
-                     "lo52d": hst.get("lo52d")})
+                     "lo52d": hst.get("lo52d"), "wrsi": hst.get("wrsi"),
+                     "wrsi_lo12": hst.get("wrsi_lo12")})
         if COMP_DUMP is not None:
             COMP_DUMP.append({
                 "code": i, "exit_day": int(day),
@@ -503,7 +524,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 "days": hst["j"] - hst["j_entry"], "cycles": hst["cycles"],
                 "exit": why, "cbull": hst.get("cbull"),
                 "cbody": hst.get("cbody"), "clower": hst.get("clower"), "vdist": hst.get("vdist"),
-                     "lo52d": hst.get("lo52d")})
+                     "lo52d": hst.get("lo52d"), "wrsi": hst.get("wrsi"),
+                     "wrsi_lo12": hst.get("wrsi_lo12")})
         curve.append((int(day), hst["net"]))
 
     for D in all_days:
@@ -656,7 +678,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
         max_pos = max(max_pos, len(holdings))
         free = free_prev if SLOT_FREE_MODE == "prev_close" else K_ - len(holdings)
         if free > 0 and not (MKT_DN and int(D) in MKT_DN):
-            for d, nsc, i, j, knd in ev_days.get(int(D), []):
+            for d, nsc, i, j, knd, _rp in ev_days.get(int(D), []):
                 if free <= 0 or len(holdings) >= K_:
                     break
                 if i in holdings:
@@ -821,6 +843,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                                               if knd == "abox"
                                               and not np.isnan(s["adist"][je])
                                               else None)),
+                               "wrsi": (float(s["wrsi"][je])
+                                        if not np.isnan(s["wrsi"][je]) else None),
+                               "wrsi_lo12": (float(s["wrsi_lo12"][je])
+                                             if not np.isnan(s["wrsi_lo12"][je]) else None),
                                "lo52d": ((px_e / float(s["low52"][je]) - 1)
                                          if (not np.isnan(s["low52"][je])
                                              and s["low52"][je] > 0) else None),
@@ -927,10 +953,10 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     "max_positions": max_pos, "max_rungs": max_rungs})
         return res
     # 상세 (사이트 렌더용)
-    bk = {"0~2": [], "3~4": [], "5~6": [], "7+": []}
+    bk = {"0~2": [], "3~4": [], "5~6": [], "7~8": []}
     for p in done:
         sc = p["score"]
-        key = "7+" if sc >= 7 else ("5~6" if sc >= 5 else ("3~4" if sc >= 3 else "0~2"))
+        key = "7~8" if sc >= 7 else ("5~6" if sc >= 5 else ("3~4" if sc >= 3 else "0~2"))
         bk[key].append(p)
     score_escape = {
         kk: {"n": len(v),
@@ -1035,7 +1061,7 @@ def main():
     global MAX_TRIPS, COMP_DUMP, SCHEME, ENTRY_MODE, ENTRY_ZONE, CANDLE_MODE, WBREAK, APOS, ROTATE, ROT_MARGIN, POOL
     global GAP_MODE, ATR_K, NEAR_OF_GAP, GAP_MIN, GAP_MAX
     global EXIT_MODE, ENTRY_EVAL, MKT_DN
-    global MIN_ROOM, EXIT_BUF, BAND_SRC, EXIT_AT, LO52_MIN
+    global MIN_ROOM, EXIT_BUF, BAND_SRC, EXIT_AT, LO52_MIN, RANK
     global ADAPT_RUNGS
     global MIN_SCORE
     global K
@@ -1069,6 +1095,8 @@ def main():
     ap.add_argument("--cool", type=int, default=0,
                     help="지수 -cool-thr%% 이하 마감 후 신규 진입 중단 일수")
     ap.add_argument("--cool-thr", type=float, default=3.0)
+    ap.add_argument("--rank", choices=["score", "pos"], default=RANK,
+                    help="같은 날 후보 정렬: score=점수 높은 순(현행) · pos=밴드 하단 가까운 순")
     ap.add_argument("--lo52-min", type=float, default=LO52_MIN,
                     help="52주 저가 대비 최소 거리 %% — 이보다 가까우면 진입 제외 (기본 0)")
     ap.add_argument("--min-room", type=float, default=MIN_ROOM,
@@ -1139,8 +1167,8 @@ def main():
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--out", type=str, default="")
-    ap.add_argument("--scheme", choices=["S1", "S2", "S2b", "S2c", "S3"],
-                    default=SCHEME, help="점수안 (S2c 기본 · 만점 7)")
+    ap.add_argument("--scheme", choices=["S1", "S2", "S2b", "S2c", "S3", "S4"],
+                    default=SCHEME, help="점수안 (S4 기본=수익 기준 · 만점 7)")
     ap.add_argument("--entry",
                     choices=["close", "next_open", "next_close",
                              "limit_signal", "limit_line"],
@@ -1188,6 +1216,7 @@ def main():
     ENTRY_EVAL = args.entry_eval
     MIN_ROOM = args.min_room
     LO52_MIN = float(getattr(args, "lo52_min", 0.0))
+    RANK = getattr(args, "rank", "score")
     ADAPT_RUNGS = args.adapt_rungs
     MIN_SCORE = args.min_score
     K = args.slots
@@ -1252,8 +1281,12 @@ def main():
     ev = []
     for i, s in enumerate(U):
         for j, knd, sc in zip(s["trig"], s["kinds"], s["sc"]):
-            ev.append((int(s["dn"][j]), -int(sc), i, int(j), knd))
-    ev.sort()
+            _wp = float(s["wpos"][j]) if not np.isnan(s["wpos"][j]) else 1.0
+            ev.append((int(s["dn"][j]), -int(sc), i, int(j), knd, _wp))
+    if RANK == "pos":
+        ev.sort(key=lambda e: (e[0], e[5], e[1], e[2]))
+    else:
+        ev.sort()
     ev_days = defaultdict(list)
     for e in ev:
         ev_days[e[0]].append(e)
