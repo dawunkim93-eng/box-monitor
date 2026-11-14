@@ -2189,7 +2189,7 @@ async function init(){
   let d=null;
   try{ const r=await fetch("data/minute_find.json?t="+Date.now(),{cache:"no-store"});
        if(!r.ok) throw 0; d=await r.json(); }catch(e){}
-  if(!d||!d.rules||!d.rules.length){
+  if(!d||(!(d.pairs||[]).length && !(d.singles||[]).length)){
     head.innerHTML='<div class="pmuted">아직 분석 표본이 부족합니다. 평일 16:40에 갱신됩니다.</div>';
     return;
   }
