@@ -2188,20 +2188,25 @@ async function init(){
        if(!r.ok) throw 0; d=await r.json(); }catch(e){}
   if(!d){ head.innerHTML='<div class="pmuted">분봉 데이터가 아직 없습니다. 평일 16:35에 쌓입니다.</div>'; return; }
   const w=d.window||{}, sm=d.summary||{}, A=d.assumptions||{};
-  head.innerHTML=`<div class="pmuted">수집 ${w.start||"-"}~${w.end||"-"} · <b>${w.days||0}거래일</b> · <b>${w.stocks||0}종목</b> · 갱신 ${d.updated_at||"-"}</div>
-    <div class="mrow" style="margin-top:6px">평균 <b>${fx(sm.avg_day_ret,3)}%</b>/일(슬롯 기준) · 승률 <b>${fx(sm.win_rate,1)}%</b> · 사이클 <b>${fx(sm.cycles,1)}</b>회/일 · 당일탈출 <b>${fx(sm.escape,1)}%</b></div>
-    <div class="msub">가정: ${A.entry||"시가"} 진입 · 갭 ${A.gap}% · 금액 ${(A.amts||[]).join("·")}만원 · ${A.exit||""} · ${A.note||""}</div>`;
-  const st=(d.stocks||[]).filter(x=>x.days>=2).slice(0,15);
+  const D=sm.dist||{};
+  const dline=["당일","2일","3일","4일","5일"].map(k=>D[k]?`${k} ${D[k]}`:"").filter(Boolean).join(" · ");
+  const miss=D[`${A.max_days||5}일 내 미탈출`]||0;
+  head.innerHTML=`<div class="pmuted">수집 ${w.start||"-"}~${w.end||"-"} · <b>${w.days||0}거래일</b> · <b>${w.stocks||0}종목</b> · 포지션 <b>${f(sm.positions)}</b> · 갱신 ${d.updated_at||"-"}</div>
+    <div class="mrow" style="margin-top:6px">탈출율 <b>${fx(sm.esc_rate,1)}%</b> · 당일 탈출 <b>${fx(sm.same_day,1)}%</b> · 평균 <b>${fx(sm.days_to_esc,2)}일</b> · 건당 <b>${fx(sm.ret,3)}%</b></div>
+    <div class="msub">탈출 분포: ${dline||"-"}${miss?` · 미탈출 ${miss}`:""}</div>
+    <div class="msub">가정: ${A.entry||""} · 갭 ${A.gap}% · 금액 ${(A.amts||[]).join("·")}만원 · 최대 ${A.max_days}일 · ${A.note||""}</div>`;
+  const st=(d.stocks||[]).filter(x=>x.pos>=2).slice(0,15);
   if(!st.length){ document.getElementById("mr-body").innerHTML=""; return; }
   document.getElementById("mr-body").innerHTML=
-    `<table class="ptbl"><thead><tr><th>#</th><th class="nm">종목</th><th>일수익률</th><th>승률</th><th class="mhide">사이클</th><th class="mhide">탈출</th><th>최악</th></tr></thead><tbody>`
+    `<table class="ptbl"><thead><tr><th>#</th><th class="nm">종목</th><th>탈출율</th><th>평균</th><th>건당</th><th class="mhide">당일</th><th class="mhide">건수</th><th>최악</th></tr></thead><tbody>`
     + st.map((x,i)=>`<tr><td>${i+1}</td><td class="nm">${x.name}</td>
-        <td class="${cls(x.day_ret)}"><b>${fx(x.day_ret,3)}%</b></td>
-        <td>${fx(x.win,0)}%</td>
-        <td class="mhide">${fx(x.cyc,1)}</td>
-        <td class="mhide">${fx(x.esc,0)}%</td>
+        <td>${fx(x.esc,0)}%</td>
+        <td>${fx(x.days,2)}일</td>
+        <td class="${cls(x.ret)}"><b>${fx(x.ret,3)}%</b></td>
+        <td class="mhide">${fx(x.same,0)}%</td>
+        <td class="mhide">${f(x.pos)}</td>
         <td class="deep">${fx(x.worst,1)}%</td></tr>`).join("")
-    + `</tbody></table><div class="msub">일수익률 = 슬롯 87만원 대비 그날 사다리 수익(%). 최악 = 하루 중 미실현 손실 최대. 2거래일 이상 수집된 종목만 표시.<br>⚠ 우선주와 초고변동 종목은 사이클이 10회를 넘고 최악이 -15%까지 갈 수 있습니다. 최악 열을 반드시 함께 보세요.</div>`;
+    + `</tbody></table><div class="msub">탈출율 = 1차가 +1.5%에 팔린 비율 · 평균 = 탈출까지 걸린 거래일 · 건당 = 슬롯 87만원 대비 수익.<br>진입은 전일 종가 지정가, 시가가 더 낮으면 시가 체결. 2건 이상 수집된 종목만 표시.<br>⚠ 우선주와 초고변동 종목은 최악이 -15%까지 갑니다. 최악 열을 함께 보세요.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();

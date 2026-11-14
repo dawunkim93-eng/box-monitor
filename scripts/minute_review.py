@@ -1,10 +1,15 @@
-"""분봉으로 사다리 실측 리포트 → data/minute_review.json.
+"""분봉 실측 리포트 → data/minute_review.json
 
-가정:
-- 진입: 그날 시가(일봉 Open). 없으면 첫 분봉 종가.
-- 사다리: 1~7차, 1.5% 간격, 금액 6·6·9·12·18·18·18만원 (슬롯 87만원)
-- 매도: 차수 가격 × 1.015 에 1분봉 종가가 닿으면 체결 (실제 순서대로)
-- 청산 규칙은 반영하지 않음 — "사다리만 돌렸을 때"의 상한/하한을 보는 지표
+목표 모델 (사용자 지정):
+- 종목 검색: 전일 종가 기준
+- 진입: 전일 종가 지정가 (시가가 더 낮으면 그 가격에 체결)
+- 목표: 당일 탈출(+1.5%) · 안 되면 최대 5거래일 추적 후 종가 평가
+
+측정:
+- 탈출율 = 1차가 +1.5%에 팔린 비율
+- 탈출일 = 진입일 기준 몇 번째 거래일에 팔렸는지 (당일 = 1)
+- 사이클 = 보유 기간 중 왕복 횟수
+- 건당 수익 = 슬롯 87만원 대비 %
 """
 import gzip
 import json
@@ -12,21 +17,16 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-import pandas as pd
-
 ROOT = Path(__file__).resolve().parent.parent
 MIN = ROOT / "data" / "minute"
 PIT = Path("/home/lucky/backtest/data/pit")
 OUT = ROOT / "data" / "minute_review.json"
 
 GAP = 0.015
-AMTS = [6, 6, 9, 12, 18, 18, 18]      # 만원
-SLOT = sum(AMTS) * 10_000            # 87만원
+AMTS = [6, 6, 9, 12, 18, 18, 18]
+SLOT = sum(AMTS) * 10_000
 FEE = 0.00015
-
-
-def minute_paths():
-    return sorted(MIN.glob("*.csv.gz"))
+MAX_DAYS = 5
 
 
 def load_bars(p):
@@ -45,120 +45,133 @@ def load_bars(p):
     return by_day
 
 
-def daily_open(code, day):
-    try:
-        df = pd.read_pickle(PIT / f"{code}.pkl")
-    except Exception:
-        return None
-    dt = pd.Timestamp(f"{day[:4]}-{day[4:6]}-{day[6:]}")
-    if dt not in df.index:
-        return None
-    v = float(df.loc[dt, "Open"])
-    return v if v > 0 else None
-
-
-def sim_day(bars, entry):
-    levels = [entry * (1 - GAP) ** k for k in range(7)]
+def sim_position(days, bars, limit):
+    levels = [limit * (1 - GAP) ** k for k in range(7)]
     held = [True] + [False] * 6
     net = 0.0
     cycles = 0
-    fills = 0
-    escape = False
-    worst = 0.0          # 미실현 손실 최대 (%)
-    for _, c in bars:
-        for k in range(1, 7):
-            if not held[k] and c <= levels[k]:
-                held[k] = True
-                fills += 1
-        for k in range(7):
-            if not held[k]:
-                continue
-            if c >= levels[k] * (1 + GAP):
-                held[k] = False
-                cycles += 1
-                net += AMTS[k] * 10_000 * (GAP - FEE)
-                if k == 0:
-                    escape = True
-        # 평가손익
-        val = sum(AMTS[k] * 10_000 * (c / levels[k] - 1) for k in range(7) if held[k])
-        worst = min(worst, val / SLOT * 100)
-    return dict(net=net, cycles=cycles, fills=fills, escape=escape, worst=worst)
+    escape_day = None
+    worst = 0.0
+    last_px = limit
+    for di, day in enumerate(days):
+        seq = bars.get(day) or []
+        if not seq:
+            continue
+        last_px = seq[-1][1]
+        for _, c in seq:
+            for k in range(1, 7):
+                if not held[k] and c <= levels[k]:
+                    held[k] = True
+            for k in range(7):
+                if not held[k]:
+                    continue
+                if c >= levels[k] * (1 + GAP):
+                    held[k] = False
+                    cycles += 1
+                    net += AMTS[k] * 10_000 * (GAP - FEE)
+                    if k == 0 and escape_day is None:
+                        escape_day = di
+            val = sum(AMTS[k] * 10_000 * (c / levels[k] - 1)
+                      for k in range(7) if held[k])
+            worst = min(worst, val / SLOT * 100)
+    for k in range(7):
+        if held[k]:
+            net += AMTS[k] * 10_000 * (last_px / levels[k] - 1)
+    return dict(net=net, cycles=cycles, escape_day=escape_day, worst=worst)
 
 
 def main():
-    files = minute_paths()
+    files = sorted(MIN.glob("*.csv.gz"))
     if not files:
         print("[WARN] data/minute 비어 있음 — minute_sync 먼저 실행")
         return
 
-    per_stock = defaultdict(lambda: dict(days=0, net=0.0, win=0, cyc=0, esc=0,
-                                         worst=0.0, fills=0))
-    daily = []
-    days_all = set()
+    per = defaultdict(lambda: dict(pos=0, esc=0, net=0.0, cyc=0, worst=0.0,
+                                   days_sum=0, same=0))
+    dist = defaultdict(int)
+    recent = []
+    all_days = set()
+
     for p in files:
         code = p.name.replace(".csv.gz", "")
-        by_day = load_bars(p)
-        for day, bars in sorted(by_day.items()):
-            if len(bars) < 30:
-                continue
-            entry = daily_open(code, day) or bars[0][1]
-            r = sim_day(bars, entry)
-            days_all.add(day)
-            s = per_stock[code]
-            s["days"] += 1
+        bars = load_bars(p)
+        days = sorted(bars)
+        all_days.update(days)
+        for i in range(len(days) - 1):
+            limit = bars[days[i]][-1][1]                  # 신호일 종가 = 지정가
+            seq_days = days[i + 1:i + 1 + MAX_DAYS]
+            first = bars.get(seq_days[0]) or []
+            if not first or min(c for _, c in first) > limit:
+                continue                                  # 미체결
+            r = sim_position(seq_days, bars, limit)
+            s = per[code]
+            s["pos"] += 1
             s["net"] += r["net"]
-            s["win"] += 1 if r["net"] > 0 else 0
             s["cyc"] += r["cycles"]
-            s["esc"] += 1 if r["escape"] else 0
-            s["fills"] += r["fills"]
             s["worst"] = min(s["worst"], r["worst"])
-            daily.append(dict(code=code, day=day, ret=round(r["net"] / SLOT * 100, 3),
-                              cycles=r["cycles"], fills=r["fills"],
-                              escape=r["escape"], worst=round(r["worst"], 2)))
+            if r["escape_day"] is not None:
+                s["esc"] += 1
+                s["days_sum"] += r["escape_day"] + 1
+                if r["escape_day"] == 0:
+                    s["same"] += 1
+                dist["당일" if r["escape_day"] == 0 else f"{r['escape_day'] + 1}일"] += 1
+            else:
+                dist[f"{MAX_DAYS}일 내 미탈출"] += 1
+            recent.append(dict(code=code, sig=days[i], ret=round(r["net"] / SLOT * 100, 3),
+                               esc=(None if r["escape_day"] is None else r["escape_day"] + 1),
+                               cyc=r["cycles"], worst=round(r["worst"], 2)))
 
     names = {}
     try:
+        import pandas as pd
         master = pd.read_pickle(PIT / "master.pkl")
         names = dict(zip(master["code"].astype(str), master["name"].astype(str)))
     except Exception:
         pass
 
     stocks = []
-    for code, s in per_stock.items():
-        n = s["days"]
-        stocks.append(dict(code=code, name=names.get(code, code), days=n,
-                           tot_ret=round(s["net"] / SLOT * 100, 2),
-                           day_ret=round(s["net"] / SLOT * 100 / n, 3),
-                           win=round(s["win"] / n * 100, 1),
-                           cyc=round(s["cyc"] / n, 1),
-                           esc=round(s["esc"] / n * 100, 1),
-                           fills=round(s["fills"] / n, 1),
-                           worst=round(s["worst"], 2)))
-    stocks.sort(key=lambda x: -x["day_ret"])
+    for code, s in per.items():
+        n = s["pos"]
+        if n < 2:
+            continue
+        stocks.append(dict(
+            code=code, name=names.get(code, code), pos=n,
+            esc=round(s["esc"] / n * 100, 1),
+            same=round(s["same"] / n * 100, 1),
+            days=round(s["days_sum"] / max(s["esc"], 1), 2),
+            cyc=round(s["cyc"] / n, 1),
+            ret=round(s["net"] / SLOT * 100 / n, 3),
+            worst=round(s["worst"], 2)))
+    stocks.sort(key=lambda x: (-x["ret"],))
 
-    tot_ret = sum(x["tot_ret"] for x in stocks)
+    tot = sum(x["pos"] for x in stocks)
+    esc_n = sum(x["esc"] * x["pos"] / 100 for x in stocks)
+    same_n = sum(x["same"] * x["pos"] / 100 for x in stocks)
+    days_avg = (sum(x["days"] * (x["esc"] * x["pos"] / 100) for x in stocks)
+                / max(esc_n, 1))
+
     out = dict(
         updated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        window=dict(start=min(days_all) if days_all else None,
-                    end=max(days_all) if days_all else None,
-                    days=len(days_all), stocks=len(stocks)),
-        summary=dict(avg_day_ret=round(tot_ret / max(len(days_all), 1) / max(len(stocks), 1), 3),
-                     tot_ret=round(tot_ret, 2),
-                     win_rate=round(sum(x["win"] * x["days"] for x in stocks)
-                                    / max(sum(x["days"] for x in stocks), 1), 1),
-                     cycles=round(sum(x["cyc"] * x["days"] for x in stocks)
-                                  / max(sum(x["days"] for x in stocks), 1), 1),
-                     escape=round(sum(x["esc"] * x["days"] for x in stocks)
-                                  / max(sum(x["days"] for x in stocks), 1), 1)),
+        window=dict(start=min(all_days) if all_days else None,
+                    end=max(all_days) if all_days else None,
+                    days=len(all_days), stocks=len(stocks)),
+        summary=dict(positions=int(tot),
+                     esc_rate=round(esc_n / max(tot, 1) * 100, 1),
+                     same_day=round(same_n / max(tot, 1) * 100, 1),
+                     days_to_esc=round(days_avg, 2),
+                     ret=round(sum(x["ret"] * x["pos"] for x in stocks) / max(tot, 1), 3),
+                     dist=dict(dist)),
         stocks=stocks,
-        daily=sorted(daily, key=lambda x: (x["day"], -x["ret"]))[-400:],
-        assumptions=dict(gap=GAP * 100, amts=AMTS, slot=SLOT,
-                         entry="당일 시가", exit="차수×1.015 (분봉 종가 기준)",
-                         note="청산 규칙 미적용 · 사다리만 돌린 상한"),
+        recent=sorted(recent, key=lambda x: (x["sig"], -x["ret"]))[-400:],
+        assumptions=dict(gap=GAP * 100, amts=AMTS, slot=SLOT, max_days=MAX_DAYS,
+                         entry="전일 종가 지정가 (시가가 더 낮으면 시가 체결)",
+                         exit="차수×1.015 분봉 종가 · 미탈출 시 5일째 종가 평가",
+                         note="분봉 종가 기준 · 고가/저가 미제공"),
     )
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"[INFO] {out['window']} · 종목 {len(stocks)} · 평균 일수익률 {out['summary']['avg_day_ret']}% "
-          f"· 승률 {out['summary']['win_rate']}% · 사이클 {out['summary']['cycles']}")
+    s = out["summary"]
+    print(f"[INFO] {out['window']} · 포지션 {s['positions']:,} · 탈출 {s['esc_rate']}%"
+          f"(당일 {s['same_day']}%) · 평균 {s['days_to_esc']}일 · 건당 {s['ret']}% · {s['dist']}")
 
 
 if __name__ == "__main__":
