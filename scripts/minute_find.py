@@ -101,7 +101,9 @@ def evaluate(df, mask):
     return dict(n=int(len(sel)), ret=round(float(sel["ret"].mean()), 3),
                 top=round(float(sel["top"].mean()) * 100, 1),
                 fill=round(float(sel["fill"].mean()), 1),
-                esc=round(float(sel["esc"].mean()), 1))
+                esc=round(float(sel["esc"].mean()), 1),
+                same=round(float(sel["same"].mean()), 1),
+                days=round(float(sel["days"].mean()), 2))
 
 
 def main():
@@ -115,7 +117,8 @@ def main():
         if not f:
             continue
         rows.append(dict(code=s["code"], name=s["name"], ret=s["ret_sig"],
-                         fill=s["fill"], esc=s["esc"], **f))
+                         fill=s["fill"], esc=s["esc"], same=s["same"],
+                         days=s["days"], **f))
     if len(rows) < 40:
         print(f"[WARN] 표본 부족 ({len(rows)}종목)")
         return
@@ -143,7 +146,7 @@ def main():
                 singles.append(st)
 
     seen, uniq = set(), []
-    for r in sorted(singles, key=lambda x: (-x["lift"], -x["ret"])):
+    for r in sorted(singles, key=lambda x: (-x["same"], -x["esc"], x["days"])):
         if r["expr"] in seen:
             continue
         seen.add(r["expr"])
@@ -163,7 +166,7 @@ def main():
         st.update(expr=f"{a['expr']} & {b['expr']}",
                   lift=round(st["top"] / max(base_rate, 0.1), 2))
         pairs.append(st)
-    pairs.sort(key=lambda x: (-x["lift"], -x["ret"]))
+    pairs.sort(key=lambda x: (-x["same"], -x["esc"], x["days"]))
 
     tri_pool = [r for r in singles if r["lift"] >= 1.2][:6]
     triples = []
@@ -180,7 +183,7 @@ def main():
         st.update(expr=" & ".join(c["expr"] for c in combo),
                   lift=round(st["top"] / max(base_rate, 0.1), 2))
         triples.append(st)
-    triples.sort(key=lambda x: (-x["lift"], -x["ret"]))
+    triples.sort(key=lambda x: (-x["same"], -x["esc"], x["days"]))
 
     feats = []
     for key, ko in FIELDS:
@@ -205,11 +208,11 @@ def main():
         window=rev.get("window"),
         base=dict(stocks=len(d), top_q=TOP_Q * 100, top_rate=round(base_rate, 1),
                   top_thr=round(thr, 3), avg_ret=round(float(d["ret"].mean()), 3)),
-        singles=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc")}
+        singles=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc", "same", "days")}
                  for r in singles[:12]],
-        pairs=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc")}
+        pairs=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc", "same", "days")}
                for r in pairs[:10]],
-        triples=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc")}
+        triples=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc", "same", "days")}
                  for r in triples[:6]],
         features=feats,
         note=("성공 = 종목별 신호당 기대수익 상위 30%. 적중률 = 걸러낸 종목 중 성공 비율, "
