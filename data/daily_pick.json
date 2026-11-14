@@ -1,5 +1,6 @@
 {
- "updated_at": "2026-11-14 17:20",
+ "updated_at": "2026-11-14 20:19",
+ "curve": [],
  "sig_date": 20261113,
  "summary": {
   "picks": 30,
@@ -9,7 +10,11 @@
   "win": 0.0,
   "avg": 0.0,
   "tot": 0,
-  "start": 20170704
+  "start": 20170704,
+  "kinds": {},
+  "days": 0,
+  "best": 0,
+  "worst": 0
  },
  "today": [
   {

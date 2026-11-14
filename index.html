@@ -2217,8 +2217,30 @@ async function init(){
         <td>${r.status==="청산완료"?(r.kind||"청산"):r.status}</td>
         <td class="${r.net>0?"up":"deep"}">${fx(r.net,2)}%</td></tr>`).join("")
     + `</tbody></table>` : "";
+  const K=sm.kinds||{};
+  const kline=Object.keys(K).length
+    ? `청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · ")
+      +` · 최고 ${fx(sm.best,2)}% · 최악 ${fx(sm.worst,2)}%`
+    : "";
+  const C=d.curve||[];
+  const curveBox=C.length? (()=>{
+      const mx=Math.max(...C.map(x=>Math.abs(x.cum)),0.01);
+      return `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (${C.length}거래일)</div>`
+        + C.slice(-15).map(x=>{
+            const w=Math.min(100,Math.abs(x.cum)/mx*100);
+            const col=x.cum>=0?"var(--green)":"var(--red)";
+            return `<div class="mrow" style="font-size:11px;line-height:1.5">
+              <span style="display:inline-block;width:52px">${String(x.day).slice(4,6)}/${String(x.day).slice(6)}</span>
+              <span style="display:inline-block;width:44px;text-align:right">${x.n}건</span>
+              <span style="display:inline-block;width:130px;margin-left:6px">
+                <i style="display:inline-block;height:7px;width:${w}%;background:${col}"></i></span>
+              <span style="margin-left:6px" class="${x.cum>=0?'up':'deep'}">${fx(x.cum,1)}%</span></div>`;
+          }).join("");
+    })() : `<div class="msub" style="margin-top:8px">아직 완료된 거래가 없습니다. 체결·청산이 쌓이면 누적 곡선이 나타납니다.</div>`;
   document.getElementById("dp-body").innerHTML=
-    `<div class="msub" style="margin:2px 0 4px"><b>오늘 후보 ${T.length}건</b> — 위에서부터 밴드 상단·거래대금 순</div>`
+    (kline?`<div class="msub" style="margin-top:6px">${kline}</div>`:"")
+    + curveBox
+    + `<div class="msub" style="margin:2px 0 4px"><b>오늘 후보 ${T.length}건</b> — 위에서부터 밴드 상단·거래대금 순</div>`
     + (T.length?tb(T.slice(0,12),true):'<div class="pmuted">오늘 조건에 맞는 종목이 없습니다.</div>')
     + rtb
     + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산(시간손절). 최대 3일 보유.<br>

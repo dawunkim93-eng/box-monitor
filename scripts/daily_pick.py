@@ -183,7 +183,30 @@ def main():
                       for k in range(3)]
         t["stop"] = round(t["limit"] * (1 - GAP) ** 2)
 
+    # 청산 유형 분포 + 일별 누적 곡선
+    kinds = {}
+    for r in done:
+        k = r.get("kind") or "기타"
+        kinds[k] = kinds.get(k, 0) + 1
+    byday = {}
+    for r in done:
+        d0 = r.get("exit") or r["sig"]
+        e = byday.setdefault(d0, dict(n=0, net=0.0))
+        e["n"] += 1
+        e["net"] += r["net"]
+    curve = []
+    cum = 0.0
+    for d0 in sorted(byday):
+        cum += byday[d0]["net"]
+        curve.append(dict(day=d0, n=byday[d0]["n"],
+                          net=round(byday[d0]["net"], 2), cum=round(cum, 2)))
+    summary["kinds"] = kinds
+    summary["days"] = len(curve)
+    summary["best"] = round(max([r["net"] for r in done], default=0), 2)
+    summary["worst"] = round(min([r["net"] for r in done], default=0), 2)
+
     out = dict(updated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+               curve=curve[-40:],
                sig_date=today, summary=summary,
                today=todays,
                recent=sorted(rows, key=lambda r: -r["sig"])[:12],
