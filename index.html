@@ -2196,16 +2196,19 @@ async function init(){
   const b=d.base||{}, w=d.window||{};
   head.innerHTML=`<div class="pmuted">${w.start||"-"}~${w.end||"-"} · ${b.stocks||0}종목 · 성공 상위 ${fx(b.top_q,0)}%(기준 ${fx(b.top_thr,2)}%) · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">전체 성공률 <b>${fx(b.top_rate,1)}%</b> · 리프트 = 성공률 배수(1.0이면 무의미)</div>`;
-  const tb=(arr)=>`<table class="ptbl"><thead><tr><th>검색식</th><th>종목</th><th>평균</th><th>적중</th><th>리프트</th></tr></thead><tbody>`
+  const tb=(arr)=>`<table class="ptbl"><thead><tr><th>검색식</th><th>종목</th><th>적중</th><th>탈출</th><th>평균</th><th>리프트</th></tr></thead><tbody>`
     + arr.map(r=>`<tr><td class="nm">${r.expr}</td>
         <td>${r.n}</td>
-        <td class="${r.ret>0?"up":"deep"}">${fx(r.ret,3)}%</td>
         <td>${fx(r.top,1)}%</td>
+        <td>${fx(r.esc,0)}%</td>
+        <td class="${r.ret>0?"up":"deep"}">${fx(r.ret,3)}%</td>
         <td class="${fg(r.lift)}"><b>${fx(r.lift,2)}</b></td></tr>`).join("")
     + `</tbody></table>`;
   const S=d.singles||[], P2=d.pairs||[];
   document.getElementById("mf-body").innerHTML=
-    `<div class="msub" style="margin:2px 0 4px"><b>조합 조건 (2개 AND)</b> — 리프트 순</div>`
+    `<div class="msub" style="margin:2px 0 4px"><b>조합 3개 (AND)</b> — 표본 25건 이상만</div>`
+    + ((d.triples||[]).length?tb(d.triples):'')
+    + `<div class="msub" style="margin:10px 0 4px"><b>조합 2개 (AND)</b> — 리프트 순</div>`
     + (P2.length?tb(P2):'<div class="pmuted">표본이 더 쌓이면 조합이 나옵니다.</div>')
     + `<div class="msub" style="margin:10px 0 4px"><b>단일 조건</b></div>`
     + (S.length?tb(S):'')

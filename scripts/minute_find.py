@@ -100,7 +100,8 @@ def evaluate(df, mask):
         return None
     return dict(n=int(len(sel)), ret=round(float(sel["ret"].mean()), 3),
                 top=round(float(sel["top"].mean()) * 100, 1),
-                fill=round(float(sel["fill"].mean()), 1))
+                fill=round(float(sel["fill"].mean()), 1),
+                esc=round(float(sel["esc"].mean()), 1))
 
 
 def main():
@@ -164,6 +165,23 @@ def main():
         pairs.append(st)
     pairs.sort(key=lambda x: (-x["lift"], -x["ret"]))
 
+    tri_pool = [r for r in singles if r["lift"] >= 1.2][:6]
+    triples = []
+    for combo in itertools.combinations(tri_pool, 3):
+        if len({c["key"] for c in combo}) < 3:
+            continue
+        mask = None
+        for c in combo:
+            m = ((d[c["key"]] >= c["cut"]) if c["op"] == ">=" else (d[c["key"]] <= c["cut"]))
+            mask = m if mask is None else (mask & m)
+        st = evaluate(d, mask.fillna(False))
+        if not st:
+            continue
+        st.update(expr=" & ".join(c["expr"] for c in combo),
+                  lift=round(st["top"] / max(base_rate, 0.1), 2))
+        triples.append(st)
+    triples.sort(key=lambda x: (-x["lift"], -x["ret"]))
+
     feats = []
     for key, ko in FIELDS:
         col = d[key].replace([np.inf, -np.inf], np.nan)
@@ -187,20 +205,26 @@ def main():
         window=rev.get("window"),
         base=dict(stocks=len(d), top_q=TOP_Q * 100, top_rate=round(base_rate, 1),
                   top_thr=round(thr, 3), avg_ret=round(float(d["ret"].mean()), 3)),
-        singles=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill")}
+        singles=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc")}
                  for r in singles[:12]],
-        pairs=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill")}
+        pairs=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc")}
                for r in pairs[:10]],
+        triples=[{k: r[k] for k in ("expr", "n", "ret", "top", "lift", "fill", "esc")}
+                 for r in triples[:6]],
         features=feats,
         note=("성공 = 종목별 신호당 기대수익 상위 30%. 적중률 = 걸러낸 종목 중 성공 비율, "
               "리프트 = 전체 성공률 대비 배수. 조건은 마지막 수집일 기준 일봉 특징. "
-              "표본 6~10거래일이면 우연이 섞이므로 리프트 1.3 이상·표본 30건 이상만 신뢰."),
+              "표본 6~10거래일이면 우연이 섞이므로 리프트 1.3 이상·표본 30건 이상만 신뢰. "
+              "체결율 = 지정가까지 내려와 실제로 산 비율, 탈출율 = 산 것 중 1차가 +1.5%에 팔린 비율."),
     )
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"[INFO] {len(d)}종목 · 성공률 {base_rate:.1f}% (기준 {thr:.3f}%)")
     print("  단일:")
     for r in out["singles"][:6]:
         print(f"    {r['expr']:<26} n={r['n']:>3} 평균 {r['ret']:>6.3f}% 적중 {r['top']:>5.1f}% L{r['lift']}")
+    print("  3개 조합:")
+    for r in out["triples"][:3]:
+        print(f"    {r['expr'][:60]:<60} n={r['n']:>3} 적중 {r['top']:>5.1f}% L{r['lift']} 탈출 {r['esc']}%")
     print("  조합:")
     for r in out["pairs"][:6]:
         print(f"    {r['expr'][:50]:<50} n={r['n']:>3} 평균 {r['ret']:>6.3f}% 적중 {r['top']:>5.1f}% L{r['lift']}")
