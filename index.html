@@ -2196,24 +2196,24 @@ async function init(){
   const b=d.base||{}, w=d.window||{};
   head.innerHTML=`<div class="pmuted">${w.start||"-"}~${w.end||"-"} · ${b.stocks||0}종목 · 성공 상위 ${fx(b.top_q,0)}%(기준 ${fx(b.top_thr,2)}%) · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">전체 성공률 <b>${fx(b.top_rate,1)}%</b> · 리프트 = 성공률 배수(1.0이면 무의미)</div>`;
-  const tb=(arr)=>`<table class="ptbl"><thead><tr><th>검색식</th><th>종목</th><th>당일</th><th>탈출</th><th>평균</th><th class="mhide">적중</th><th>리프트</th></tr></thead><tbody>`
+  const tb=(arr)=>`<table class="ptbl"><thead><tr><th>검색식</th><th>종합</th><th>체결</th><th>당일</th><th>평균</th><th class="mhide">종목</th><th class="mhide">리프트</th></tr></thead><tbody>`
     + arr.map(r=>`<tr><td class="nm">${r.expr}</td>
-        <td>${r.n}</td>
-        <td class="${r.same>=70?"up":""}"><b>${fx(r.same,0)}%</b></td>
-        <td>${fx(r.esc,0)}%</td>
+        <td class="${(r.score||0)>=50?"up":""}"><b>${fx(r.score,0)}%</b></td>
+        <td>${fx(r.fill,0)}%</td>
+        <td>${fx(r.same,0)}%</td>
         <td>${fx(r.days,2)}일</td>
-        <td class="mhide">${fx(r.top,1)}%</td>
-        <td class="${fg(r.lift)}"><b>${fx(r.lift,2)}</b></td></tr>`).join("")
+        <td class="mhide">${r.n}</td>
+        <td class="mhide ${fg(r.lift)}">${fx(r.lift,2)}</td></tr>`).join("")
     + `</tbody></table>`;
   const S=d.singles||[], P2=d.pairs||[];
   document.getElementById("mf-body").innerHTML=
-    `<div class="msub" style="margin:2px 0 4px"><b>조합 3개 (AND)</b> — 당일 탈출률 순 · 표본 25건 이상</div>`
+    `<div class="msub" style="margin:2px 0 4px"><b>조합 3개 (AND)</b> — 종합(체결 × 당일탈출) 순 · 표본 25건 이상</div>`
     + ((d.triples||[]).length?tb(d.triples):'')
-    + `<div class="msub" style="margin:10px 0 4px"><b>조합 2개 (AND)</b> — 당일 탈출률 순</div>`
+    + `<div class="msub" style="margin:10px 0 4px"><b>조합 2개 (AND)</b> — 종합 순</div>`
     + (P2.length?tb(P2):'<div class="pmuted">표본이 더 쌓이면 조합이 나옵니다.</div>')
-    + `<div class="msub" style="margin:10px 0 4px"><b>단일 조건</b> — 당일 탈출률 순</div>`
+    + `<div class="msub" style="margin:10px 0 4px"><b>단일 조건</b> — 종합 순</div>`
     + (S.length?tb(S):'')
-    + `<div class="msub">${d.note||""}<br><b>당일</b> = 그 조건 종목 중 1차가 당일 +1.5%에 팔린 비율 · <b>탈출</b> = 5일 내 탈출 · <b>평균</b> = 탈출까지 걸린 일수 · <b>적중</b> = 상위 ${fx(b.top_q,0)}% 수익군에 든 비율 · 리프트 2.0이면 무작위의 2배.<br>
+    + `<div class="msub">${d.note||""}<br><b>종합</b> = 체결율 × 당일 탈출률 (신호 1건이 그날 사서 그날 파는 확률) — 순위 기준 · <b>체결</b> = 지정가까지 내려와 실제로 산 비율 · <b>당일</b> = 산 것 중 1차가 당일 +1.5%에 팔린 비율 · <b>평균</b> = 탈출까지 걸린 일수.<br>
        ⚠ 표본이 6~10거래일이면 조합은 우연히 튀기 쉽습니다. 표본 30건 이상·리프트 1.3 이상만 후보로 보세요.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
