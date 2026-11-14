@@ -1,0 +1,4512 @@
+{
+ "updated_at": "2026-11-14 09:08",
+ "window": {
+  "start": "20261106",
+  "end": "20261113",
+  "days": 6,
+  "stocks": 73
+ },
+ "summary": {
+  "avg_day_ret": 0.19,
+  "tot_ret": 83.06,
+  "win_rate": 84.2,
+  "cycles": 1.4,
+  "escape": 62.1
+ },
+ "stocks": [
+  {
+   "code": "004830",
+   "name": "덕성",
+   "days": 6,
+   "tot_ret": 4.25,
+   "day_ret": 0.708,
+   "win": 100.0,
+   "cyc": 3.7,
+   "esc": 66.7,
+   "fills": 4.8,
+   "worst": -7.01
+  },
+  {
+   "code": "323990",
+   "name": "박셀바이오",
+   "days": 6,
+   "tot_ret": 3.99,
+   "day_ret": 0.666,
+   "win": 100.0,
+   "cyc": 3.0,
+   "esc": 50.0,
+   "fills": 5.2,
+   "worst": -4.59
+  },
+  {
+   "code": "091580",
+   "name": "상신이디피",
+   "days": 6,
+   "tot_ret": 3.17,
+   "day_ret": 0.529,
+   "win": 100.0,
+   "cyc": 4.0,
+   "esc": 100.0,
+   "fills": 4.2,
+   "worst": -0.8
+  },
+  {
+   "code": "095500",
+   "name": "미래나노텍",
+   "days": 6,
+   "tot_ret": 3.12,
+   "day_ret": 0.521,
+   "win": 83.3,
+   "cyc": 2.5,
+   "esc": 50.0,
+   "fills": 3.5,
+   "worst": -4.59
+  },
+  {
+   "code": "223250",
+   "name": "드림씨아이에스",
+   "days": 6,
+   "tot_ret": 2.92,
+   "day_ret": 0.486,
+   "win": 100.0,
+   "cyc": 2.8,
+   "esc": 66.7,
+   "fills": 3.3,
+   "worst": -3.24
+  },
+  {
+   "code": "085620",
+   "name": "미래에셋생명",
+   "days": 6,
+   "tot_ret": 2.82,
+   "day_ret": 0.469,
+   "win": 83.3,
+   "cyc": 2.8,
+   "esc": 66.7,
+   "fills": 4.7,
+   "worst": -7.29
+  },
+  {
+   "code": "048910",
+   "name": "대원미디어",
+   "days": 6,
+   "tot_ret": 2.77,
+   "day_ret": 0.461,
+   "win": 100.0,
+   "cyc": 3.2,
+   "esc": 83.3,
+   "fills": 3.2,
+   "worst": -1.56
+  },
+  {
+   "code": "187660",
+   "name": "페니트리움바이오",
+   "days": 6,
+   "tot_ret": 2.1,
+   "day_ret": 0.35,
+   "win": 100.0,
+   "cyc": 2.8,
+   "esc": 100.0,
+   "fills": 2.8,
+   "worst": -4.01
+  },
+  {
+   "code": "048530",
+   "name": "인트론바이오",
+   "days": 6,
+   "tot_ret": 1.95,
+   "day_ret": 0.324,
+   "win": 100.0,
+   "cyc": 2.7,
+   "esc": 83.3,
+   "fills": 2.3,
+   "worst": -0.61
+  },
+  {
+   "code": "101360",
+   "name": "에코앤드림",
+   "days": 6,
+   "tot_ret": 1.95,
+   "day_ret": 0.324,
+   "win": 100.0,
+   "cyc": 2.2,
+   "esc": 66.7,
+   "fills": 2.8,
+   "worst": -2.68
+  },
+  {
+   "code": "006400",
+   "name": "삼성SDI",
+   "days": 6,
+   "tot_ret": 1.79,
+   "day_ret": 0.299,
+   "win": 100.0,
+   "cyc": 1.8,
+   "esc": 83.3,
+   "fills": 2.2,
+   "worst": -5.56
+  },
+  {
+   "code": "317850",
+   "name": "대모",
+   "days": 6,
+   "tot_ret": 1.79,
+   "day_ret": 0.299,
+   "win": 100.0,
+   "cyc": 1.5,
+   "esc": 66.7,
+   "fills": 2.0,
+   "worst": -2.85
+  },
+  {
+   "code": "021240",
+   "name": "코웨이",
+   "days": 6,
+   "tot_ret": 1.74,
+   "day_ret": 0.29,
+   "win": 100.0,
+   "cyc": 1.7,
+   "esc": 33.3,
+   "fills": 2.8,
+   "worst": -7.45
+  },
+  {
+   "code": "051915",
+   "name": "LG화학우",
+   "days": 6,
+   "tot_ret": 1.64,
+   "day_ret": 0.273,
+   "win": 100.0,
+   "cyc": 2.3,
+   "esc": 50.0,
+   "fills": 2.5,
+   "worst": -0.51
+  },
+  {
+   "code": "383310",
+   "name": "에코프로에이치엔",
+   "days": 6,
+   "tot_ret": 1.64,
+   "day_ret": 0.273,
+   "win": 100.0,
+   "cyc": 2.3,
+   "esc": 83.3,
+   "fills": 2.2,
+   "worst": -0.49
+  },
+  {
+   "code": "067160",
+   "name": "SOOP",
+   "days": 6,
+   "tot_ret": 1.54,
+   "day_ret": 0.256,
+   "win": 100.0,
+   "cyc": 2.0,
+   "esc": 50.0,
+   "fills": 2.5,
+   "worst": -0.68
+  },
+  {
+   "code": "243840",
+   "name": "신흥에스이씨",
+   "days": 6,
+   "tot_ret": 1.48,
+   "day_ret": 0.247,
+   "win": 100.0,
+   "cyc": 2.0,
+   "esc": 50.0,
+   "fills": 2.8,
+   "worst": -1.23
+  },
+  {
+   "code": "330350",
+   "name": "위더스제약",
+   "days": 6,
+   "tot_ret": 1.48,
+   "day_ret": 0.247,
+   "win": 100.0,
+   "cyc": 2.0,
+   "esc": 66.7,
+   "fills": 1.8,
+   "worst": -0.51
+  },
+  {
+   "code": "009290",
+   "name": "광동제약",
+   "days": 6,
+   "tot_ret": 1.43,
+   "day_ret": 0.239,
+   "win": 100.0,
+   "cyc": 1.7,
+   "esc": 83.3,
+   "fills": 1.5,
+   "worst": -1.13
+  },
+  {
+   "code": "001800",
+   "name": "오리온홀딩스",
+   "days": 6,
+   "tot_ret": 1.33,
+   "day_ret": 0.222,
+   "win": 100.0,
+   "cyc": 1.8,
+   "esc": 50.0,
+   "fills": 2.3,
+   "worst": -0.71
+  },
+  {
+   "code": "241690",
+   "name": "유니테크노",
+   "days": 6,
+   "tot_ret": 1.33,
+   "day_ret": 0.222,
+   "win": 100.0,
+   "cyc": 2.2,
+   "esc": 83.3,
+   "fills": 1.8,
+   "worst": -0.39
+  },
+  {
+   "code": "004430",
+   "name": "송원산업",
+   "days": 6,
+   "tot_ret": 1.23,
+   "day_ret": 0.205,
+   "win": 100.0,
+   "cyc": 1.7,
+   "esc": 66.7,
+   "fills": 1.3,
+   "worst": -0.68
+  },
+  {
+   "code": "009470",
+   "name": "삼화전기",
+   "days": 6,
+   "tot_ret": 1.23,
+   "day_ret": 0.205,
+   "win": 100.0,
+   "cyc": 1.8,
+   "esc": 83.3,
+   "fills": 1.7,
+   "worst": -0.58
+  },
+  {
+   "code": "010130",
+   "name": "고려아연",
+   "days": 6,
+   "tot_ret": 1.23,
+   "day_ret": 0.205,
+   "win": 83.3,
+   "cyc": 1.5,
+   "esc": 50.0,
+   "fills": 2.2,
+   "worst": -1.01
+  },
+  {
+   "code": "041510",
+   "name": "에스엠",
+   "days": 6,
+   "tot_ret": 1.23,
+   "day_ret": 0.205,
+   "win": 100.0,
+   "cyc": 1.7,
+   "esc": 83.3,
+   "fills": 1.3,
+   "worst": -1.43
+  },
+  {
+   "code": "111770",
+   "name": "영원무역",
+   "days": 6,
+   "tot_ret": 1.23,
+   "day_ret": 0.205,
+   "win": 83.3,
+   "cyc": 1.8,
+   "esc": 50.0,
+   "fills": 1.8,
+   "worst": -0.63
+  },
+  {
+   "code": "081660",
+   "name": "미스토홀딩스",
+   "days": 6,
+   "tot_ret": 1.18,
+   "day_ret": 0.196,
+   "win": 100.0,
+   "cyc": 1.7,
+   "esc": 16.7,
+   "fills": 1.8,
+   "worst": -0.45
+  },
+  {
+   "code": "094850",
+   "name": "참좋은여행",
+   "days": 6,
+   "tot_ret": 1.13,
+   "day_ret": 0.188,
+   "win": 100.0,
+   "cyc": 1.7,
+   "esc": 100.0,
+   "fills": 0.7,
+   "worst": -0.51
+  },
+  {
+   "code": "003670",
+   "name": "포스코퓨처엠",
+   "days": 6,
+   "tot_ret": 1.02,
+   "day_ret": 0.171,
+   "win": 100.0,
+   "cyc": 1.5,
+   "esc": 66.7,
+   "fills": 1.5,
+   "worst": -0.97
+  },
+  {
+   "code": "005940",
+   "name": "NH투자증권",
+   "days": 6,
+   "tot_ret": 1.02,
+   "day_ret": 0.171,
+   "win": 83.3,
+   "cyc": 1.2,
+   "esc": 50.0,
+   "fills": 1.5,
+   "worst": -1.24
+  },
+  {
+   "code": "085660",
+   "name": "차바이오텍",
+   "days": 6,
+   "tot_ret": 0.97,
+   "day_ret": 0.162,
+   "win": 100.0,
+   "cyc": 1.5,
+   "esc": 83.3,
+   "fills": 1.0,
+   "worst": -0.27
+  },
+  {
+   "code": "259960",
+   "name": "크래프톤",
+   "days": 6,
+   "tot_ret": 0.97,
+   "day_ret": 0.162,
+   "win": 66.7,
+   "cyc": 1.2,
+   "esc": 66.7,
+   "fills": 1.8,
+   "worst": -1.69
+  },
+  {
+   "code": "105560",
+   "name": "KB금융",
+   "days": 6,
+   "tot_ret": 0.92,
+   "day_ret": 0.154,
+   "win": 83.3,
+   "cyc": 1.2,
+   "esc": 33.3,
+   "fills": 1.3,
+   "worst": -0.7
+  },
+  {
+   "code": "352820",
+   "name": "하이브",
+   "days": 6,
+   "tot_ret": 0.92,
+   "day_ret": 0.154,
+   "win": 100.0,
+   "cyc": 1.3,
+   "esc": 66.7,
+   "fills": 1.2,
+   "worst": -0.52
+  },
+  {
+   "code": "000490",
+   "name": "대동",
+   "days": 6,
+   "tot_ret": 0.87,
+   "day_ret": 0.145,
+   "win": 100.0,
+   "cyc": 1.3,
+   "esc": 83.3,
+   "fills": 1.3,
+   "worst": -0.56
+  },
+  {
+   "code": "003030",
+   "name": "세아제강지주",
+   "days": 6,
+   "tot_ret": 0.87,
+   "day_ret": 0.145,
+   "win": 83.3,
+   "cyc": 1.3,
+   "esc": 66.7,
+   "fills": 1.3,
+   "worst": -0.48
+  },
+  {
+   "code": "051910",
+   "name": "LG화학",
+   "days": 6,
+   "tot_ret": 0.87,
+   "day_ret": 0.145,
+   "win": 83.3,
+   "cyc": 1.3,
+   "esc": 50.0,
+   "fills": 1.8,
+   "worst": -0.97
+  },
+  {
+   "code": "006405",
+   "name": "삼성SDI우",
+   "days": 6,
+   "tot_ret": 0.82,
+   "day_ret": 0.137,
+   "win": 100.0,
+   "cyc": 1.3,
+   "esc": 83.3,
+   "fills": 1.3,
+   "worst": -1.06
+  },
+  {
+   "code": "001040",
+   "name": "CJ",
+   "days": 6,
+   "tot_ret": 0.77,
+   "day_ret": 0.128,
+   "win": 83.3,
+   "cyc": 1.2,
+   "esc": 50.0,
+   "fills": 1.5,
+   "worst": -0.41
+  },
+  {
+   "code": "003380",
+   "name": "하림지주",
+   "days": 6,
+   "tot_ret": 0.77,
+   "day_ret": 0.128,
+   "win": 100.0,
+   "cyc": 1.2,
+   "esc": 83.3,
+   "fills": 1.0,
+   "worst": -0.5
+  },
+  {
+   "code": "018670",
+   "name": "SK가스",
+   "days": 6,
+   "tot_ret": 0.77,
+   "day_ret": 0.128,
+   "win": 83.3,
+   "cyc": 1.2,
+   "esc": 83.3,
+   "fills": 0.5,
+   "worst": -0.39
+  },
+  {
+   "code": "175330",
+   "name": "JB금융지주",
+   "days": 6,
+   "tot_ret": 0.77,
+   "day_ret": 0.128,
+   "win": 83.3,
+   "cyc": 1.0,
+   "esc": 50.0,
+   "fills": 0.8,
+   "worst": -1.01
+  },
+  {
+   "code": "195940",
+   "name": "HK이노엔",
+   "days": 6,
+   "tot_ret": 0.77,
+   "day_ret": 0.128,
+   "win": 83.3,
+   "cyc": 1.2,
+   "esc": 83.3,
+   "fills": 0.5,
+   "worst": -0.25
+  },
+  {
+   "code": "000210",
+   "name": "DL",
+   "days": 6,
+   "tot_ret": 0.72,
+   "day_ret": 0.119,
+   "win": 83.3,
+   "cyc": 1.0,
+   "esc": 66.7,
+   "fills": 1.3,
+   "worst": -0.86
+  },
+  {
+   "code": "005850",
+   "name": "에스엘",
+   "days": 6,
+   "tot_ret": 0.72,
+   "day_ret": 0.119,
+   "win": 83.3,
+   "cyc": 1.0,
+   "esc": 66.7,
+   "fills": 1.0,
+   "worst": -0.86
+  },
+  {
+   "code": "032350",
+   "name": "롯데관광개발",
+   "days": 6,
+   "tot_ret": 0.72,
+   "day_ret": 0.119,
+   "win": 66.7,
+   "cyc": 1.2,
+   "esc": 66.7,
+   "fills": 1.3,
+   "worst": -1.88
+  },
+  {
+   "code": "039860",
+   "name": "나노엔텍",
+   "days": 6,
+   "tot_ret": 0.72,
+   "day_ret": 0.119,
+   "win": 100.0,
+   "cyc": 1.2,
+   "esc": 100.0,
+   "fills": 0.5,
+   "worst": -0.05
+  },
+  {
+   "code": "069620",
+   "name": "대웅제약",
+   "days": 6,
+   "tot_ret": 0.72,
+   "day_ret": 0.119,
+   "win": 50.0,
+   "cyc": 1.0,
+   "esc": 33.3,
+   "fills": 1.5,
+   "worst": -0.66
+  },
+  {
+   "code": "255220",
+   "name": "SG",
+   "days": 6,
+   "tot_ret": 0.72,
+   "day_ret": 0.119,
+   "win": 83.3,
+   "cyc": 1.0,
+   "esc": 50.0,
+   "fills": 1.2,
+   "worst": -0.62
+  },
+  {
+   "code": "460860",
+   "name": "동국제강",
+   "days": 6,
+   "tot_ret": 0.72,
+   "day_ret": 0.119,
+   "win": 100.0,
+   "cyc": 1.2,
+   "esc": 100.0,
+   "fills": 0.2,
+   "worst": -0.11
+  },
+  {
+   "code": "012330",
+   "name": "현대모비스",
+   "days": 6,
+   "tot_ret": 0.67,
+   "day_ret": 0.111,
+   "win": 100.0,
+   "cyc": 1.0,
+   "esc": 66.7,
+   "fills": 0.8,
+   "worst": -1.13
+  },
+  {
+   "code": "204620",
+   "name": "글로벌텍스프리",
+   "days": 6,
+   "tot_ret": 0.67,
+   "day_ret": 0.111,
+   "win": 100.0,
+   "cyc": 1.0,
+   "esc": 66.7,
+   "fills": 0.8,
+   "worst": -0.64
+  },
+  {
+   "code": "395400",
+   "name": "SK리츠",
+   "days": 6,
+   "tot_ret": 0.67,
+   "day_ret": 0.111,
+   "win": 83.3,
+   "cyc": 1.0,
+   "esc": 16.7,
+   "fills": 1.7,
+   "worst": -0.32
+  },
+  {
+   "code": "005490",
+   "name": "POSCO홀딩스",
+   "days": 6,
+   "tot_ret": 0.61,
+   "day_ret": 0.102,
+   "win": 100.0,
+   "cyc": 1.0,
+   "esc": 83.3,
+   "fills": 0.3,
+   "worst": -0.12
+  },
+  {
+   "code": "112040",
+   "name": "위메이드",
+   "days": 6,
+   "tot_ret": 0.61,
+   "day_ret": 0.102,
+   "win": 83.3,
+   "cyc": 1.0,
+   "esc": 83.3,
+   "fills": 0.5,
+   "worst": -0.62
+  },
+  {
+   "code": "128820",
+   "name": "대성산업",
+   "days": 6,
+   "tot_ret": 0.61,
+   "day_ret": 0.102,
+   "win": 100.0,
+   "cyc": 1.0,
+   "esc": 83.3,
+   "fills": 0.3,
+   "worst": -0.26
+  },
+  {
+   "code": "000120",
+   "name": "CJ대한통운",
+   "days": 6,
+   "tot_ret": 0.56,
+   "day_ret": 0.094,
+   "win": 66.7,
+   "cyc": 0.8,
+   "esc": 33.3,
+   "fills": 1.0,
+   "worst": -0.44
+  },
+  {
+   "code": "011200",
+   "name": "HMM",
+   "days": 6,
+   "tot_ret": 0.51,
+   "day_ret": 0.085,
+   "win": 66.7,
+   "cyc": 0.8,
+   "esc": 66.7,
+   "fills": 1.3,
+   "worst": -1.92
+  },
+  {
+   "code": "011210",
+   "name": "현대위아",
+   "days": 6,
+   "tot_ret": 0.51,
+   "day_ret": 0.085,
+   "win": 83.3,
+   "cyc": 0.8,
+   "esc": 83.3,
+   "fills": 0.2,
+   "worst": -0.08
+  },
+  {
+   "code": "017800",
+   "name": "현대엘리베이터",
+   "days": 6,
+   "tot_ret": 0.51,
+   "day_ret": 0.085,
+   "win": 66.7,
+   "cyc": 0.8,
+   "esc": 50.0,
+   "fills": 0.8,
+   "worst": -0.25
+  },
+  {
+   "code": "190510",
+   "name": "나무가",
+   "days": 6,
+   "tot_ret": 0.51,
+   "day_ret": 0.085,
+   "win": 83.3,
+   "cyc": 0.8,
+   "esc": 66.7,
+   "fills": 1.2,
+   "worst": -1.04
+  },
+  {
+   "code": "004990",
+   "name": "롯데지주",
+   "days": 6,
+   "tot_ret": 0.46,
+   "day_ret": 0.077,
+   "win": 66.7,
+   "cyc": 0.7,
+   "esc": 50.0,
+   "fills": 0.5,
+   "worst": -0.44
+  },
+  {
+   "code": "035250",
+   "name": "강원랜드",
+   "days": 6,
+   "tot_ret": 0.46,
+   "day_ret": 0.077,
+   "win": 66.7,
+   "cyc": 0.7,
+   "esc": 50.0,
+   "fills": 0.7,
+   "worst": -0.48
+  },
+  {
+   "code": "003220",
+   "name": "대원제약",
+   "days": 6,
+   "tot_ret": 0.41,
+   "day_ret": 0.068,
+   "win": 66.7,
+   "cyc": 0.7,
+   "esc": 50.0,
+   "fills": 0.3,
+   "worst": -0.21
+  },
+  {
+   "code": "011370",
+   "name": "서한",
+   "days": 6,
+   "tot_ret": 0.41,
+   "day_ret": 0.068,
+   "win": 66.7,
+   "cyc": 0.7,
+   "esc": 66.7,
+   "fills": 0.2,
+   "worst": -0.17
+  },
+  {
+   "code": "035420",
+   "name": "NAVER",
+   "days": 6,
+   "tot_ret": 0.41,
+   "day_ret": 0.068,
+   "win": 66.7,
+   "cyc": 0.7,
+   "esc": 50.0,
+   "fills": 1.3,
+   "worst": -0.84
+  },
+  {
+   "code": "008770",
+   "name": "호텔신라",
+   "days": 6,
+   "tot_ret": 0.31,
+   "day_ret": 0.051,
+   "win": 50.0,
+   "cyc": 0.5,
+   "esc": 50.0,
+   "fills": 0.5,
+   "worst": -0.27
+  },
+  {
+   "code": "097950",
+   "name": "CJ제일제당",
+   "days": 6,
+   "tot_ret": 0.31,
+   "day_ret": 0.051,
+   "win": 50.0,
+   "cyc": 0.5,
+   "esc": 33.3,
+   "fills": 0.7,
+   "worst": -0.3
+  },
+  {
+   "code": "100250",
+   "name": "진양홀딩스",
+   "days": 6,
+   "tot_ret": 0.31,
+   "day_ret": 0.051,
+   "win": 33.3,
+   "cyc": 0.5,
+   "esc": 33.3,
+   "fills": 0.2,
+   "worst": -0.13
+  },
+  {
+   "code": "439090",
+   "name": "마녀공장",
+   "days": 6,
+   "tot_ret": 0.31,
+   "day_ret": 0.051,
+   "win": 50.0,
+   "cyc": 0.5,
+   "esc": 33.3,
+   "fills": 0.3,
+   "worst": -0.24
+  },
+  {
+   "code": "001680",
+   "name": "대상",
+   "days": 6,
+   "tot_ret": 0.2,
+   "day_ret": 0.034,
+   "win": 33.3,
+   "cyc": 0.3,
+   "esc": 16.7,
+   "fills": 1.2,
+   "worst": -0.34
+  },
+  {
+   "code": "031210",
+   "name": "서울보증보험",
+   "days": 6,
+   "tot_ret": 0.1,
+   "day_ret": 0.017,
+   "win": 16.7,
+   "cyc": 0.2,
+   "esc": 16.7,
+   "fills": 0.3,
+   "worst": -0.19
+  },
+  {
+   "code": "214320",
+   "name": "이노션",
+   "days": 6,
+   "tot_ret": 0.1,
+   "day_ret": 0.017,
+   "win": 16.7,
+   "cyc": 0.2,
+   "esc": 16.7,
+   "fills": 0.3,
+   "worst": -0.22
+  }
+ ],
+ "daily": [
+  {
+   "code": "004990",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.09
+  },
+  {
+   "code": "005490",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "006400",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "008770",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "009470",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "010130",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "011210",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "011370",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.1
+  },
+  {
+   "code": "012330",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "017800",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "018670",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "031210",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "035250",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.0
+  },
+  {
+   "code": "035420",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "039860",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "048530",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.03
+  },
+  {
+   "code": "069620",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.09
+  },
+  {
+   "code": "097950",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "100250",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.04
+  },
+  {
+   "code": "101360",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "112040",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "128820",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "175330",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.04
+  },
+  {
+   "code": "187660",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "190510",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "195940",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "204620",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.1
+  },
+  {
+   "code": "214320",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "223250",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "255220",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "259960",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "317850",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "323990",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "352820",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "439090",
+   "day": "20261106",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "004830",
+   "day": "20261109",
+   "ret": 2.56,
+   "cycles": 12,
+   "fills": 18,
+   "escape": false,
+   "worst": -7.01
+  },
+  {
+   "code": "317850",
+   "day": "20261109",
+   "ret": 1.229,
+   "cycles": 4,
+   "fills": 9,
+   "escape": false,
+   "worst": -2.85
+  },
+  {
+   "code": "091580",
+   "day": "20261109",
+   "ret": 1.178,
+   "cycles": 8,
+   "fills": 10,
+   "escape": true,
+   "worst": -0.8
+  },
+  {
+   "code": "048910",
+   "day": "20261109",
+   "ret": 1.127,
+   "cycles": 6,
+   "fills": 8,
+   "escape": true,
+   "worst": -1.56
+  },
+  {
+   "code": "006400",
+   "day": "20261109",
+   "ret": 1.024,
+   "cycles": 4,
+   "fills": 10,
+   "escape": false,
+   "worst": -5.56
+  },
+  {
+   "code": "223250",
+   "day": "20261109",
+   "ret": 0.973,
+   "cycles": 4,
+   "fills": 7,
+   "escape": false,
+   "worst": -2.26
+  },
+  {
+   "code": "021240",
+   "day": "20261109",
+   "ret": 0.922,
+   "cycles": 3,
+   "fills": 9,
+   "escape": false,
+   "worst": -7.45
+  },
+  {
+   "code": "101360",
+   "day": "20261109",
+   "ret": 0.717,
+   "cycles": 4,
+   "fills": 8,
+   "escape": false,
+   "worst": -2.68
+  },
+  {
+   "code": "069620",
+   "day": "20261109",
+   "ret": 0.512,
+   "cycles": 4,
+   "fills": 5,
+   "escape": false,
+   "worst": -0.52
+  },
+  {
+   "code": "243840",
+   "day": "20261109",
+   "ret": 0.512,
+   "cycles": 3,
+   "fills": 6,
+   "escape": false,
+   "worst": -1.23
+  },
+  {
+   "code": "001800",
+   "day": "20261109",
+   "ret": 0.461,
+   "cycles": 4,
+   "fills": 5,
+   "escape": true,
+   "worst": -0.52
+  },
+  {
+   "code": "067160",
+   "day": "20261109",
+   "ret": 0.41,
+   "cycles": 3,
+   "fills": 5,
+   "escape": false,
+   "worst": -0.58
+  },
+  {
+   "code": "085620",
+   "day": "20261109",
+   "ret": 0.41,
+   "cycles": 3,
+   "fills": 4,
+   "escape": true,
+   "worst": -0.78
+  },
+  {
+   "code": "187660",
+   "day": "20261109",
+   "ret": 0.41,
+   "cycles": 3,
+   "fills": 8,
+   "escape": true,
+   "worst": -4.01
+  },
+  {
+   "code": "000490",
+   "day": "20261109",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 5,
+   "escape": true,
+   "worst": -0.51
+  },
+  {
+   "code": "003670",
+   "day": "20261109",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 6,
+   "escape": false,
+   "worst": -0.97
+  },
+  {
+   "code": "010130",
+   "day": "20261109",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.38
+  },
+  {
+   "code": "195940",
+   "day": "20261109",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.25
+  },
+  {
+   "code": "352820",
+   "day": "20261109",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 5,
+   "escape": false,
+   "worst": -0.46
+  },
+  {
+   "code": "048530",
+   "day": "20261109",
+   "ret": 0.307,
+   "cycles": 3,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.25
+  },
+  {
+   "code": "051910",
+   "day": "20261109",
+   "ret": 0.307,
+   "cycles": 3,
+   "fills": 6,
+   "escape": false,
+   "worst": -0.97
+  },
+  {
+   "code": "051915",
+   "day": "20261109",
+   "ret": 0.307,
+   "cycles": 3,
+   "fills": 5,
+   "escape": false,
+   "worst": -0.4
+  },
+  {
+   "code": "111770",
+   "day": "20261109",
+   "ret": 0.307,
+   "cycles": 3,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.14
+  },
+  {
+   "code": "241690",
+   "day": "20261109",
+   "ret": 0.307,
+   "cycles": 3,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.05
+  },
+  {
+   "code": "081660",
+   "day": "20261109",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.34
+  },
+  {
+   "code": "259960",
+   "day": "20261109",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.21
+  },
+  {
+   "code": "005940",
+   "day": "20261109",
+   "ret": 0.205,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.82
+  },
+  {
+   "code": "017800",
+   "day": "20261109",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.25
+  },
+  {
+   "code": "039860",
+   "day": "20261109",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.05
+  },
+  {
+   "code": "041510",
+   "day": "20261109",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.15
+  },
+  {
+   "code": "085660",
+   "day": "20261109",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.16
+  },
+  {
+   "code": "175330",
+   "day": "20261109",
+   "ret": 0.205,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -1.01
+  },
+  {
+   "code": "004990",
+   "day": "20261109",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.44
+  },
+  {
+   "code": "012330",
+   "day": "20261109",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 4,
+   "escape": false,
+   "worst": -1.13
+  },
+  {
+   "code": "035250",
+   "day": "20261109",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.48
+  },
+  {
+   "code": "000120",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.28
+  },
+  {
+   "code": "000210",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "001040",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.19
+  },
+  {
+   "code": "003030",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.05
+  },
+  {
+   "code": "003220",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "003380",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "004430",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "005490",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.08
+  },
+  {
+   "code": "006405",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 4,
+   "escape": true,
+   "worst": -1.06
+  },
+  {
+   "code": "009290",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "009470",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "011210",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.08
+  },
+  {
+   "code": "011370",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "018670",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "032350",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "094850",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "095500",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.04
+  },
+  {
+   "code": "105560",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.08
+  },
+  {
+   "code": "112040",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "128820",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "190510",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "204620",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "255220",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.25
+  },
+  {
+   "code": "323990",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "330350",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "383310",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.26
+  },
+  {
+   "code": "439090",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.24
+  },
+  {
+   "code": "460860",
+   "day": "20261109",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "001680",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.34
+  },
+  {
+   "code": "005850",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.37
+  },
+  {
+   "code": "008770",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.13
+  },
+  {
+   "code": "011200",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 4,
+   "escape": false,
+   "worst": -1.92
+  },
+  {
+   "code": "031210",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.06
+  },
+  {
+   "code": "035420",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.48
+  },
+  {
+   "code": "097950",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.21
+  },
+  {
+   "code": "100250",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.07
+  },
+  {
+   "code": "214320",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.14
+  },
+  {
+   "code": "395400",
+   "day": "20261109",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.29
+  },
+  {
+   "code": "323990",
+   "day": "20261110",
+   "ret": 2.509,
+   "cycles": 10,
+   "fills": 16,
+   "escape": false,
+   "worst": -4.59
+  },
+  {
+   "code": "101360",
+   "day": "20261110",
+   "ret": 0.768,
+   "cycles": 5,
+   "fills": 5,
+   "escape": true,
+   "worst": -0.56
+  },
+  {
+   "code": "048530",
+   "day": "20261110",
+   "ret": 0.614,
+   "cycles": 5,
+   "fills": 5,
+   "escape": true,
+   "worst": -0.33
+  },
+  {
+   "code": "111770",
+   "day": "20261110",
+   "ret": 0.41,
+   "cycles": 3,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.41
+  },
+  {
+   "code": "003030",
+   "day": "20261110",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.39
+  },
+  {
+   "code": "081660",
+   "day": "20261110",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.31
+  },
+  {
+   "code": "187660",
+   "day": "20261110",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.12
+  },
+  {
+   "code": "009470",
+   "day": "20261110",
+   "ret": 0.307,
+   "cycles": 3,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "041510",
+   "day": "20261110",
+   "ret": 0.307,
+   "cycles": 1,
+   "fills": 4,
+   "escape": false,
+   "worst": -1.43
+  },
+  {
+   "code": "000120",
+   "day": "20261110",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.44
+  },
+  {
+   "code": "048910",
+   "day": "20261110",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.41
+  },
+  {
+   "code": "085660",
+   "day": "20261110",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.12
+  },
+  {
+   "code": "001800",
+   "day": "20261110",
+   "ret": 0.205,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.71
+  },
+  {
+   "code": "004830",
+   "day": "20261110",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.08
+  },
+  {
+   "code": "032350",
+   "day": "20261110",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "091580",
+   "day": "20261110",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "223250",
+   "day": "20261110",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.18
+  },
+  {
+   "code": "241690",
+   "day": "20261110",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.0
+  },
+  {
+   "code": "021240",
+   "day": "20261110",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.42
+  },
+  {
+   "code": "352820",
+   "day": "20261110",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.52
+  },
+  {
+   "code": "395400",
+   "day": "20261110",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.32
+  },
+  {
+   "code": "000210",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "000490",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "001040",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.09
+  },
+  {
+   "code": "003220",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "003380",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "003670",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "004430",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "005490",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "005850",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "006400",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "006405",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "009290",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "010130",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.1
+  },
+  {
+   "code": "011370",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "012330",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "017800",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "018670",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.1
+  },
+  {
+   "code": "035420",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "039860",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "051910",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "051915",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "067160",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.05
+  },
+  {
+   "code": "085620",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "094850",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "095500",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.13
+  },
+  {
+   "code": "097950",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.17
+  },
+  {
+   "code": "112040",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "128820",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "190510",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "204620",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "243840",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "255220",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "317850",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "330350",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "383310",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "460860",
+   "day": "20261110",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "001680",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.33
+  },
+  {
+   "code": "004990",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.06
+  },
+  {
+   "code": "005940",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.03
+  },
+  {
+   "code": "008770",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.13
+  },
+  {
+   "code": "011200",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.63
+  },
+  {
+   "code": "011210",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.08
+  },
+  {
+   "code": "031210",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.16
+  },
+  {
+   "code": "035250",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.2
+  },
+  {
+   "code": "069620",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.04
+  },
+  {
+   "code": "100250",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.04
+  },
+  {
+   "code": "105560",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.55
+  },
+  {
+   "code": "175330",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.07
+  },
+  {
+   "code": "195940",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.07
+  },
+  {
+   "code": "214320",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.01
+  },
+  {
+   "code": "259960",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 4,
+   "escape": false,
+   "worst": -1.69
+  },
+  {
+   "code": "439090",
+   "day": "20261110",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.06
+  },
+  {
+   "code": "330350",
+   "day": "20261111",
+   "ret": 0.563,
+   "cycles": 4,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.51
+  },
+  {
+   "code": "259960",
+   "day": "20261111",
+   "ret": 0.512,
+   "cycles": 3,
+   "fills": 5,
+   "escape": true,
+   "worst": -1.21
+  },
+  {
+   "code": "323990",
+   "day": "20261111",
+   "ret": 0.41,
+   "cycles": 2,
+   "fills": 5,
+   "escape": false,
+   "worst": -1.25
+  },
+  {
+   "code": "005940",
+   "day": "20261111",
+   "ret": 0.307,
+   "cycles": 1,
+   "fills": 4,
+   "escape": false,
+   "worst": -1.24
+  },
+  {
+   "code": "001040",
+   "day": "20261111",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "041510",
+   "day": "20261111",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "111770",
+   "day": "20261111",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.0
+  },
+  {
+   "code": "112040",
+   "day": "20261111",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "187660",
+   "day": "20261111",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.26
+  },
+  {
+   "code": "000120",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.1
+  },
+  {
+   "code": "000490",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "001800",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "003220",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.12
+  },
+  {
+   "code": "003380",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "003670",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "004430",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.03
+  },
+  {
+   "code": "004830",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.1
+  },
+  {
+   "code": "004990",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "005490",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "005850",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "006400",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "006405",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "008770",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "009290",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "009470",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "011200",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "011210",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "012330",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "018670",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "021240",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "032350",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "035250",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "035420",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "039860",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "048530",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "048910",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "051910",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "051915",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "067160",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.54
+  },
+  {
+   "code": "081660",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.24
+  },
+  {
+   "code": "085620",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "085660",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "091580",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "094850",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "095500",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "097950",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "101360",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "105560",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.12
+  },
+  {
+   "code": "128820",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "175330",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "190510",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.09
+  },
+  {
+   "code": "195940",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "204620",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "223250",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.04
+  },
+  {
+   "code": "241690",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "243840",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.09
+  },
+  {
+   "code": "317850",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "352820",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "383310",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "395400",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.18
+  },
+  {
+   "code": "460860",
+   "day": "20261111",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "000210",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.86
+  },
+  {
+   "code": "001680",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.12
+  },
+  {
+   "code": "003030",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.48
+  },
+  {
+   "code": "010130",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 3,
+   "escape": false,
+   "worst": -1.01
+  },
+  {
+   "code": "011370",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.05
+  },
+  {
+   "code": "017800",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.14
+  },
+  {
+   "code": "031210",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.1
+  },
+  {
+   "code": "069620",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.35
+  },
+  {
+   "code": "100250",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.08
+  },
+  {
+   "code": "214320",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.05
+  },
+  {
+   "code": "255220",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.21
+  },
+  {
+   "code": "439090",
+   "day": "20261111",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.08
+  },
+  {
+   "code": "223250",
+   "day": "20261112",
+   "ret": 1.178,
+   "cycles": 6,
+   "fills": 10,
+   "escape": false,
+   "worst": -3.24
+  },
+  {
+   "code": "004830",
+   "day": "20261112",
+   "ret": 0.922,
+   "cycles": 3,
+   "fills": 7,
+   "escape": false,
+   "worst": -2.39
+  },
+  {
+   "code": "187660",
+   "day": "20261112",
+   "ret": 0.922,
+   "cycles": 7,
+   "fills": 6,
+   "escape": true,
+   "worst": -0.46
+  },
+  {
+   "code": "009290",
+   "day": "20261112",
+   "ret": 0.871,
+   "cycles": 5,
+   "fills": 7,
+   "escape": true,
+   "worst": -1.13
+  },
+  {
+   "code": "048530",
+   "day": "20261112",
+   "ret": 0.614,
+   "cycles": 4,
+   "fills": 5,
+   "escape": false,
+   "worst": -0.61
+  },
+  {
+   "code": "323990",
+   "day": "20261112",
+   "ret": 0.614,
+   "cycles": 2,
+   "fills": 7,
+   "escape": false,
+   "worst": -3.9
+  },
+  {
+   "code": "091580",
+   "day": "20261112",
+   "ret": 0.563,
+   "cycles": 4,
+   "fills": 5,
+   "escape": true,
+   "worst": -0.42
+  },
+  {
+   "code": "009470",
+   "day": "20261112",
+   "ret": 0.512,
+   "cycles": 4,
+   "fills": 6,
+   "escape": false,
+   "worst": -0.58
+  },
+  {
+   "code": "383310",
+   "day": "20261112",
+   "ret": 0.461,
+   "cycles": 3,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.49
+  },
+  {
+   "code": "004430",
+   "day": "20261112",
+   "ret": 0.358,
+   "cycles": 2,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.68
+  },
+  {
+   "code": "006400",
+   "day": "20261112",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.16
+  },
+  {
+   "code": "010130",
+   "day": "20261112",
+   "ret": 0.358,
+   "cycles": 2,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.85
+  },
+  {
+   "code": "018670",
+   "day": "20261112",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.39
+  },
+  {
+   "code": "051915",
+   "day": "20261112",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.51
+  },
+  {
+   "code": "255220",
+   "day": "20261112",
+   "ret": 0.307,
+   "cycles": 2,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.62
+  },
+  {
+   "code": "330350",
+   "day": "20261112",
+   "ret": 0.307,
+   "cycles": 2,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.42
+  },
+  {
+   "code": "021240",
+   "day": "20261112",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.33
+  },
+  {
+   "code": "175330",
+   "day": "20261112",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.36
+  },
+  {
+   "code": "243840",
+   "day": "20261112",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.51
+  },
+  {
+   "code": "000210",
+   "day": "20261112",
+   "ret": 0.205,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.68
+  },
+  {
+   "code": "005850",
+   "day": "20261112",
+   "ret": 0.205,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.86
+  },
+  {
+   "code": "006405",
+   "day": "20261112",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.23
+  },
+  {
+   "code": "094850",
+   "day": "20261112",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.05
+  },
+  {
+   "code": "241690",
+   "day": "20261112",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.39
+  },
+  {
+   "code": "003380",
+   "day": "20261112",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.5
+  },
+  {
+   "code": "003670",
+   "day": "20261112",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.53
+  },
+  {
+   "code": "051910",
+   "day": "20261112",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.34
+  },
+  {
+   "code": "081660",
+   "day": "20261112",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.45
+  },
+  {
+   "code": "101360",
+   "day": "20261112",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.66
+  },
+  {
+   "code": "105560",
+   "day": "20261112",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.37
+  },
+  {
+   "code": "317850",
+   "day": "20261112",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.48
+  },
+  {
+   "code": "000490",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.56
+  },
+  {
+   "code": "001800",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.17
+  },
+  {
+   "code": "003030",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.29
+  },
+  {
+   "code": "005490",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.12
+  },
+  {
+   "code": "005940",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.05
+  },
+  {
+   "code": "011200",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "011210",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "012330",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.11
+  },
+  {
+   "code": "039860",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.05
+  },
+  {
+   "code": "041510",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.08
+  },
+  {
+   "code": "048910",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "067160",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.2
+  },
+  {
+   "code": "085660",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.18
+  },
+  {
+   "code": "128820",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.26
+  },
+  {
+   "code": "195940",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "204620",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.64
+  },
+  {
+   "code": "259960",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.04
+  },
+  {
+   "code": "352820",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.09
+  },
+  {
+   "code": "395400",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.26
+  },
+  {
+   "code": "460860",
+   "day": "20261112",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "000120",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.03
+  },
+  {
+   "code": "001040",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.31
+  },
+  {
+   "code": "001680",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.18
+  },
+  {
+   "code": "003220",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.21
+  },
+  {
+   "code": "004990",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.15
+  },
+  {
+   "code": "008770",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.27
+  },
+  {
+   "code": "011370",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.17
+  },
+  {
+   "code": "017800",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.12
+  },
+  {
+   "code": "031210",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.19
+  },
+  {
+   "code": "032350",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 4,
+   "escape": false,
+   "worst": -1.88
+  },
+  {
+   "code": "035250",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.08
+  },
+  {
+   "code": "035420",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.44
+  },
+  {
+   "code": "069620",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.66
+  },
+  {
+   "code": "085620",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 6,
+   "escape": false,
+   "worst": -6.41
+  },
+  {
+   "code": "095500",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.52
+  },
+  {
+   "code": "097950",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.3
+  },
+  {
+   "code": "100250",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.04
+  },
+  {
+   "code": "111770",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.63
+  },
+  {
+   "code": "112040",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.62
+  },
+  {
+   "code": "190510",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 3,
+   "escape": false,
+   "worst": -1.04
+  },
+  {
+   "code": "214320",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.02
+  },
+  {
+   "code": "439090",
+   "day": "20261112",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.22
+  },
+  {
+   "code": "085620",
+   "day": "20261113",
+   "ret": 0.717,
+   "cycles": 3,
+   "fills": 9,
+   "escape": false,
+   "worst": -7.29
+  },
+  {
+   "code": "001800",
+   "day": "20261113",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.14
+  },
+  {
+   "code": "004830",
+   "day": "20261113",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.31
+  },
+  {
+   "code": "223250",
+   "day": "20261113",
+   "ret": 0.358,
+   "cycles": 3,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.43
+  },
+  {
+   "code": "010130",
+   "day": "20261113",
+   "ret": 0.307,
+   "cycles": 2,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.53
+  },
+  {
+   "code": "067160",
+   "day": "20261113",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 3,
+   "escape": false,
+   "worst": -0.41
+  },
+  {
+   "code": "323990",
+   "day": "20261113",
+   "ret": 0.256,
+   "cycles": 2,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.22
+  },
+  {
+   "code": "003380",
+   "day": "20261113",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 3,
+   "escape": true,
+   "worst": -0.33
+  },
+  {
+   "code": "048530",
+   "day": "20261113",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.27
+  },
+  {
+   "code": "091580",
+   "day": "20261113",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "095500",
+   "day": "20261113",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "100250",
+   "day": "20261113",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.13
+  },
+  {
+   "code": "330350",
+   "day": "20261113",
+   "ret": 0.205,
+   "cycles": 2,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.35
+  },
+  {
+   "code": "001040",
+   "day": "20261113",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.41
+  },
+  {
+   "code": "051915",
+   "day": "20261113",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.47
+  },
+  {
+   "code": "204620",
+   "day": "20261113",
+   "ret": 0.154,
+   "cycles": 1,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.58
+  },
+  {
+   "code": "000210",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "000490",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "001680",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "003030",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 2,
+   "escape": true,
+   "worst": -0.27
+  },
+  {
+   "code": "003670",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "004430",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "004990",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "005490",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "005850",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "005940",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "006400",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "006405",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "008770",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "009290",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.04
+  },
+  {
+   "code": "009470",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "011200",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "011210",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "011370",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "012330",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "017800",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "021240",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "035250",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "035420",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.84
+  },
+  {
+   "code": "039860",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "041510",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "048910",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "069620",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.03
+  },
+  {
+   "code": "081660",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.01
+  },
+  {
+   "code": "085660",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "094850",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "101360",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "105560",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "111770",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "112040",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.06
+  },
+  {
+   "code": "128820",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.02
+  },
+  {
+   "code": "175330",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "187660",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": -0.07
+  },
+  {
+   "code": "190510",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.82
+  },
+  {
+   "code": "195940",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "241690",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "243840",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 4,
+   "escape": false,
+   "worst": -0.71
+  },
+  {
+   "code": "255220",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "317850",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "352820",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "383310",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 1,
+   "escape": true,
+   "worst": -0.1
+  },
+  {
+   "code": "395400",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "439090",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "460860",
+   "day": "20261113",
+   "ret": 0.102,
+   "cycles": 1,
+   "fills": 0,
+   "escape": true,
+   "worst": 0.0
+  },
+  {
+   "code": "000120",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.02
+  },
+  {
+   "code": "003220",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.07
+  },
+  {
+   "code": "018670",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.09
+  },
+  {
+   "code": "031210",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.09
+  },
+  {
+   "code": "032350",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.24
+  },
+  {
+   "code": "051910",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 2,
+   "escape": false,
+   "worst": -0.6
+  },
+  {
+   "code": "097950",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.01
+  },
+  {
+   "code": "214320",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 1,
+   "escape": false,
+   "worst": -0.22
+  },
+  {
+   "code": "259960",
+   "day": "20261113",
+   "ret": 0.0,
+   "cycles": 0,
+   "fills": 0,
+   "escape": false,
+   "worst": -0.08
+  }
+ ],
+ "assumptions": {
+  "gap": 1.5,
+  "amts": [
+   6,
+   6,
+   9,
+   12,
+   18,
+   18,
+   18
+  ],
+  "slot": 870000,
+  "entry": "당일 시가",
+  "exit": "차수×1.015 (분봉 종가 기준)",
+  "note": "청산 규칙 미적용 · 사다리만 돌린 상한"
+ }
+}

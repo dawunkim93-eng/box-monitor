@@ -536,6 +536,10 @@
     </div>
   </div>
   <div id="view-rev" hidden role="tabpanel" aria-labelledby="tb-rev">
+    <h2 class="sec">📊 분봉 실측 리포트 · 사다리 매매</h2>
+    <div class="pcard" id="mr-head"><div class="pmuted">분봉 데이터 불러오는 중…</div></div>
+    <div id="mr-body"></div>
+
     <h2 class="sec">🧾 오늘의 복기</h2>
     <div class="pcard" id="rev-head"><div class="pmuted">복기 데이터 불러오는 중…</div></div>
 
@@ -2172,6 +2176,36 @@ setInterval(()=>{
   }
 },1800000);
 })();
+/* ══════════ 분봉 실측 리포트 ══════════ */
+(function(){
+const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
+const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?2:d);
+const cls=n=>n>0?"up":(n<0?"deep":"");
+async function init(){
+  const head=document.getElementById("mr-head"); if(!head) return;
+  let d=null;
+  try{ const r=await fetch("data/minute_review.json?t="+Date.now(),{cache:"no-store"});
+       if(!r.ok) throw 0; d=await r.json(); }catch(e){}
+  if(!d){ head.innerHTML='<div class="pmuted">분봉 데이터가 아직 없습니다. 평일 16:35에 쌓입니다.</div>'; return; }
+  const w=d.window||{}, sm=d.summary||{}, A=d.assumptions||{};
+  head.innerHTML=`<div class="pmuted">수집 ${w.start||"-"}~${w.end||"-"} · <b>${w.days||0}거래일</b> · <b>${w.stocks||0}종목</b> · 갱신 ${d.updated_at||"-"}</div>
+    <div class="mrow" style="margin-top:6px">평균 <b>${fx(sm.avg_day_ret,3)}%</b>/일(슬롯 기준) · 승률 <b>${fx(sm.win_rate,1)}%</b> · 사이클 <b>${fx(sm.cycles,1)}</b>회/일 · 당일탈출 <b>${fx(sm.escape,1)}%</b></div>
+    <div class="msub">가정: ${A.entry||"시가"} 진입 · 갭 ${A.gap}% · 금액 ${(A.amts||[]).join("·")}만원 · ${A.exit||""} · ${A.note||""}</div>`;
+  const st=(d.stocks||[]).filter(x=>x.days>=2).slice(0,15);
+  if(!st.length){ document.getElementById("mr-body").innerHTML=""; return; }
+  document.getElementById("mr-body").innerHTML=
+    `<table class="ptbl"><thead><tr><th>#</th><th class="nm">종목</th><th>일수익률</th><th>승률</th><th class="mhide">사이클</th><th class="mhide">탈출</th><th>최악</th></tr></thead><tbody>`
+    + st.map((x,i)=>`<tr><td>${i+1}</td><td class="nm">${x.name}</td>
+        <td class="${cls(x.day_ret)}"><b>${fx(x.day_ret,3)}%</b></td>
+        <td>${fx(x.win,0)}%</td>
+        <td class="mhide">${fx(x.cyc,1)}</td>
+        <td class="mhide">${fx(x.esc,0)}%</td>
+        <td class="deep">${fx(x.worst,1)}%</td></tr>`).join("")
+    + `</tbody></table><div class="msub">일수익률 = 슬롯 87만원 대비 그날 사다리 수익(%). 최악 = 하루 중 미실현 손실 최대. 2거래일 이상 수집된 종목만 표시.</div>`;
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
 /* ══════════ 복기 탭 ══════════ */
 (function(){
 const RK="boxrev_v1";
