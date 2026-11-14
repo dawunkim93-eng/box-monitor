@@ -2201,7 +2201,7 @@ async function init(){
         <td class="mhide">${fx(x.cyc,1)}</td>
         <td class="mhide">${fx(x.esc,0)}%</td>
         <td class="deep">${fx(x.worst,1)}%</td></tr>`).join("")
-    + `</tbody></table><div class="msub">일수익률 = 슬롯 87만원 대비 그날 사다리 수익(%). 최악 = 하루 중 미실현 손실 최대. 2거래일 이상 수집된 종목만 표시.</div>`;
+    + `</tbody></table><div class="msub">일수익률 = 슬롯 87만원 대비 그날 사다리 수익(%). 최악 = 하루 중 미실현 손실 최대. 2거래일 이상 수집된 종목만 표시.<br>⚠ 우선주와 초고변동 종목은 사이클이 10회를 넘고 최악이 -15%까지 갈 수 있습니다. 최악 열을 반드시 함께 보세요.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();

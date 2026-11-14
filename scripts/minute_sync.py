@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "minute"
 LIVE = ROOT / "data" / "box_live.json"
+UNIV = ROOT / "data" / "minute_universe.json"
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 
 
@@ -66,14 +67,18 @@ def save(code, data):
 
 
 def watchlist():
-    if not LIVE.exists():
-        return []
-    d = json.loads(LIVE.read_text(encoding="utf-8"))
+    """거래대금 상위(분봉 유니버스) + 박스 라이브 종목."""
     codes = []
-    for r in d.get("rows", []):
-        c = str(r.get("code") or "")
-        if len(c) == 6 and c not in codes:
-            codes.append(c)
+    if UNIV.exists():
+        for c in json.loads(UNIV.read_text(encoding="utf-8")).get("codes", []):
+            if len(str(c)) == 6 and c not in codes:
+                codes.append(c)
+    if LIVE.exists():
+        d = json.loads(LIVE.read_text(encoding="utf-8"))
+        for r in d.get("rows", []):
+            c = str(r.get("code") or "")
+            if len(c) == 6 and c not in codes:
+                codes.append(c)
     return codes
 
 
