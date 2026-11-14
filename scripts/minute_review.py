@@ -86,7 +86,7 @@ def main():
         print("[WARN] data/minute 비어 있음 — minute_sync 먼저 실행")
         return
 
-    per = defaultdict(lambda: dict(pos=0, esc=0, net=0.0, cyc=0, worst=0.0,
+    per = defaultdict(lambda: dict(sig=0, pos=0, esc=0, net=0.0, cyc=0, worst=0.0,
                                    days_sum=0, same=0))
     dist = defaultdict(int)
     recent = []
@@ -99,6 +99,7 @@ def main():
         all_days.update(days)
         for i in range(len(days) - 1):
             limit = bars[days[i]][-1][1]                  # 신호일 종가 = 지정가
+            per[code]["sig"] += 1
             seq_days = days[i + 1:i + 1 + MAX_DAYS]
             first = bars.get(seq_days[0]) or []
             if not first or min(c for _, c in first) > limit:
@@ -135,14 +136,16 @@ def main():
         if n < 2:
             continue
         stocks.append(dict(
-            code=code, name=names.get(code, code), pos=n,
+            code=code, name=names.get(code, code), pos=n, sig=s["sig"],
+            fill=round(n / max(s["sig"], 1) * 100, 1),
             esc=round(s["esc"] / n * 100, 1),
+            ret_sig=round(s["net"] / SLOT * 100 / max(s["sig"], 1), 3),
             same=round(s["same"] / n * 100, 1),
             days=round(s["days_sum"] / max(s["esc"], 1), 2),
             cyc=round(s["cyc"] / n, 1),
             ret=round(s["net"] / SLOT * 100 / n, 3),
             worst=round(s["worst"], 2)))
-    stocks.sort(key=lambda x: (-x["ret"],))
+    stocks.sort(key=lambda x: (-x["ret_sig"],))
 
     tot = sum(x["pos"] for x in stocks)
     esc_n = sum(x["esc"] * x["pos"] / 100 for x in stocks)
@@ -156,6 +159,8 @@ def main():
                     end=max(all_days) if all_days else None,
                     days=len(all_days), stocks=len(stocks)),
         summary=dict(positions=int(tot),
+                     signals=int(sum(x["sig"] for x in stocks)),
+                     fill_rate=round(tot / max(sum(x["sig"] for x in stocks), 1) * 100, 1),
                      esc_rate=round(esc_n / max(tot, 1) * 100, 1),
                      same_day=round(same_n / max(tot, 1) * 100, 1),
                      days_to_esc=round(days_avg, 2),

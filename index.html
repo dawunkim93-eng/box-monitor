@@ -2192,21 +2192,21 @@ async function init(){
   const dline=["당일","2일","3일","4일","5일"].map(k=>D[k]?`${k} ${D[k]}`:"").filter(Boolean).join(" · ");
   const miss=D[`${A.max_days||5}일 내 미탈출`]||0;
   head.innerHTML=`<div class="pmuted">수집 ${w.start||"-"}~${w.end||"-"} · <b>${w.days||0}거래일</b> · <b>${w.stocks||0}종목</b> · 포지션 <b>${f(sm.positions)}</b> · 갱신 ${d.updated_at||"-"}</div>
-    <div class="mrow" style="margin-top:6px">탈출율 <b>${fx(sm.esc_rate,1)}%</b> · 당일 탈출 <b>${fx(sm.same_day,1)}%</b> · 평균 <b>${fx(sm.days_to_esc,2)}일</b> · 건당 <b>${fx(sm.ret,3)}%</b></div>
+    <div class="mrow" style="margin-top:6px">체결율 <b>${fx(sm.fill_rate,1)}%</b> · 탈출율 <b>${fx(sm.esc_rate,1)}%</b> · 당일 탈출 <b>${fx(sm.same_day,1)}%</b> · 평균 <b>${fx(sm.days_to_esc,2)}일</b> · 신호당 <b>${fx((sm.ret||0)*(sm.fill_rate||0)/100,3)}%</b></div>
     <div class="msub">탈출 분포: ${dline||"-"}${miss?` · 미탈출 ${miss}`:""}</div>
     <div class="msub">가정: ${A.entry||""} · 갭 ${A.gap}% · 금액 ${(A.amts||[]).join("·")}만원 · 최대 ${A.max_days}일 · ${A.note||""}</div>`;
   const st=(d.stocks||[]).filter(x=>x.pos>=2).slice(0,15);
   if(!st.length){ document.getElementById("mr-body").innerHTML=""; return; }
   document.getElementById("mr-body").innerHTML=
-    `<table class="ptbl"><thead><tr><th>#</th><th class="nm">종목</th><th>탈출율</th><th>평균</th><th>건당</th><th class="mhide">당일</th><th class="mhide">건수</th><th>최악</th></tr></thead><tbody>`
+    `<table class="ptbl"><thead><tr><th>#</th><th class="nm">종목</th><th>신호당</th><th class="mhide">체결율</th><th>탈출율</th><th>평균</th><th class="mhide">건수</th><th>최악</th></tr></thead><tbody>`
     + st.map((x,i)=>`<tr><td>${i+1}</td><td class="nm">${x.name}</td>
+        <td class="${cls(x.ret_sig)}"><b>${fx(x.ret_sig,3)}%</b></td>
+        <td class="mhide">${fx(x.fill,0)}%</td>
         <td>${fx(x.esc,0)}%</td>
         <td>${fx(x.days,2)}일</td>
-        <td class="${cls(x.ret)}"><b>${fx(x.ret,3)}%</b></td>
-        <td class="mhide">${fx(x.same,0)}%</td>
-        <td class="mhide">${f(x.pos)}</td>
+        <td class="mhide">${f(x.pos)}/${f(x.sig)}</td>
         <td class="deep">${fx(x.worst,1)}%</td></tr>`).join("")
-    + `</tbody></table><div class="msub">탈출율 = 1차가 +1.5%에 팔린 비율 · 평균 = 탈출까지 걸린 거래일 · 건당 = 슬롯 87만원 대비 수익.<br>진입은 전일 종가 지정가, 시가가 더 낮으면 시가 체결. 2건 이상 수집된 종목만 표시.<br>⚠ 우선주와 초고변동 종목은 최악이 -15%까지 갑니다. 최악 열을 함께 보세요.</div>`;
+    + `</tbody></table><div class="msub"><b>신호당</b> = 신호 1건당 기대 수익(체결율 × 건당 수익) — 순위 기준 · <b>체결율</b> = 지정가까지 내려와 실제로 산 비율 · <b>탈출율</b> = 산 것 중 1차가 +1.5%에 팔린 비율 · 평균 = 탈출까지 걸린 거래일.<br>진입은 전일 종가 지정가, 시가가 더 낮으면 시가 체결. 2건 이상 체결된 종목만 표시.<br>⚠ 우선주와 초고변동 종목은 최악이 -19%까지 갑니다. 최악 열을 함께 보세요.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
