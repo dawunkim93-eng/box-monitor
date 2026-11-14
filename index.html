@@ -536,6 +536,10 @@
     </div>
   </div>
   <div id="view-rev" hidden role="tabpanel" aria-labelledby="tb-rev">
+    <h2 class="sec">🎯 저변동 모의매매</h2>
+    <div class="pcard" id="dp-head"><div class="pmuted">모의매매 데이터 불러오는 중…</div></div>
+    <div id="dp-body"></div>
+
     <h2 class="sec">📈 6개월 일봉 분석 · 검색식</h2>
     <div class="pcard" id="df-head"><div class="pmuted">분석 중…</div></div>
     <div id="df-body"></div>
@@ -2184,6 +2188,45 @@ setInterval(()=>{
   }
 },1800000);
 })();
+/* ══════════ 저변동 모의매매 ══════════ */
+(function(){
+const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
+const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?2:d);
+async function init(){
+  const head=document.getElementById("dp-head"); if(!head) return;
+  let d=null;
+  try{ const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"});
+       if(!r.ok) throw 0; d=await r.json(); }catch(e){}
+  if(!d){ head.innerHTML='<div class="pmuted">모의매매 데이터가 없습니다. 평일 16:32에 갱신됩니다.</div>'; return; }
+  const sm=d.summary||{}, R=d.rule||{};
+  head.innerHTML=`<div class="pmuted">신호일 ${d.sig_date||"-"} · 후보 ${sm.picks||0} · 체결 ${sm.filled||0} · 완료 ${sm.done||0} · 갱신 ${d.updated_at||"-"}</div>
+    <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win,1)}%</b> · 건당 <b>${fx(sm.avg,3)}%</b> · 누적 <b>${fx(sm.tot,1)}%</b> (슬롯 ${(R.slot||210000)/10000}만원)</div>
+    <div class="msub">${R.cond_a||""} · 진입 ${R.entry||""} · ${R.stop||""} · 최대 ${R.hold}일 · 최소 거래대금 ${R.min_amt}억</div>`;
+  const T=d.today||[];
+  const tb=(arr,showToday)=>`<table class="ptbl"><thead><tr><th class="nm">종목</th><th>지정가</th><th>3차(손절)</th><th class="mhide">거래대금</th><th class="mhide">조건</th></tr></thead><tbody>`
+    + arr.map(t=>`<tr><td class="nm">${t.name}</td>
+        <td><b>${f(t.limit)}</b></td>
+        <td class="deep">${f(t.stop)}</td>
+        <td class="mhide">${fx(t.amt,0)}억</td>
+        <td class="mhide">${t.cond}</td></tr>`).join("")
+    + `</tbody></table>`;
+  const rc=(d.recent||[]).filter(r=>r.status!=="대기").slice(0,10);
+  const rtb = rc.length? `<div class="msub" style="margin:10px 0 4px"><b>최근 기록</b></div>
+    <table class="ptbl"><thead><tr><th class="nm">종목</th><th>신호일</th><th>상태</th><th>손익</th></tr></thead><tbody>`
+    + rc.map(r=>`<tr><td class="nm">${r.name}</td><td>${String(r.sig).slice(4,6)}/${String(r.sig).slice(6)}</td>
+        <td>${r.status==="청산완료"?(r.kind||"청산"):r.status}</td>
+        <td class="${r.net>0?"up":"deep"}">${fx(r.net,2)}%</td></tr>`).join("")
+    + `</tbody></table>` : "";
+  document.getElementById("dp-body").innerHTML=
+    `<div class="msub" style="margin:2px 0 4px"><b>오늘 후보 ${T.length}건</b> — 위에서부터 밴드 상단·거래대금 순</div>`
+    + (T.length?tb(T.slice(0,12),true):'<div class="pmuted">오늘 조건에 맞는 종목이 없습니다.</div>')
+    + rtb
+    + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산(시간손절). 최대 3일 보유.<br>
+       2년 검증: 승률 79%, 건당 +0.25% (거래대금 10~20억 구간 +0.30%). 표본이 쌓이면 실측으로 대체됩니다.</div>`;
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
 /* ══════════ 6개월 일봉 분석 ══════════ */
 (function(){
 const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?1:d);
