@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-16 16:32",
+ "updated_at": "2026-11-16 16:43",
  "curve": [
   {
    "day": 20261116,
@@ -10,14 +10,14 @@
  ],
  "sig_date": 20261116,
  "summary": {
-  "picks": 46,
+  "picks": 37,
   "filled": 20,
   "done": 20,
-  "fill_rate": 43.5,
+  "fill_rate": 54.1,
   "win": 75.0,
   "avg": 0.509,
   "tot": 10.2,
-  "start": 20170704,
+  "start": 20261113,
   "kinds": {
    "전량익절": 11,
    "기간청산": 6,

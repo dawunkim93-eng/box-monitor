@@ -128,6 +128,8 @@ def main():
     seen = {(p["code"], p["sig"]) for p in picks}
     today = None
     added = []
+    scanned = []
+    cand = []
     for code in codes:
         df = load(code)
         if df is None:
@@ -136,7 +138,7 @@ def main():
         if not f:
             continue
         sig = int(df.index[-1].strftime("%Y%m%d"))
-        today = sig
+        scanned.append(sig)
         cond = []
         if f["amt"] >= MIN_AMT and f["amt"] <= 37.51 and f["pos"] >= 89.47:
             cond.append("A")
@@ -144,14 +146,22 @@ def main():
             cond.append("B")
         if "A" not in cond or (code, sig) in seen:   # 모의는 A(밴드 상단)만 추적
             continue
-        rec = dict(code=code, name=names.get(code, code), sig=sig,
-                   limit=round(f["close"]), cond="+".join(cond),
-                   amt=round(f["amt"], 1), pos=round(f["pos"], 1),
-                   atr=round(f["atr"], 2))
+        cand.append(dict(code=code, name=names.get(code, code), sig=sig,
+                         limit=round(f["close"]), cond="+".join(cond),
+                         amt=round(f["amt"], 1), pos=round(f["pos"], 1),
+                         atr=round(f["atr"], 2)))
+
+    today = max(scanned) if scanned else None
+    # 최신 거래일 신호만 등록 (거래정지·데이터 미갱신 종목의 옛 신호 배제)
+    for rec in cand:
+        if rec["sig"] != today or (rec["code"], rec["sig"]) in seen:
+            continue
         picks.append(rec)
         added.append(rec)
-        seen.add((code, sig))
-
+        seen.add((rec["code"], rec["sig"]))
+    # 최근 30일 밖 신호는 정리
+    cutoff = int((pd.Timestamp.now() - pd.Timedelta(days=30)).strftime("%Y%m%d"))
+    picks = [p for p in picks if p["sig"] >= cutoff]
     PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
 
     rows = []
