@@ -108,12 +108,23 @@ def evaluate(code, df, sig, limit):
             exit_kind = exit_kind or "전량익절"
             break
     if any(held):
-        j = min(i + HOLD, len(df) - 1)
-        for k in range(3):
-            if held[k]:
-                net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
-        exit_kind = exit_kind or "기간청산"
-    exit_day = int(df.index[min(i + HOLD, len(df) - 1)].strftime("%Y%m%d"))
+        full = i + HOLD                     # 기간청산 예정일
+        if full <= len(df) - 1:             # 3거래일이 지났으면 종가 청산 확정
+            for k in range(3):
+                if held[k]:
+                    net += AMTS[k] * 10_000 * (float(c[full]) / lv[k] - 1 - FEE)
+            exit_kind = exit_kind or "기간청산"
+            exit_day = int(df.index[full].strftime("%Y%m%d"))
+        else:                               # 아직 보유 중 — 평가손익만
+            j = len(df) - 1
+            for k in range(3):
+                if held[k]:
+                    net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
+            return dict(status="보유중", net=net / SLOT * 100, days=j - i,
+                        entry=int(df.index[i + 1].strftime("%Y%m%d")),
+                        exit=None, kind="보유중")
+    else:
+        exit_day = int(df.index[min(i + HOLD, len(df) - 1)].strftime("%Y%m%d"))
     return dict(status="청산완료", net=net / SLOT * 100, days=min(HOLD, len(df) - 1 - i),
                 entry=int(df.index[i + 1].strftime("%Y%m%d")),
                 exit=exit_day, kind=exit_kind)
@@ -175,10 +186,11 @@ def main():
         rows.append({**p, **r})
 
     done = [r for r in rows if r["status"] == "청산완료"]
-    fills = [r for r in rows if r["status"] != "미체결" and r["status"] != "대기"]
+    fills = [r for r in rows if r["status"] not in ("미체결", "대기")]
+    holding = [r for r in rows if r["status"] == "보유중"]
     tot = sum(r["net"] for r in done)
     summary = dict(
-        picks=len(rows), filled=len(fills), done=len(done),
+        picks=len(rows), filled=len(fills), done=len(done), holding=len(holding),
         fill_rate=round(len(fills) / max(len(rows), 1) * 100, 1),
         win=round(sum(1 for r in done if r["net"] > 0) / max(len(done), 1) * 100, 1),
         avg=round(tot / max(len(done), 1), 3), tot=round(tot, 1),
