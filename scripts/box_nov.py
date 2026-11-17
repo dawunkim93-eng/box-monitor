@@ -16,6 +16,9 @@ DUMP = Path("/tmp/dump_nov.json")
 OUT = ROOT / "data" / "box_nov.json"
 PIT = Path("/home/lucky/backtest/data/pit")
 SINCE = 20261101
+BOX_SLOT = sum([6, 6, 9, 12, 18, 18, 18]) * 10000   # 주봉박스 슬롯 87만원
+LOW_SLOT = sum([6, 6, 9]) * 10000                    # 저변동 슬롯 21만원
+SCALE = LOW_SLOT / BOX_SLOT                          # 비교용 환산 계수
 
 rows = json.loads(DUMP.read_text(encoding="utf-8"))
 master = pd.read_pickle(PIT / "master.pkl")
@@ -32,8 +35,11 @@ if not sel:
     print("[WARN] 11월 데이터 없음")
     raise SystemExit
 
-net_sum = sum(float(r.get("net") or 0) for r in sel)
-win = sum(1 for r in sel if float(r.get("net") or 0) > 0)
+def _net(r):
+    return float(r.get("net") or 0) * SCALE
+
+net_sum = sum(_net(r) for r in sel)
+win = sum(1 for r in sel if _net(r) > 0)
 esc = sum(1 for r in sel if r.get("escape0"))
 kinds = Counter(r.get("exit") or "기타" for r in sel)
 
@@ -41,7 +47,7 @@ byday = defaultdict(lambda: [0, 0.0])
 for r in sel:
     d = int(r.get("exit_day") or r["entry_day"])
     byday[d][0] += 1
-    byday[d][1] += float(r.get("net") or 0)
+    byday[d][1] += _net(r)
 daily, cum = [], 0.0
 for d in sorted(byday):
     n, net = byday[d]
@@ -54,14 +60,15 @@ for r in recent:
     nm = r.get("name") or names.get(str(r.get("symbol", "")), "")
     rec.append(dict(name=nm or "-", entry=int(r.get("entry_day") or 0),
                     exit=int(r.get("exit_day") or r.get("entry_day") or 0),
-                    net=round(float(r.get("net") or 0)), kind=r.get("exit") or "",
+                    net=round(_net(r)), kind=r.get("exit") or "",
                     cycles=r.get("cycles"), days=r.get("days")))
 
 _s = dict(positions=len(sel), win=round(win / len(sel) * 100, 1),
           esc=round(esc / len(sel) * 100, 1),
           avg=round(net_sum / len(sel)), total=round(net_sum),
-          best=round(max(float(r.get("net") or 0) for r in sel)),
-          worst=round(min(float(r.get("net") or 0) for r in sel)),
+          best=round(max(_net(r) for r in sel)),
+          worst=round(min(_net(r) for r in sel)),
+          slot=LOW_SLOT, box_slot=BOX_SLOT, scale=round(SCALE, 3),
           kinds=dict(kinds))
 out = dict(
     updated_at=pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
@@ -69,7 +76,9 @@ out = dict(
                 end=max(int(r.get("exit_day") or r["entry_day"]) for r in sel)),
     summary=_s,
     daily=daily, recent=rec,
-    note="슬롯 무제한 가정 · 1.5% 7차 · 당일 종가 청산 · 6주 주봉 밴드",
+    note=("슬롯 무제한 가정 · 1.5% 7차 · 당일 종가 청산 · 6주 주봉 밴드 · "
+          f"금액은 슬롯 {LOW_SLOT//10000}만원 기준(주봉박스 {BOX_SLOT//10000}만원의 "
+          f"{SCALE*100:.1f}%로 환산)"),
 )
 OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 print(f"[INFO] 11월 {len(sel)}건 · 승률 {_s['win']}% · 탈출 {_s['esc']}% · "

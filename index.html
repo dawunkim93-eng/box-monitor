@@ -541,7 +541,7 @@
     </div>
   </div>
   <div id="view-rev" hidden role="tabpanel" aria-labelledby="tb-rev">
-    <h2 class="sec">📦 주봉박스 11월 실적 (슬롯 무제한)</h2>
+    <h2 class="sec">📦 주봉박스 11월 실적 (슬롯 무제한 · 21만원 환산)</h2>
     <div class="pcard" id="bn-head"><div class="pmuted">11월 데이터 불러오는 중…</div></div>
     <div id="bn-body"></div>
 
@@ -2257,6 +2257,7 @@ async function init(){
   const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
   head.innerHTML=`<div class="pmuted">${P.start||"-"} ~ ${P.end||"-"} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> · 합계 <b>${f(sm.total)}원</b></div>
+    <div class="msub">슬롯 ${(sm.slot||210000)/10000}만원 기준 · 원래 ${(sm.box_slot||870000)/10000}만원의 ${((sm.scale||0.241)*100).toFixed(1)}%로 환산</div>
     <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
   const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
