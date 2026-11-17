@@ -2199,7 +2199,9 @@ async function init(){
        if(!r.ok) throw 0; d=await r.json(); }catch(e){}
   if(!d){ head.innerHTML='<div class="pmuted">모의매매 데이터가 없습니다. 평일 16:32에 갱신됩니다.</div>'; return; }
   const sm=d.summary||{}, R=d.rule||{};
-  head.innerHTML=`<div class="pmuted">신호일 ${d.sig_date||"-"} · 후보 ${sm.picks||0} · 체결 ${sm.filled||0} · 완료 ${sm.done||0} · 갱신 ${d.updated_at||"-"}</div>
+  const cd=d.cooldown||{};
+  const coolBar = cd.on ? `<div class="msub" style="margin-top:4px;color:#e0a020"><b>⛔ 급락 쿨다운</b> — 신호일 KOSPI ${fx(cd.pct,2)}% (기준 ${cd.thr}%) · 오늘 신규 진입 없음, 아래 후보는 참고용</div>` : "";
+  head.innerHTML=`<div class="pmuted">신호일 ${d.sig_date||"-"} · 후보 ${sm.picks||0} · 체결 ${sm.filled||0} · 완료 ${sm.done||0} · 갱신 ${d.updated_at||"-"}</div>${coolBar}
     <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win,1)}%</b> · 건당 <b>${fx(sm.avg,3)}%</b> · 누적 <b>${fx(sm.tot,1)}%</b> (슬롯 ${(R.slot||210000)/10000}만원)</div>
     <div class="msub">${R.cond_a||""} · 진입 ${R.entry||""} · ${R.stop||""} · 최대 ${R.hold}일 · 최소 거래대금 ${R.min_amt}억</div>`;
   const T=d.today||[];
@@ -2240,7 +2242,7 @@ async function init(){
   document.getElementById("dp-body").innerHTML=
     (kline?`<div class="msub" style="margin-top:6px">${kline}</div>`:"")
     + curveBox
-    + `<div class="msub" style="margin:2px 0 4px"><b>오늘 후보 ${T.length}건</b> — 위에서부터 밴드 상단·거래대금 순</div>`
+    + `<div class="msub" style="margin:2px 0 4px"><b>오늘 후보 ${T.length}건</b> — ${cd.on?"쿨다운으로 건너뜀(참고용)":"위에서부터 밴드 상단·거래대금 순"}</div>`
     + (T.length?tb(T.slice(0,12),true):'<div class="pmuted">오늘 조건에 맞는 종목이 없습니다.</div>')
     + rtb
     + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산(시간손절). 최대 3일 보유.<br>

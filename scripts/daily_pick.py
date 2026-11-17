@@ -37,6 +37,31 @@ MIN_AMT = 10.0      # 실전 최소 유동성(20일 평균 거래대금, 억원)
 PREF_TAIL = "579K"  # 우선주(코드 끝자리) 제외
 
 
+def market_cooldown(sig_date, thr=-3.0):
+    """신호일 KOSPI 등락 ≤ thr%이면 다음 거래일 신규 진입 중단. (True, pct) 반환."""
+    import re
+    import urllib.request
+    if not sig_date:
+        return False, None
+    end = pd.Timestamp.now()
+    st = (end - pd.Timedelta(days=30)).strftime("%Y%m%d")
+    url = ("https://api.finance.naver.com/siseJson.naver?symbol=KOSPI"
+           f"&requestType=1&startTime={st}&endTime={end:%Y%m%d}&timeframe=day")
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        raw = urllib.request.urlopen(req, timeout=10).read().decode("utf-8", "ignore")
+        rows = re.findall(r'\["(\d{8})",\s*[\d.]+,\s*[\d.]+,\s*[\d.]+,\s*([\d.]+)', raw)
+        days = [int(d) for d, _ in rows]
+        cl = [float(c) for _, c in rows]
+        i = days.index(int(sig_date))
+        if i == 0:
+            return False, None
+        pct = (cl[i] / cl[i - 1] - 1) * 100
+        return pct <= thr, round(pct, 2)
+    except Exception:
+        return False, None
+
+
 def load(code):
     try:
         df = pd.read_pickle(PIT / f"{code}.pkl")
@@ -166,8 +191,9 @@ def main():
                          atr=round(f["atr"], 2)))
 
     today = max(scanned) if scanned else None
+    cool_on, cool_pct = market_cooldown(today)
     # 최신 거래일 신호만 등록 (거래정지·데이터 미갱신 종목의 옛 신호 배제)
-    for rec in cand:
+    for rec in ([] if cool_on else cand):
         if rec["sig"] != today or (rec["code"], rec["sig"]) in seen:
             continue
         picks.append(rec)
@@ -176,6 +202,8 @@ def main():
     # 최근 30일 밖 신호는 정리
     cutoff = int((pd.Timestamp.now() - pd.Timedelta(days=30)).strftime("%Y%m%d"))
     picks = [p for p in picks if p["sig"] >= cutoff and p["code"][-1] not in PREF_TAIL]
+    if cool_on:      # 쿨다운 날 신호는 원장에서 제외
+        picks = [p for p in picks if p["sig"] != today]
     PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
 
     rows = []
@@ -202,6 +230,9 @@ def main():
     # 오늘 후보
     todays = [{k: r[k] for k in ("code", "name", "limit", "cond", "amt", "pos", "atr")}
               for r in rows if r["sig"] == today]
+    if not todays and cool_on:     # 쿨다운 날은 참고용으로만 표시
+        todays = [{k: c[k] for k in ("code", "name", "limit", "cond", "amt", "pos", "atr")}
+                  for c in cand if c["sig"] == today]
     todays.sort(key=lambda t: ("A" not in t["cond"], -t["amt"]))
     for t in todays:
         t["rungs"] = [round(t["limit"] * (1 - GAP) ** k)
@@ -231,6 +262,7 @@ def main():
     summary["worst"] = round(min([r["net"] for r in done], default=0), 2)
 
     out = dict(updated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+               cooldown=dict(on=bool(cool_on), pct=cool_pct, thr=-3.0),
                curve=curve[-40:],
                sig_date=today, summary=summary,
                today=todays,
@@ -241,6 +273,8 @@ def main():
                          min_amt=MIN_AMT,
                          entry="전일 종가 지정가", stop="진입일 종가가 3차 가격 아래면 그날 청산"))
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    if cool_on:
+        print(f"[INFO] ⛔ 급락 쿨다운 — 신호일 KOSPI {cool_pct:+.2f}% · 신규 진입 중단")
     print(f"[INFO] 신호일 {today} · 오늘 후보 {len(todays)}건 · 신규 {len(added)}건 · "
           f"누적 {len(rows)}건(체결 {len(fills)}) · 완료 {len(done)}건 "
           f"승률 {summary['win']}% 평균 {summary['avg']:+.3f}% 합계 {summary['tot']:+.1f}%")
