@@ -1,12 +1,16 @@
 {
-"updated_at": "2026-11-17 16:31",
+"updated_at": "2026-11-17 16:33",
 "source": {
 "positions": 5826,
 "days": 2608,
 "first": 20140912,
 "last": 20261117,
-"mdd": -109318,
-"peak": 17648147
+"mdd": -109320,
+"peak_capital": 3480000,
+"avg_capital": 401968,
+"ret_peak_pct": 39.2,
+"escape_rate": 77.6,
+"net_total": 17733256
 },
 "daily": [
 {

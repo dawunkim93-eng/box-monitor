@@ -51,7 +51,10 @@ for m in sorted(bym):
     mc += net
     monthly.append(dict(m=m, n=n, net=round(net), cum=round(mc)))
 
-vy = {y["year"]: y for y in json.loads(VAL.read_text(encoding="utf-8"))["yearly"]}
+_v = json.loads(VAL.read_text(encoding="utf-8"))
+vy = {y["year"]: y for y in _v["yearly"]}
+_cap = _v.get("capital") or {}
+_sum = _v.get("summary") or {}
 yearly, yc = [], 0.0
 for y in sorted(vy):
     yc += vy[y]["net"]
@@ -64,9 +67,15 @@ out = dict(updated_at=pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
            source=dict(positions=len(rows), days=len(daily),
                        first=daily[0]["d"] if daily else None,
                        last=daily[-1]["d"] if daily else None,
-                       mdd=round(mdd), peak=round(peak)),
+                       mdd=round(_sum.get("mdd_won") or mdd),
+                       peak_capital=round(_cap.get("peak") or 0),
+                       avg_capital=round(_cap.get("avg") or 0),
+                       ret_peak_pct=_cap.get("ret_peak_pct"),
+                       escape_rate=_sum.get("escape_rate"),
+                       net_total=round(_sum.get("net_total") or 0)),
            daily=daily, monthly=monthly, yearly=yearly, live=live)
 OUT.write_text(json.dumps(out, ensure_ascii=False, indent=0), encoding="utf-8")
 print(f"[INFO] 일별 {len(daily)}일 · 월별 {len(monthly)}개월 · 연도 {len(yearly)} · 실거래 {len(live)}건")
-print(f"[INFO] 최종 누적 {daily[-1]['cum']:,}원 · MDD {mdd:,.0f}원 · 피크 {peak:,.0f}원")
+print(f"[INFO] 최종 누적 {daily[-1]['cum']:,}원 · MDD {mdd:,.0f}원 · "
+      f"피크자본 {_cap.get('peak', 0):,.0f}원 · 자본수익률 {_cap.get('ret_peak_pct')}%/년")
 

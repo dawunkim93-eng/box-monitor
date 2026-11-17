@@ -2219,7 +2219,7 @@ async function init(){
   const area=line+`L${(W-PAD).toFixed(1)},${H-PAD}L${PAD},${H-PAD}Z`;
   const last=D[D.length-1], mid=D[Math.floor(D.length/2)];
   head.innerHTML=`<div class="mrow">13년 누적 <b>${f(last.cum)}원</b> · 포지션 ${f(S.positions)} · MDD <b>${f(S.mdd)}원</b></div>
-    <div class="msub">${String(S.first).slice(0,4)}년 ~ ${String(S.last).slice(0,4)}년 · ${D.length.toLocaleString()}거래일 · 피크 자본 ${f(S.peak)}원</div>`;
+    <div class="msub">${String(S.first).slice(0,4)}년 ~ ${String(S.last).slice(0,4)}년 · ${D.length.toLocaleString()}거래일 · 피크 자본 ${f(S.peak_capital)}원(평균 ${f(S.avg_capital)}원) · 자본수익률 ${S.ret_peak_pct}%/년 · 탈출율 ${S.escape_rate}%</div>`;
   box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;margin:6px 0 2px">
     <defs><linearGradient id="bcg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="var(--green)" stop-opacity=".35"/>
