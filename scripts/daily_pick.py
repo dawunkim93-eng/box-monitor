@@ -65,6 +65,20 @@ def cond_score(amt, pos, atr):
     return None
 
 
+def naver_close(code):
+    """네이버 현재가(장 마감 후엔 확정 종가) — PIT 종가 지연 보정용."""
+    import urllib.request
+    try:
+        req = urllib.request.Request(
+            f"https://m.stock.naver.com/api/stock/{code}/basic",
+            headers={"User-Agent": "Mozilla/5.0"})
+        d = json.loads(urllib.request.urlopen(req, timeout=6).read().decode("utf-8"))
+        v = str(d.get("closePrice") or "").replace(",", "")
+        return float(v) if v else None
+    except Exception:
+        return None
+
+
 def market_cooldown(sig_date, thr=-3.0):
     """신호일 KOSPI 등락 ≤ thr%이면 다음 거래일 신규 진입 중단. (True, pct) 반환."""
     import re
@@ -119,7 +133,8 @@ def features(df):
     if lo30[i] <= 0 or hi30[i] <= lo30[i]:
         return None
     return dict(close=float(c[i]), atr=float(atr[i] * 100), amt=float(amt20[i]),
-                pos=float((c[i] - lo30[i]) / (hi30[i] - lo30[i]) * 100))
+                pos=float((c[i] - lo30[i]) / (hi30[i] - lo30[i]) * 100),
+                lo30=float(lo30[i]), hi30=float(hi30[i]))
 
 
 def evaluate(code, df, sig, limit):
@@ -189,6 +204,14 @@ def main():
     master = pd.read_pickle(PIT / "master.pkl")
     names = dict(zip(master["code"].astype(str), master["name"].astype(str)))
 
+    # 시장 최신 거래일 (대형주 기준)
+    market_date = None
+    for ref in ("005930", "000660", "035720", "005380"):
+        d0 = load(ref)
+        if d0 is not None:
+            d0 = int(d0.index[-1].strftime("%Y%m%d"))
+            market_date = d0 if market_date is None else max(market_date, d0)
+
     picks = json.loads(PICKS.read_text(encoding="utf-8")) if PICKS.exists() else []
     seen = {(p["code"], p["sig"]) for p in picks}
     today = None
@@ -206,6 +229,13 @@ def main():
             continue
         sig = int(df.index[-1].strftime("%Y%m%d"))
         scanned.append(sig)
+        # PIT 종가가 확정 전 값일 수 있음 → 최신 거래일이면 네이버 확정가로 보정
+        if sig == market_date:
+            real = naver_close(code)
+            if real and abs(real - f["close"]) > 0.5:
+                f["close"] = real
+                lo, hi = min(f["lo30"], real), max(f["hi30"], real)
+                f["pos"] = (real - lo) / max(hi - lo, 1e-9) * 100
         cond = []
         if f["amt"] >= MIN_AMT and f["amt"] <= 37.51 and f["pos"] >= 89.47:
             cond.append("A")
@@ -234,6 +264,19 @@ def main():
     if cool_on:      # 쿨다운 날 신호는 원장에서 제외
         picks = [p for p in picks if p["sig"] != today]
     PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    # 최신일 후보의 지정가를 확정 종가로 보정 (PIT 지연 대비)
+    fixed = 0
+    for p in picks:
+        if p["sig"] != market_date:
+            continue
+        real = naver_close(p["code"])
+        if real and abs(real - float(p["limit"])) > 0.5:
+            p["limit"] = round(real)
+            fixed += 1
+    if fixed:
+        print(f"[INFO] 지정가 보정 {fixed}건 (네이버 확정 종가)")
+        PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
 
     rows = []
     for p in picks:
