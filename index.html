@@ -2254,12 +2254,12 @@ async function init(){
   const LBL={"청산완료":"청산","보유중":"보유중","미체결":"미체결"};
   for(const r of (d.recent||[])) if(LBL[r.status]) st[r.code]=LBL[r.status];
   if(note){
-    note.innerHTML=`신호일 ${d.sig_date||"-"} · ${P.length}건 · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
+    note.innerHTML=`신호일 ${d.sig_date||"-"} · 후보 ${P.length}건 전체 · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
       + (cd.on?` · <span style="color:var(--amber)">⛔ 급락 쿨다운 — 오늘 신규 진입 없음</span>`:"");
   }
   if(!P.length){ box.innerHTML='<div class="sub">오늘 조건에 맞는 종목이 없습니다.</div>'; return; }
   box.innerHTML=`<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th>3차</th><th class="mhide">거래대금</th><th class="mhide">위치</th>${cd.on?"":""}</tr></thead><tbody>`
-    + P.slice(0,12).map(t=>{
+    + P.map(t=>{
         const s3=Math.round((t.stop||t.limit*0.97));
         const tag=st[t.code];
         return `<tr><td><b>${t.score==null?"-":fx(t.score)}</b></td>
