@@ -2376,42 +2376,6 @@ async function init(){
 document.addEventListener("DOMContentLoaded", init);
 })();
 
-/* ══════════ 주봉박스 11월 (슬롯 무제한) ══════════ */
-(function(){
-const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
-const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?1:d);
-async function init(){
-  const head=document.getElementById("bn-head"); if(!head) return;
-  let d=null;
-  try{const r=await fetch("data/box_nov.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
-  if(!d||d.empty){ head.innerHTML='<div class="pmuted">11월 데이터가 없습니다.</div>'; return; }
-  const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
-  head.innerHTML=`<div class="pmuted">진입 ${String(P.start||"").slice(4,6)}/${String(P.start||"").slice(6)} ~ 청산 ${String(P.end||"").slice(4,6)}/${String(P.end||"").slice(6)} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
-    <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
-    <div class="msub">슬롯 ${(sm.slot||210000)/10000}만원 기준 · 원래 ${(sm.box_slot||870000)/10000}만원의 ${((sm.scale||0.241)*100).toFixed(1)}%로 환산</div>
-    <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
-  const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
-  const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
-  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (청산일 기준, ${C.length}일)</div>`
-    + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
-        <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
-        <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
-        <span style="display:inline-block;width:130px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
-        <span style="margin-left:6px" class="${x.cum>=0?"up":"deep"}">${f(x.cum)}원 (${fx(x.pct,2)}%)</span></div>`).join("")
-    : "";
-  const R=d.recent||[];
-  const rt=R.length? `<div class="msub" style="margin:10px 0 4px"><b>최근 기록</b></div>
-    <table class="ptbl"><thead><tr><th class="nm">종목</th><th>진입</th><th>유형</th><th>손익</th></tr></thead><tbody>`
-    + R.map(r=>`<tr><td class="nm">${r.name}</td>
-        <td>${String(r.entry).slice(4,6)}/${String(r.entry).slice(6)}</td>
-        <td>${r.kind||"-"}</td>
-        <td class="${r.net>0?"up":"deep"}">${f(r.net)}원</td></tr>`).join("")
-    + `</tbody></table>` : "";
-  document.getElementById("bn-body").innerHTML=
-    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt;
-}
-document.addEventListener("DOMContentLoaded", init);
-})();
 
 /* ══════════ 저변동 모의매매 ══════════ */
 (function(){
