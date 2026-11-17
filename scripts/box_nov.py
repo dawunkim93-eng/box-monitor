@@ -12,7 +12,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path("/home/lucky/box-monitor")
-DUMP = Path("/tmp/dump_nov3.json")   # --cool 1 (급락 쿨다운 적용)
+DUMP = Path("/tmp/dump_nov4.json")   # --slots 999 --cool 1 (엔진이 체결일 기준 차단)
 OUT = ROOT / "data" / "box_nov.json"
 PIT = Path("/home/lucky/backtest/data/pit")
 SINCE = 20261101
@@ -26,26 +26,8 @@ names = dict(zip(master["code"].astype(str), master["name"].astype(str)))
 codes = sorted({int(r.get("code")) for r in rows if r.get("code") is not None})
 idx_name = {}
 # 덤프의 code는 유니버스 인덱스 → 이름 복원은 symbol 필드가 있으면 사용
-# 급락 쿨다운 차단일 (전일 KOSPI -3% 이하 → 당일 신규 진입 금지)
-_m = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
-_dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
-_ret = _m["Close"].pct_change() * 100
-BLOCK = set()
-for _i in range(1, len(_dn)):
-    if _ret.iloc[_i] <= -3.0 and _i + 1 < len(_dn):
-        BLOCK.add(_dn[_i + 1])
-
-sel = [r for r in rows if int(r.get("entry_day") or 0) >= SINCE
-       and int(r.get("entry_day") or 0) not in BLOCK]
-_dropped = sum(1 for r in rows if int(r.get("entry_day") or 0) >= SINCE) - len(sel)
-print(f"[INFO] 쿨다운 차단일 {sorted(x for x in BLOCK if x >= SINCE)} · 11월 진입 {_dropped}건 제외")
-print(f"[INFO] 전체 {len(rows):,}건 중 11월 진입 {len(sel):,}건")
-
-if not sel:
-    OUT.write_text(json.dumps(dict(updated_at=str(pd.Timestamp.now())[:16], empty=True),
-                              ensure_ascii=False, indent=1), encoding="utf-8")
-    print("[WARN] 11월 데이터 없음")
-    raise SystemExit
+sel = [r for r in rows if int(r.get("entry_day") or 0) >= SINCE]
+print(f"[INFO] 11월 진입 {len(sel)}건 (쿨다운은 엔진에서 체결일 기준 적용)")
 
 def _net(r):
     return float(r.get("net") or 0) * SCALE

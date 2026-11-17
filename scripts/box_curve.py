@@ -17,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path("/home/lucky/box-monitor")
-DUMP = Path("/tmp/dump_cur.json")
+DUMP = Path("/tmp/dump_cur2.json")   # --cool 1 (체결일 기준 쿨다운)
 OUT = ROOT / "data" / "box_curve.json"
 VAL = ROOT / "data" / "box_validation.json"
 LEDGER = Path("/home/lucky/magicsplit-safe-strategy/backtest/results/box_ledger.jsonl")

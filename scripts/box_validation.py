@@ -680,7 +680,7 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
             for h in holdings.values()) * UNIT)
         max_pos = max(max_pos, len(holdings))
         free = free_prev if SLOT_FREE_MODE == "prev_close" else K_ - len(holdings)
-        if free > 0 and not (MKT_DN and int(D) in MKT_DN):
+        if free > 0:
             for d, nsc, i, j, knd, _rp in ev_days.get(int(D), []):
                 if free <= 0 or len(holdings) >= K_:
                     break
@@ -706,6 +706,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                     je = j + 1
                     if je >= len(dn_s):
                         continue
+                    if MKT_DN and int(dn_s[je]) in MKT_DN:   # 급락 다음날 신규 진입 금지
+                        continue
                     if ENTRY_MODE == "limit_signal":
                         lim = float(s["c"][j])          # 신호일 종가 지정가
                     else:
@@ -719,6 +721,8 @@ def run(gap, rungs, near, sameday, U, all_days, ev_days,
                 else:
                     je = j if ENTRY_MODE == "close" else j + 1
                     if je >= len(dn_s):
+                        continue
+                    if MKT_DN and int(dn_s[je]) in MKT_DN:   # 급락 다음날 신규 진입 금지
                         continue
                     px_e = (float(s["c"][je])
                             if ENTRY_MODE in ("close", "next_close")
