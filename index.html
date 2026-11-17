@@ -2267,8 +2267,8 @@ async function init(){
   const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (청산일 기준, ${C.length}일)</div>`
     + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
-        <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
-        <span style="display:inline-block;width:130px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
+        <span style="display:inline-block;width:96px;text-align:right">진입 ${x.ein||0} · 청산 ${x.n}</span>
+        <span style="display:inline-block;width:78px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
         <span style="margin-left:6px" class="${x.cum>=0?"up":"deep"}">${f(x.cum)}원 (${fx(x.pct,2)}%)</span></div>`).join("")
     : "";
   const R=d.recent||[];
@@ -2307,8 +2307,8 @@ async function init(){
   const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>11월 누적 곡선</b> (청산일 기준, 실현 ${C.length}일)</div>`
     + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
-        <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
-        <span style="display:inline-block;width:110px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
+        <span style="display:inline-block;width:96px;text-align:right">진입 ${x.ein||0} · 청산 ${x.n}</span>
+        <span style="display:inline-block;width:70px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
         <span style="margin-left:6px" class="${x.cum>=0?"up":"deep"}">${f(x.cum)}원 (${fx(x.pct,2)}%)</span></div>`).join("")
     : `<div class="msub" style="margin-top:8px">아직 청산이 끝난 거래가 없습니다.</div>`;
   const R=d.recent||[];

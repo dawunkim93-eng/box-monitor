@@ -140,6 +140,9 @@ def main():
     rows = out_rows
     done = [r for r in rows if r["status"] == "청산완료"]
     total = sum(r["net"] for r in done)
+    entry_cnt = defaultdict(int)
+    for r in rows:
+        entry_cnt[r["entry_day"]] += 1
     byday = defaultdict(lambda: [0, 0.0])
     for r in done:
         byday[r["exit_day"]][0] += 1
@@ -148,8 +151,8 @@ def main():
     for d in sorted(byday):
         n, net = byday[d]
         cum += net
-        daily.append(dict(d=d, n=n, net=round(net), cum=round(cum),
-                          pct=round(cum / SLOT * 100, 2)))
+        daily.append(dict(d=d, n=n, ein=entry_cnt.get(d, 0), net=round(net),
+                          cum=round(cum), pct=round(cum / SLOT * 100, 2)))
 
     kinds = Counter(r["kind"] for r in rows if r["status"] == "청산완료")
     recent = sorted(rows, key=lambda r: -r["exit_day"])[:12]

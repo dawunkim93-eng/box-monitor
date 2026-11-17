@@ -56,7 +56,7 @@ daily, cum = [], 0.0
 for d in sorted(byday):
     n, net = byday[d]
     cum += net
-    daily.append(dict(d=d, n=n, net=round(net), cum=round(cum),
+    daily.append(dict(d=d, n=n, ein=_ecnt.get(d, 0), net=round(net), cum=round(cum),
                       pct=round(cum / LOW_SLOT * 100, 2)))
 
 recent = sorted(sel, key=lambda r: -int(r.get("exit_day") or r["entry_day"]))[:12]
