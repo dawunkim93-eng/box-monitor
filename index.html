@@ -2261,7 +2261,7 @@ async function init(){
     <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
   const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
-  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (${C.length}거래일)</div>`
+  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (청산일 기준, ${C.length}일)</div>`
     + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
         <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
@@ -2298,7 +2298,10 @@ async function init(){
     <div class="msub">${d.note||""} · 슬롯 ${(sm.slot||210000)/10000}만원 · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
   const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
-  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>11월 누적 곡선</b> (실현 ${C.length}거래일)</div>`
+  const eb=(d.entries_by_day||[]).map(x=>`${String(x.d).slice(4,6)}/${String(x.d).slice(6)} ${x.n}`).join(" · ");
+  const bd=(d.blocked||[]).map(x=>`${String(x).slice(4,6)}/${String(x).slice(6)}`).join(" · ");
+  const dayNote = eb? `<div class="msub" style="margin-top:6px">진입일: ${eb}${bd?`<br>쿨다운 차단일(진입 없음): ${bd}`:""}</div>` : "";
+  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>11월 누적 곡선</b> (청산일 기준, 실현 ${C.length}일)</div>`
     + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
         <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
@@ -2316,7 +2319,7 @@ async function init(){
   const ls=live&&live.summary;
   const liveNote = ls? `<div class="msub" style="margin-top:12px"><b>실시간 모의 기록</b>(11/13 시작) — 진입 ${ls.entries||0}건 · 완료 ${ls.done||0} · 보유 ${ls.holding||0} · 승률 ${fx(ls.win)}% · 누적 ${fx(ls.tot,2)}%</div>` : "";
   document.getElementById("dp-body").innerHTML=
-    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt + liveNote
+    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + dayNote + curve + rt + liveNote
     + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산. 최대 3일 보유.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
@@ -2386,7 +2389,7 @@ async function init(){
     <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
   const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
-  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (${C.length}거래일)</div>`
+  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (청산일 기준, ${C.length}일)</div>`
     + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
         <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
