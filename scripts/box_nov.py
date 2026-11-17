@@ -12,7 +12,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path("/home/lucky/box-monitor")
-DUMP = Path("/tmp/dump_nov.json")
+DUMP = Path("/tmp/dump_nov3.json")   # --cool 1 (급락 쿨다운 적용)
 OUT = ROOT / "data" / "box_nov.json"
 PIT = Path("/home/lucky/backtest/data/pit")
 SINCE = 20261101
@@ -26,7 +26,19 @@ names = dict(zip(master["code"].astype(str), master["name"].astype(str)))
 codes = sorted({int(r.get("code")) for r in rows if r.get("code") is not None})
 idx_name = {}
 # 덤프의 code는 유니버스 인덱스 → 이름 복원은 symbol 필드가 있으면 사용
-sel = [r for r in rows if int(r.get("entry_day") or 0) >= SINCE]
+# 급락 쿨다운 차단일 (전일 KOSPI -3% 이하 → 당일 신규 진입 금지)
+_m = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
+_dn = [int(d.strftime("%Y%m%d")) for d in _m.index]
+_ret = _m["Close"].pct_change() * 100
+BLOCK = set()
+for _i in range(1, len(_dn)):
+    if _ret.iloc[_i] <= -3.0 and _i + 1 < len(_dn):
+        BLOCK.add(_dn[_i + 1])
+
+sel = [r for r in rows if int(r.get("entry_day") or 0) >= SINCE
+       and int(r.get("entry_day") or 0) not in BLOCK]
+_dropped = sum(1 for r in rows if int(r.get("entry_day") or 0) >= SINCE) - len(sel)
+print(f"[INFO] 쿨다운 차단일 {sorted(x for x in BLOCK if x >= SINCE)} · 11월 진입 {_dropped}건 제외")
 print(f"[INFO] 전체 {len(rows):,}건 중 11월 진입 {len(sel):,}건")
 
 if not sel:
@@ -76,7 +88,8 @@ out = dict(
                 end=max(int(r.get("exit_day") or r["entry_day"]) for r in sel)),
     summary=_s,
     daily=daily, recent=rec,
-    note=("슬롯 무제한 가정 · 1.5% 7차 · 당일 종가 청산 · 6주 주봉 밴드 · "
+    note=("슬롯 무제한 · 급락 쿨다운 적용(전일 KOSPI -3% 이하 → 당일 진입 제외) · "
+          "1.5% 7차 · 당일 종가 청산 · 6주 주봉 밴드 · "
           f"금액은 슬롯 {LOW_SLOT//10000}만원 기준(주봉박스 {BOX_SLOT//10000}만원의 "
           f"{SCALE*100:.1f}%로 환산)"),
 )
