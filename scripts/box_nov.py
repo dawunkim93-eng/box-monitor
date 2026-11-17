@@ -46,7 +46,8 @@ daily, cum = [], 0.0
 for d in sorted(byday):
     n, net = byday[d]
     cum += net
-    daily.append(dict(d=d, n=n, net=round(net), cum=round(cum)))
+    daily.append(dict(d=d, n=n, net=round(net), cum=round(cum),
+                      pct=round(cum / LOW_SLOT * 100, 2)))
 
 recent = sorted(sel, key=lambda r: -int(r.get("exit_day") or r["entry_day"]))[:12]
 rec = []
@@ -54,12 +55,15 @@ for r in recent:
     nm = r.get("name") or names.get(str(r.get("symbol", "")), "")
     rec.append(dict(name=nm or "-", entry=int(r.get("entry_day") or 0),
                     exit=int(r.get("exit_day") or r.get("entry_day") or 0),
-                    net=round(_net(r)), kind=r.get("exit") or "",
+                    net=round(_net(r)), pct=round(_net(r) / LOW_SLOT * 100, 2),
+                    kind=r.get("exit") or "",
                     cycles=r.get("cycles"), days=r.get("days")))
 
 _s = dict(positions=len(sel), win=round(win / len(sel) * 100, 1),
           esc=round(esc / len(sel) * 100, 1),
           avg=round(net_sum / len(sel)), total=round(net_sum),
+          pct=round(net_sum / LOW_SLOT * 100, 2),
+          avg_pct=round(net_sum / len(sel) / LOW_SLOT * 100, 3),
           best=round(max(_net(r) for r in sel)),
           worst=round(min(_net(r) for r in sel)),
           slot=LOW_SLOT, box_slot=BOX_SLOT, scale=round(SCALE, 3),
@@ -77,5 +81,5 @@ out = dict(
 )
 OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 print(f"[INFO] 11월 {len(sel)}건 · 승률 {_s['win']}% · 탈출 {_s['esc']}% · "
-      f"건당 {_s['avg']:,}원 · 합계 {_s['total']:,}원")
+      f"건당 {_s['avg']:,}원({_s['avg_pct']:+.3f}%) · 합계 {_s['total']:,}원({_s['pct']:+.2f}%)")
 print(f"[INFO] 일별 {len(daily)}일 · 청산유형 {dict(kinds)}")

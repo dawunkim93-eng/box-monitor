@@ -541,11 +541,11 @@
     </div>
   </div>
   <div id="view-rev" hidden role="tabpanel" aria-labelledby="tb-rev">
-    <h2 class="sec">📦 주봉박스 11월 실적 (슬롯 무제한 · 21만원 환산)</h2>
+    <h2 class="sec">📦 주봉박스 11월 실적 (슬롯 무제한 · 21만원 기준)</h2>
     <div class="pcard" id="bn-head"><div class="pmuted">11월 데이터 불러오는 중…</div></div>
     <div id="bn-body"></div>
 
-    <h2 class="sec">🎯 저변동 모의매매</h2>
+    <h2 class="sec">🎯 저변동 11월 실적 (슬롯 무제한 · 21만원 기준)</h2>
     <div class="pcard" id="dp-head"><div class="pmuted">모의매매 데이터 불러오는 중…</div></div>
     <div id="dp-body"></div>
 
@@ -2256,7 +2256,7 @@ async function init(){
   if(!d||d.empty){ head.innerHTML='<div class="pmuted">11월 데이터가 없습니다.</div>'; return; }
   const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
   head.innerHTML=`<div class="pmuted">${P.start||"-"} ~ ${P.end||"-"} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
-    <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> · 합계 <b>${f(sm.total)}원</b></div>
+    <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
     <div class="msub">슬롯 ${(sm.slot||210000)/10000}만원 기준 · 원래 ${(sm.box_slot||870000)/10000}만원의 ${((sm.scale||0.241)*100).toFixed(1)}%로 환산</div>
     <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
@@ -2266,7 +2266,132 @@ async function init(){
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
         <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
         <span style="display:inline-block;width:130px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
-        <span style="margin-left:6px" class="${x.cum>=0?"up":"deep"}">${f(x.cum)}원</span></div>`).join("")
+        <span style="margin-left:6px" class="${x.cum>=0?"up":"deep"}">${f(x.cum)}원 (${fx(x.pct,2)}%)</span></div>`).join("")
+    : "";
+  const R=d.recent||[];
+  const rt=R.length? `<div class="msub" style="margin:10px 0 4px"><b>최근 기록</b></div>
+    <table class="ptbl"><thead><tr><th class="nm">종목</th><th>진입</th><th>유형</th><th>손익</th></tr></thead><tbody>`
+    + R.map(r=>`<tr><td class="nm">${r.name}</td>
+        <td>${String(r.entry).slice(4,6)}/${String(r.entry).slice(6)}</td>
+        <td>${r.kind||"-"}</td>
+        <td class="${r.net>0?"up":"deep"}">${f(r.net)}원</td></tr>`).join("")
+    + `</tbody></table>` : "";
+  document.getElementById("bn-body").innerHTML=
+    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt;
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
+/* ══════════ 저변동 11월 실적 (백테스트) ══════════ */
+(function(){
+const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
+const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?1:d);
+async function init(){
+  const head=document.getElementById("dp-head"); if(!head) return;
+  let d=null, live=null;
+  try{const r=await fetch("data/low_nov.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
+  try{const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) live=await r.json();}catch(e){}
+  if(!d){ head.innerHTML='<div class="pmuted">11월 데이터가 없습니다.</div>'; return; }
+  const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
+  head.innerHTML=`<div class="pmuted">${P.start||"-"} ~ ${P.end||"-"} · 진입 ${sm.positions||0}건 · 완료 ${sm.done||0} · 보유 ${sm.holding||0} · 갱신 ${d.updated_at||"-"}</div>
+    <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
+    <div class="msub">${d.note||""} · 슬롯 ${(sm.slot||210000)/10000}만원 · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
+  const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
+  const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
+  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>11월 누적 곡선</b> (실현 ${C.length}거래일)</div>`
+    + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
+        <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
+        <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
+        <span style="display:inline-block;width:110px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
+        <span style="margin-left:6px" class="${x.cum>=0?"up":"deep"}">${f(x.cum)}원 (${fx(x.pct,2)}%)</span></div>`).join("")
+    : `<div class="msub" style="margin-top:8px">아직 청산이 끝난 거래가 없습니다.</div>`;
+  const R=d.recent||[];
+  const rt=R.length? `<div class="msub" style="margin:10px 0 4px"><b>최근 기록</b></div>
+    <table class="ptbl"><thead><tr><th class="nm">종목</th><th>진입</th><th>유형</th><th>손익</th></tr></thead><tbody>`
+    + R.map(r=>`<tr><td class="nm">${r.name}</td>
+        <td>${String(r.entry).slice(4,6)}/${String(r.entry).slice(6)}</td>
+        <td>${r.kind||"-"}</td>
+        <td class="${r.net>0?"up":"deep"}">${f(r.net)}원 (${fx(r.pct,2)}%)</td></tr>`).join("")
+    + `</tbody></table>` : "";
+  const ls=live&&live.summary;
+  const liveNote = ls? `<div class="msub" style="margin-top:12px"><b>실시간 모의 기록</b>(11/13 시작) — 진입 ${ls.entries||0}건 · 완료 ${ls.done||0} · 보유 ${ls.holding||0} · 승률 ${fx(ls.win)}% · 누적 ${fx(ls.tot,2)}%</div>` : "";
+  document.getElementById("dp-body").innerHTML=
+    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt + liveNote
+    + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산. 최대 3일 보유.</div>`;
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
+/* ══════════ 주봉박스 누적 곡선 ══════════ */
+(function(){
+const W=340,H=132,PAD=6;
+const f=n=>Math.round(Number(n)).toLocaleString("ko-KR");
+function path(pts,w,h,minv,maxv){
+  const sx=pts.length>1?(w-PAD*2)/(pts.length-1):1;
+  const rng=(maxv-minv)||1;
+  return pts.map((v,i)=>{
+    const x=PAD+i*sx, y=h-PAD-((v-minv)/rng)*(h-PAD*2);
+    return `${i?"L":"M"}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join("");
+}
+async function init(){
+  let d=null; try{const r=await fetch("data/box_curve.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
+  const head=document.getElementById("bc-head"), box=document.getElementById("bc-chart"), note=document.getElementById("bc-note");
+  if(!d||!d.daily||!d.daily.length){ if(head) head.innerHTML='<div class="pmuted">누적 곡선 데이터가 없습니다.</div>'; return; }
+  const D=d.daily, S=d.source||{};
+  // 다운샘플 (모바일 성능)
+  const N=Math.min(160,D.length), step=D.length/N;
+  const pts=[]; for(let i=0;i<N;i++) pts.push(D[Math.min(D.length-1,Math.floor(i*step))].cum);
+  pts[pts.length-1]=D[D.length-1].cum;
+  const maxv=Math.max(...pts), minv=0;
+  const line=path(pts,W,H,minv,maxv);
+  const area=line+`L${(W-PAD).toFixed(1)},${H-PAD}L${PAD},${H-PAD}Z`;
+  const last=D[D.length-1], mid=D[Math.floor(D.length/2)];
+  head.innerHTML=`<div class="mrow">13년 누적 <b>${f(last.cum)}원</b> · 포지션 ${f(S.positions)} · MDD <b>${f(S.mdd)}원</b></div>
+    <div class="msub">${String(S.first).slice(0,4)}년 ~ ${String(S.last).slice(0,4)}년 · ${D.length.toLocaleString()}거래일 · 피크 자본 ${f(S.peak_capital)}원(평균 ${f(S.avg_capital)}원) · 자본수익률 ${S.ret_peak_pct}%/년 · 탈출율 ${S.escape_rate}%</div>`;
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;margin:6px 0 2px">
+    <defs><linearGradient id="bcg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--green)" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="var(--green)" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#bcg)"/>
+    <path d="${line}" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linejoin="round"/>
+    <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="currentColor" stroke-opacity=".18"/>
+  </svg>
+  <div class="msub" style="display:flex;justify-content:space-between;font-size:11px">
+    <span>${String(S.first).slice(0,4)}</span><span>${String(mid.d).slice(0,4)}</span><span>${String(last.d).slice(0,4)}</span></div>`;
+  const Y=d.yearly||[], mx=Math.max(...Y.map(y=>Math.abs(y.net)),1);
+  note.innerHTML=`<div style="margin-top:8px"><b>연도별 순익</b></div>`
+    + Y.map(y=>`<div class="mrow" style="font-size:11px;line-height:1.6">
+        <span style="display:inline-block;width:40px">${y.year}</span>
+        <span style="display:inline-block;width:96px"><i style="display:inline-block;height:7px;width:${Math.abs(y.net)/mx*100}%;background:${y.net>=0?"var(--green)":"var(--red)"}"></i></span>
+        <span style="margin-left:6px">${f(y.net)}원</span>
+        <span class="msub" style="margin-left:6px">탈출 ${y.esc}%</span></div>`).join("");
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
+/* ══════════ 주봉박스 11월 (슬롯 무제한) ══════════ */
+(function(){
+const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
+const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?1:d);
+async function init(){
+  const head=document.getElementById("bn-head"); if(!head) return;
+  let d=null;
+  try{const r=await fetch("data/box_nov.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
+  if(!d||d.empty){ head.innerHTML='<div class="pmuted">11월 데이터가 없습니다.</div>'; return; }
+  const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
+  head.innerHTML=`<div class="pmuted">${P.start||"-"} ~ ${P.end||"-"} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
+    <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
+    <div class="msub">슬롯 ${(sm.slot||210000)/10000}만원 기준 · 원래 ${(sm.box_slot||870000)/10000}만원의 ${((sm.scale||0.241)*100).toFixed(1)}%로 환산</div>
+    <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
+  const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
+  const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
+  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (${C.length}거래일)</div>`
+    + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
+        <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
+        <span style="display:inline-block;width:38px;text-align:right">${x.n}건</span>
+        <span style="display:inline-block;width:130px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.cum)/mx*100}%;background:${x.cum>=0?"var(--green)":"var(--red)"}"></i></span>
+        <span style="margin-left:6px" class="${x.cum>=0?"up":"deep"}">${f(x.cum)}원 (${fx(x.pct,2)}%)</span></div>`).join("")
     : "";
   const R=d.recent||[];
   const rt=R.length? `<div class="msub" style="margin:10px 0 4px"><b>최근 기록</b></div>
