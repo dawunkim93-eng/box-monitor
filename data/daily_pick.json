@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-17 16:32",
+ "updated_at": "2026-11-17 17:32",
  "cooldown": {
   "on": false,
   "pct": -2.59,
@@ -16,6 +16,7 @@
  "sig_date": 20261117,
  "summary": {
   "picks": 36,
+  "entries": 20,
   "filled": 20,
   "done": 14,
   "holding": 6,
@@ -23,7 +24,10 @@
   "win": 85.7,
   "avg": 0.659,
   "tot": 9.2,
-  "start": 20261113,
+  "period": {
+   "start": 20261113,
+   "end": 20261113
+  },
   "kinds": {
    "전량익절": 11,
    "시간손절": 3

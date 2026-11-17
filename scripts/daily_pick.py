@@ -221,11 +221,13 @@ def main():
     holding = [r for r in rows if r["status"] == "보유중"]
     tot = sum(r["net"] for r in done)
     summary = dict(
-        picks=len(rows), filled=len(fills), done=len(done), holding=len(holding),
+        picks=len(rows), entries=len(fills), filled=len(fills),
+        done=len(done), holding=len(holding),
         fill_rate=round(len(fills) / max(len(rows), 1) * 100, 1),
         win=round(sum(1 for r in done if r["net"] > 0) / max(len(done), 1) * 100, 1),
         avg=round(tot / max(len(done), 1), 3), tot=round(tot, 1),
-        start=min((r["sig"] for r in rows), default=None))
+        period=dict(start=min((r["sig"] for r in fills), default=None),
+                    end=max((r["sig"] for r in fills), default=None)))
 
     # 오늘 후보
     todays = [{k: r[k] for k in ("code", "name", "limit", "cond", "amt", "pos", "atr")}
@@ -245,7 +247,7 @@ def main():
         k = r.get("kind") or "기타"
         kinds[k] = kinds.get(k, 0) + 1
     byday = {}
-    for r in done:
+    for r in done:   # 완료(실현) 기준 누적
         d0 = r.get("exit") or r["sig"]
         e = byday.setdefault(d0, dict(n=0, net=0.0))
         e["n"] += 1
