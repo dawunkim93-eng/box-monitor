@@ -2219,7 +2219,8 @@ async function init(){
   const P=(d.today||[]).slice().sort((a,b)=>((b.score==null?-1:b.score)-(a.score==null?-1:a.score)));
   // 원장 상태 맵
   const st={};
-  for(const r of (d.recent||[])) st[r.code]=r.status;
+  const LBL={"청산완료":"청산","보유중":"보유중","미체결":"미체결"};
+  for(const r of (d.recent||[])) if(LBL[r.status]) st[r.code]=LBL[r.status];
   if(note){
     note.innerHTML=`신호일 ${d.sig_date||"-"} · ${P.length}건 · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
       + (cd.on?` · <span style="color:var(--amber)">⛔ 급락 쿨다운 — 오늘 신규 진입 없음</span>`:"");
