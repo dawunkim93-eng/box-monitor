@@ -296,6 +296,10 @@
   </table>
   <div id="mobile-holds" class="mob-list"></div>
   <div class="sub" id="hold-mismatch" hidden style="margin:4px 0 8px;color:var(--amber)"></div>
+  <h2 class="sec" id="lowlive-sec">🎯 저변동 후보 (오늘 종가 지정가)</h2>
+  <div class="sub" id="lowlive-note">로딩 중…</div>
+  <div id="lowlive"></div>
+
   <h2 class="sec">전체 목록</h2>
   <div class="toolbar">
     <span class="sub">정렬</span>
@@ -2201,6 +2205,41 @@ setInterval(()=>{
   }
 },1800000);
 })();
+/* ══════════ 실시간: 저변동 후보 ══════════ */
+(function(){
+const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
+const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?1:d);
+async function init(){
+  const box=document.getElementById("lowlive"); if(!box) return;
+  let d=null;
+  try{const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
+  const note=document.getElementById("lowlive-note");
+  if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
+  const cd=d.cooldown||{}, sm=d.summary||{};
+  const P=(d.today||[]).slice().sort((a,b)=>((b.score==null?-1:b.score)-(a.score==null?-1:a.score)));
+  // 원장 상태 맵
+  const st={};
+  for(const r of (d.recent||[])) st[r.code]=r.status;
+  if(note){
+    note.innerHTML=`신호일 ${d.sig_date||"-"} · ${P.length}건 · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
+      + (cd.on?` · <span style="color:var(--amber)">⛔ 급락 쿨다운 — 오늘 신규 진입 없음</span>`:"");
+  }
+  if(!P.length){ box.innerHTML='<div class="sub">오늘 조건에 맞는 종목이 없습니다.</div>'; return; }
+  box.innerHTML=`<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th>3차</th><th class="mhide">거래대금</th><th class="mhide">위치</th>${cd.on?"":""}</tr></thead><tbody>`
+    + P.slice(0,12).map(t=>{
+        const s3=Math.round((t.stop||t.limit*0.97));
+        const tag=st[t.code];
+        return `<tr><td><b>${t.score==null?"-":fx(t.score)}</b></td>
+          <td class="nm">${t.name}${tag?` <span class="sub">${tag}</span>`:""}</td>
+          <td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>
+          <td class="mhide">${fx(t.amt,0)}억</td><td class="mhide">${fx(t.pos,1)}%</td></tr>`;
+      }).join("")
+    + `</tbody></table>`
+    + `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선. 다음날 그 가격 이하로 내려오면 체결되고, 진입일 종가가 3차 아래면 그날 청산합니다.</div>`;
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
 /* ══════════ 저변동 조건 점수 ══════════ */
 (function(){
 const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
