@@ -549,6 +549,10 @@
     <div class="pcard" id="dp-head"><div class="pmuted">모의매매 데이터 불러오는 중…</div></div>
     <div id="dp-body"></div>
 
+    <h2 class="sec">🎚️ 저변동 조건 점수</h2>
+    <div class="pcard" id="lc-head"><div class="pmuted">조건 점수 불러오는 중…</div></div>
+    <div id="lc-body"></div>
+
     <h2 class="sec">📈 6개월 일봉 분석 · 검색식</h2>
     <div class="pcard" id="df-head"><div class="pmuted">분석 중…</div></div>
     <div id="df-body"></div>
@@ -2197,6 +2201,44 @@ setInterval(()=>{
   }
 },1800000);
 })();
+/* ══════════ 저변동 조건 점수 ══════════ */
+(function(){
+const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
+const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?1:d);
+async function init(){
+  const head=document.getElementById("lc-head"); if(!head) return;
+  let d=null, pick=null;
+  try{const r=await fetch("data/low_cond.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
+  try{const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) pick=await r.json();}catch(e){}
+  if(!d){ head.innerHTML='<div class="pmuted">조건 점수 데이터가 없습니다.</div>'; return; }
+  const b=d.base||{}, V=d.validation||[];
+  head.innerHTML=`<div class="pmuted">유동성 × 밴드위치 × ATR, 27칸 · 학습 ${f(b.is_n)}건 / 검증 ${f(b.oos_n)}건 · 갱신 ${d.updated_at||"-"}</div>
+    <div class="msub">${d.note||""}</div>`;
+  const mx=Math.max(...V.map(v=>Math.abs(v.avg)),0.01);
+  const vt=V.length? `<div class="msub" style="margin:10px 0 4px"><b>검증 (전기 학습 → 후기 적용)</b></div>
+    <table class="ptbl"><thead><tr><th>점수</th><th>건수</th><th>승률</th><th>건당</th></tr></thead><tbody>`
+    + V.map(v=>`<tr><td>${v.grade}</td><td>${f(v.n)}</td><td>${fx(v.win)}%</td>
+        <td class="${v.avg>0?"up":"deep"}">${fx(v.avg,3)}%</td></tr>`).join("")
+    + `</tbody></table>` : "";
+  const T=(d.cells||[]).slice(0,6);
+  const tt=`<div class="msub" style="margin:10px 0 4px"><b>점수 상위 조건</b></div>
+    <table class="ptbl"><thead><tr><th>점수</th><th class="nm">조건</th><th>건당</th></tr></thead><tbody>`
+    + T.map(c=>`<tr><td><b>${fx(c.score)}</b></td>
+        <td class="nm">${c.amt} · ${c.pos} · ATR ${c.atr}</td>
+        <td class="up">${fx(c.avg,3)}%</td></tr>`).join("")
+    + `</tbody></table>`;
+  const P=(pick&&pick.today||[]).filter(t=>t.score!=null).sort((a,b2)=>b2.score-a.score);
+  const pt=P.length? `<div class="msub" style="margin:10px 0 4px"><b>오늘 후보 점수</b> (${pick.sig_date})</div>
+    <table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th></tr></thead><tbody>`
+    + P.slice(0,10).map(t=>`<tr><td><b>${fx(t.score)}</b></td>
+        <td class="nm">${t.name}</td><td>${f(t.limit)}</td></tr>`).join("")
+    + `</tbody></table>` : "";
+  document.getElementById("lc-body").innerHTML = vt + tt + pt
+    + `<div class="msub">점수는 과거 기대값의 백분위입니다. 종목이 아니라 조건(유동성·위치·ATR)에 매긴 점수이며, 검증에서 상위 조건이 하위보다 건당 +0.1%p 정도 우수했습니다.</div>`;
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
 /* ══════════ 주봉박스 누적 곡선 ══════════ */
 (function(){
 const W=340,H=132,PAD=6;

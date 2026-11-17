@@ -35,6 +35,34 @@ HOLD = 3
 MIN_HIST = 60
 MIN_AMT = 10.0      # 실전 최소 유동성(20일 평균 거래대금, 억원)
 PREF_TAIL = "579K"  # 우선주(코드 끝자리) 제외
+COND = ROOT / "data" / "low_cond.json"
+
+
+def cond_score(amt, pos, atr):
+    """조건 점수 (유동성·밴드위치·ATR 칸 → 기대값 백분위 0~100)."""
+    try:
+        c = json.loads(COND.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    bands = c["bands"]
+    def idx(v, bs):
+        for i, (lo, hi) in enumerate(bs):
+            if lo <= v < hi:
+                return i
+        return None
+    ai, pi, ti = idx(amt, bands["amt"]), idx(pos, bands["pos"]), idx(atr, bands["atr"])
+    if None in (ai, pi, ti):
+        return None
+    alo, ahi = bands["amt"][ai]
+    plo, phi = bands["pos"][pi]
+    tlo, thi = bands["atr"][ti]
+    key = (f"{alo:.0f}~{ahi:.0f}억",
+           f"{plo:.0f}~{min(phi, 100):.0f}%",
+           f"{tlo:.1f}~{min(thi, 20):.0f}%")
+    for row in c["cells"]:
+        if (row["amt"], row["pos"], row["atr"]) == key:
+            return row["score"]
+    return None
 
 
 def market_cooldown(sig_date, thr=-3.0):
@@ -188,7 +216,8 @@ def main():
         cand.append(dict(code=code, name=names.get(code, code), sig=sig,
                          limit=round(f["close"]), cond="+".join(cond),
                          amt=round(f["amt"], 1), pos=round(f["pos"], 1),
-                         atr=round(f["atr"], 2)))
+                         atr=round(f["atr"], 2),
+                         score=cond_score(f["amt"], f["pos"], f["atr"])))
 
     today = max(scanned) if scanned else None
     cool_on, cool_pct = market_cooldown(today)
@@ -230,11 +259,13 @@ def main():
                     end=max((r["sig"] for r in fills), default=None)))
 
     # 오늘 후보
-    todays = [{k: r[k] for k in ("code", "name", "limit", "cond", "amt", "pos", "atr")}
-              for r in rows if r["sig"] == today]
+    keys = ("code", "name", "limit", "cond", "amt", "pos", "atr", "score")
+    todays = [{k: r.get(k) for k in keys} for r in rows if r["sig"] == today]
+    for t in todays:                      # 원장에 점수가 없으면 즉석 계산
+        if t.get("score") is None:
+            t["score"] = cond_score(t["amt"], t["pos"], t["atr"])
     if not todays and cool_on:     # 쿨다운 날은 참고용으로만 표시
-        todays = [{k: c[k] for k in ("code", "name", "limit", "cond", "amt", "pos", "atr")}
-                  for c in cand if c["sig"] == today]
+        todays = [{k: c.get(k) for k in keys} for c in cand if c["sig"] == today]
     todays.sort(key=lambda t: ("A" not in t["cond"], -t["amt"]))
     for t in todays:
         t["rungs"] = [round(t["limit"] * (1 - GAP) ** k)
