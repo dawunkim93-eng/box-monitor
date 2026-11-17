@@ -541,11 +541,11 @@
     </div>
   </div>
   <div id="view-rev" hidden role="tabpanel" aria-labelledby="tb-rev">
-    <h2 class="sec">📦 주봉박스 10~11월 실적 (슬롯 무제한 · 21만원 기준)</h2>
+    <h2 class="sec">📦 주봉박스 9~11월 실적 (슬롯 무제한 · 21만원 기준)</h2>
     <div class="pcard" id="bn-head"><div class="pmuted">11월 데이터 불러오는 중…</div></div>
     <div id="bn-body"></div>
 
-    <h2 class="sec">🎯 저변동 10~11월 실적 (슬롯 무제한 · 21만원 기준)</h2>
+    <h2 class="sec">🎯 저변동 9~11월 실적 (슬롯 무제한 · 21만원 기준)</h2>
     <div class="pcard" id="dp-head"><div class="pmuted">모의매매 데이터 불러오는 중…</div></div>
     <div id="dp-body"></div>
 
@@ -2304,7 +2304,7 @@ async function init(){
   const eb=(d.entries_by_day||[]).map(x=>`${String(x.d).slice(4,6)}/${String(x.d).slice(6)} ${x.n}`).join(" · ");
   const _bd=(d.blocked||[]); const bd=(_bd.length>7?"… ":"")+_bd.slice(-7).map(x=>`${String(x).slice(4,6)}/${String(x).slice(6)}`).join(" · ");
   const dayNote = eb? `<div class="msub" style="margin-top:6px">진입일: ${eb}${bd?`<br>쿨다운 차단일(진입 없음): ${bd}`:""}</div>` : "";
-  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>10~11월 누적 곡선</b> (청산일 기준, 실현 ${C.length}일)</div>`
+  const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>9~11월 누적 곡선</b> (청산일 기준, 실현 ${C.length}일)</div>`
     + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
         <span style="display:inline-block;width:96px;text-align:right">진입 ${x.ein||0} · 청산 ${x.n}</span>

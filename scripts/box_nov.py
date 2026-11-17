@@ -15,7 +15,7 @@ ROOT = Path("/home/lucky/box-monitor")
 DUMP = Path("/tmp/dump_nov4.json")   # --slots 999 --cool 1 (엔진이 체결일 기준 차단)
 OUT = ROOT / "data" / "box_nov.json"
 PIT = Path("/home/lucky/backtest/data/pit")
-SINCE = 20261001
+SINCE = 20260901
 BOX_SLOT = sum([6, 6, 9, 12, 18, 18, 18]) * 10000   # 주봉박스 슬롯 87만원
 LOW_SLOT = sum([6, 6, 9]) * 10000                    # 저변동 슬롯 21만원
 SCALE = LOW_SLOT / BOX_SLOT                          # 비교용 환산 계수
@@ -27,7 +27,7 @@ codes = sorted({int(r.get("code")) for r in rows if r.get("code") is not None})
 idx_name = {}
 # 덤프의 code는 유니버스 인덱스 → 이름 복원은 symbol 필드가 있으면 사용
 sel = [r for r in rows if int(r.get("entry_day") or 0) >= SINCE]
-print(f"[INFO] 10~11월 진입 {len(sel)}건 (쿨다운은 엔진에서 체결일 기준 적용)")
+print(f"[INFO] 9~11월 진입 {len(sel)}건 (쿨다운은 엔진에서 체결일 기준 적용)")
 
 # 표시용: 진입일 분포와 쿨다운 차단일
 _m = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
@@ -92,6 +92,6 @@ out = dict(
           f"{SCALE*100:.1f}%로 환산)"),
 )
 OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-print(f"[INFO] 10~11월 {len(sel)}건 · 승률 {_s['win']}% · 탈출 {_s['esc']}% · "
+print(f"[INFO] 9~11월 {len(sel)}건 · 승률 {_s['win']}% · 탈출 {_s['esc']}% · "
       f"건당 {_s['avg']:,}원({_s['avg_pct']:+.3f}%) · 합계 {_s['total']:,}원({_s['pct']:+.2f}%)")
 print(f"[INFO] 일별 {len(daily)}일 · 청산유형 {dict(kinds)}")
