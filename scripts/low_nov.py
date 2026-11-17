@@ -21,7 +21,7 @@ PIT = Path("/home/lucky/backtest/data/pit")
 UNIV = ROOT / "data" / "daily_universe.json"
 OUT = ROOT / "data" / "low_nov.json"
 
-SINCE, UNTIL = 20261101, 20261231
+SINCE, UNTIL = 20261001, 20261231
 GAP, FEE = 0.015, 0.00015
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
@@ -116,7 +116,8 @@ def main():
         hi30 = cs.rolling(30).max().values
         amt20 = pd.Series(c * v).rolling(20).mean().values / 1e8
         n = len(df)
-        for i in range(max(40, n - 40), n - 1):
+        _lo = max(40, n - 90)
+        for i in range(_lo, n - 1):
             day = int(df.index[i].strftime("%Y%m%d"))
             if not (SINCE <= day <= UNTIL):
                 continue
@@ -180,7 +181,7 @@ def main():
                note=("슬롯 무제한 · 급락 쿨다운 적용(체결일 기준) · 1.5% 3차 · 최대 3일 · "
                      "진입일 종가가 3차 아래면 당일 청산 · 금액은 슬롯 21만원 기준"))
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"[INFO] 11월 진입 {s['positions']}건 · 완료 {s['done']} · 보유 {s['holding']} · "
+    print(f"[INFO] 10~11월 진입 {s['positions']}건 · 완료 {s['done']} · 보유 {s['holding']} · "
           f"승률 {s['win']}% · 건당 {s['avg']:,}원({s['avg_pct']:+.3f}%) · "
           f"합계 {s['total']:,}원({s['pct']:+.2f}%)")
     print(f"[INFO] 청산유형 {dict(kinds)} · 곡선 {len(daily)}일")
