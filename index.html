@@ -365,6 +365,11 @@
     <h2 class="sec">📊 7슬롯 진입 시뮬레이션</h2>
     <div class="sub" id="v-info">로딩 중…</div>
     <div class="stats" id="v-chips"></div>
+    <h2 class="sec">📈 누적 곡선 (13년 백테스트)</h2>
+    <div class="pcard" id="bc-head"><div class="pmuted">누적 곡선 불러오는 중…</div></div>
+    <div id="bc-chart"></div>
+    <div class="msub" id="bc-note"></div>
+
     <h2 class="sec">연도별 손익</h2>
     <table id="v-year-tbl"><thead><tr><th class="nm">연도</th><th>손익</th><th>포지션</th><th>탈출율</th></tr></thead><tbody><tr><td colspan="4">로딩 중…</td></tr></tbody></table>
     <h2 class="sec">청산 사유 · 지속기간</h2>
@@ -2188,6 +2193,54 @@ setInterval(()=>{
   }
 },1800000);
 })();
+/* ══════════ 주봉박스 누적 곡선 ══════════ */
+(function(){
+const W=340,H=132,PAD=6;
+const f=n=>Math.round(Number(n)).toLocaleString("ko-KR");
+function path(pts,w,h,minv,maxv){
+  const sx=pts.length>1?(w-PAD*2)/(pts.length-1):1;
+  const rng=(maxv-minv)||1;
+  return pts.map((v,i)=>{
+    const x=PAD+i*sx, y=h-PAD-((v-minv)/rng)*(h-PAD*2);
+    return `${i?"L":"M"}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join("");
+}
+async function init(){
+  let d=null; try{const r=await fetch("data/box_curve.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
+  const head=document.getElementById("bc-head"), box=document.getElementById("bc-chart"), note=document.getElementById("bc-note");
+  if(!d||!d.daily||!d.daily.length){ if(head) head.innerHTML='<div class="pmuted">누적 곡선 데이터가 없습니다.</div>'; return; }
+  const D=d.daily, S=d.source||{};
+  // 다운샘플 (모바일 성능)
+  const N=Math.min(160,D.length), step=D.length/N;
+  const pts=[]; for(let i=0;i<N;i++) pts.push(D[Math.min(D.length-1,Math.floor(i*step))].cum);
+  pts[pts.length-1]=D[D.length-1].cum;
+  const maxv=Math.max(...pts), minv=0;
+  const line=path(pts,W,H,minv,maxv);
+  const area=line+`L${(W-PAD).toFixed(1)},${H-PAD}L${PAD},${H-PAD}Z`;
+  const last=D[D.length-1], mid=D[Math.floor(D.length/2)];
+  head.innerHTML=`<div class="mrow">13년 누적 <b>${f(last.cum)}원</b> · 포지션 ${f(S.positions)} · MDD <b>${f(S.mdd)}원</b></div>
+    <div class="msub">${String(S.first).slice(0,4)}년 ~ ${String(S.last).slice(0,4)}년 · ${D.length.toLocaleString()}거래일 · 피크 자본 ${f(S.peak)}원</div>`;
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;margin:6px 0 2px">
+    <defs><linearGradient id="bcg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--green)" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="var(--green)" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#bcg)"/>
+    <path d="${line}" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linejoin="round"/>
+    <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="currentColor" stroke-opacity=".18"/>
+  </svg>
+  <div class="msub" style="display:flex;justify-content:space-between;font-size:11px">
+    <span>${String(S.first).slice(0,4)}</span><span>${String(mid.d).slice(0,4)}</span><span>${String(last.d).slice(0,4)}</span></div>`;
+  const Y=d.yearly||[], mx=Math.max(...Y.map(y=>Math.abs(y.net)),1);
+  note.innerHTML=`<div style="margin-top:8px"><b>연도별 순익</b></div>`
+    + Y.map(y=>`<div class="mrow" style="font-size:11px;line-height:1.6">
+        <span style="display:inline-block;width:40px">${y.year}</span>
+        <span style="display:inline-block;width:96px"><i style="display:inline-block;height:7px;width:${Math.abs(y.net)/mx*100}%;background:${y.net>=0?"var(--green)":"var(--red)"}"></i></span>
+        <span style="margin-left:6px">${f(y.net)}원</span>
+        <span class="msub" style="margin-left:6px">탈출 ${y.esc}%</span></div>`).join("");
+}
+document.addEventListener("DOMContentLoaded", init);
+})();
+
 /* ══════════ 저변동 모의매매 ══════════ */
 (function(){
 const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
