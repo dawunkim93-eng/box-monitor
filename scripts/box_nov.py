@@ -12,7 +12,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path("/home/lucky/box-monitor")
-DUMP = Path("/tmp/dump_nov4.json")   # --slots 999 --cool 1 (엔진이 체결일 기준 차단)
+DUMP = Path("/tmp/dump_nov5.json")   # --slots 999 --cool 1 (엔진이 체결일 기준 차단)
 OUT = ROOT / "data" / "box_nov.json"
 PIT = Path("/home/lucky/backtest/data/pit")
 SINCE = 20260901
