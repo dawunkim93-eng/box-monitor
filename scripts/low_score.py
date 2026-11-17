@@ -55,7 +55,7 @@ def trade(c, h, l, o, i):
             if float(h[j]) >= held[k] * (1 + GAP):
                 net += AMTS[k] * 10_000 * (GAP - FEE)
                 del held[k]
-        if dd == 0 and held and float(c[j]) < lv[2]:
+        if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
             for k in list(held):
                 net += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
                 del held[k]

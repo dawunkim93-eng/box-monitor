@@ -151,7 +151,7 @@ def evaluate(code, df, sig, limit):
             if held[k] and float(h[j]) >= tg[k]:
                 held[k] = False
                 net += AMTS[k] * 10_000 * (GAP - FEE)
-        if dd == 0 and any(held) and float(c[j]) < lv[2]:
+        if any(held) and float(c[j]) < lv[2]:      # 매일 종가 3차 이탈 → 그날 청산
             for k in range(3):
                 if held[k]:
                     net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
@@ -304,7 +304,7 @@ def main():
                          cond_a="거래대금 ≤ 37.5억 & 밴드위치 ≥ 89.5%",
                          cond_b="거래대금 ≤ 37.5억 & ATR ≤ 5.85%",
                          min_amt=MIN_AMT,
-                         entry="전일 종가 지정가", stop="진입일 종가가 3차 가격 아래면 그날 청산"))
+                         entry="전일 종가 지정가", stop="종가가 3차 가격(-3%) 아래면 그날 청산 (1~3일차 매일 적용)"))
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     if cool_on:
         print(f"[INFO] ⛔ 급락 쿨다운 — 신호일 KOSPI {cool_pct:+.2f}% · 신규 진입 중단")

@@ -71,7 +71,7 @@ def trade(df, i):
                 realised += AMTS[k] * 10_000 * (GAP - FEE)
                 del held[k]
         exit_day = int(df.index[min(j, len(df) - 1)].strftime("%Y%m%d"))
-        if dd == 0 and held and float(c[j]) < lv[2]:
+        if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
             for k in list(held):
                 realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
                 del held[k]
@@ -179,7 +179,7 @@ def main():
                             pct=round(r["net"] / SLOT * 100, 2),
                             status=r["status"]) for r in recent],
                note=("슬롯 무제한 · 급락 쿨다운 적용(체결일 기준) · 1.5% 3차 · 최대 3일 · "
-                     "진입일 종가가 3차 아래면 당일 청산 · 금액은 슬롯 21만원 기준"))
+                     "종가가 3차(-3%) 아래면 그날 청산 · 금액은 슬롯 21만원 기준"))
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"[INFO] 9~11월 진입 {s['positions']}건 · 완료 {s['done']} · 보유 {s['holding']} · "
           f"승률 {s['win']}% · 건당 {s['avg']:,}원({s['avg_pct']:+.3f}%) · "
