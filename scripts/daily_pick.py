@@ -34,6 +34,7 @@ SLOT = sum(AMTS) * 10_000
 HOLD = 3
 MIN_HIST = 60
 MIN_AMT = 10.0      # 실전 최소 유동성(20일 평균 거래대금, 억원)
+PREF_TAIL = "579K"  # 우선주(코드 끝자리) 제외
 
 
 def load(code):
@@ -142,6 +143,8 @@ def main():
     scanned = []
     cand = []
     for code in codes:
+        if code[-1] in PREF_TAIL:      # 우선주 제외
+            continue
         df = load(code)
         if df is None:
             continue
@@ -172,7 +175,7 @@ def main():
         seen.add((rec["code"], rec["sig"]))
     # 최근 30일 밖 신호는 정리
     cutoff = int((pd.Timestamp.now() - pd.Timedelta(days=30)).strftime("%Y%m%d"))
-    picks = [p for p in picks if p["sig"] >= cutoff]
+    picks = [p for p in picks if p["sig"] >= cutoff and p["code"][-1] not in PREF_TAIL]
     PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
 
     rows = []

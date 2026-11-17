@@ -12,11 +12,14 @@ PIT = Path("/home/lucky/backtest/data/pit")
 OUT = Path("/home/lucky/box-monitor/data/daily_universe.json")
 AMT_LO, AMT_HI = 3.0, 60.0        # 억원
 MIN_PX = 1000
+PREF_TAIL = "579K"     # 종목코드 끝자리 5·7·9·K = 우선주/전환우선주
 
 master = pd.read_pickle(PIT / "master.pkl")
 rows = []
 for r in master.itertuples():
     code, name = str(r.code), str(r.name)
+    if code[-1] in PREF_TAIL:      # 우선주 제외
+        continue
     try:
         df = pd.read_pickle(PIT / f"{code}.pkl")
     except Exception:
