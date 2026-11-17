@@ -167,7 +167,7 @@ def main():
     out = dict(updated_at=pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
                entries_by_day=[dict(d=k, n=v) for k, v in sorted(entry_cnt.items())],
                blocked=sorted(x for x in blk if x >= SINCE),
-               period=dict(start=min((r["sig"] for r in rows), default=None),
+               period=dict(start=min((r["entry_day"] for r in rows), default=None),
                            end=max((r["exit_day"] for r in rows), default=None)),
                summary=s, daily=daily,
                recent=[dict(name=r["name"], entry=r["entry_day"], exit=r["exit_day"],

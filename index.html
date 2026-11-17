@@ -2255,11 +2255,14 @@ async function init(){
   try{const r=await fetch("data/box_nov.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
   if(!d||d.empty){ head.innerHTML='<div class="pmuted">11월 데이터가 없습니다.</div>'; return; }
   const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
-  head.innerHTML=`<div class="pmuted">${P.start||"-"} ~ ${P.end||"-"} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
+  head.innerHTML=`<div class="pmuted">진입 ${String(P.start||"").slice(4,6)}/${String(P.start||"").slice(6)} ~ 청산 ${String(P.end||"").slice(4,6)}/${String(P.end||"").slice(6)} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
     <div class="msub">슬롯 ${(sm.slot||210000)/10000}만원 기준 · 원래 ${(sm.box_slot||870000)/10000}만원의 ${((sm.scale||0.241)*100).toFixed(1)}%로 환산</div>
     <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
+  const beb=(d.entries_by_day||[]).map(x=>`${String(x.d).slice(4,6)}/${String(x.d).slice(6)} ${x.n}`).join(" · ");
+  const bbd=(d.blocked||[]).map(x=>`${String(x).slice(4,6)}/${String(x).slice(6)}`).join(" · ");
+  const bday=(beb?`<div class="msub" style="margin-top:6px">진입일: ${beb}${bbd?`<br>쿨다운 차단일(진입 없음): ${bbd}`:""}</div>`:"");
   const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
   const curve=C.length? `<div class="msub" style="margin:10px 0 4px"><b>누적 곡선</b> (청산일 기준, ${C.length}일)</div>`
     + C.map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
@@ -2277,7 +2280,7 @@ async function init(){
         <td class="${r.net>0?"up":"deep"}">${f(r.net)}원</td></tr>`).join("")
     + `</tbody></table>` : "";
   document.getElementById("bn-body").innerHTML=
-    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt;
+    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + bday + curve + rt;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
@@ -2293,7 +2296,7 @@ async function init(){
   try{const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) live=await r.json();}catch(e){}
   if(!d){ head.innerHTML='<div class="pmuted">11월 데이터가 없습니다.</div>'; return; }
   const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
-  head.innerHTML=`<div class="pmuted">${P.start||"-"} ~ ${P.end||"-"} · 진입 ${sm.positions||0}건 · 완료 ${sm.done||0} · 보유 ${sm.holding||0} · 갱신 ${d.updated_at||"-"}</div>
+  head.innerHTML=`<div class="pmuted">진입 ${String(P.start||"").slice(4,6)}/${String(P.start||"").slice(6)} ~ 청산 ${String(P.end||"").slice(4,6)}/${String(P.end||"").slice(6)} · ${sm.positions||0}건 · 완료 ${sm.done||0} · 보유 ${sm.holding||0} · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
     <div class="msub">${d.note||""} · 슬롯 ${(sm.slot||210000)/10000}만원 · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
@@ -2383,7 +2386,7 @@ async function init(){
   try{const r=await fetch("data/box_nov.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
   if(!d||d.empty){ head.innerHTML='<div class="pmuted">11월 데이터가 없습니다.</div>'; return; }
   const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
-  head.innerHTML=`<div class="pmuted">${P.start||"-"} ~ ${P.end||"-"} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
+  head.innerHTML=`<div class="pmuted">진입 ${String(P.start||"").slice(4,6)}/${String(P.start||"").slice(6)} ~ 청산 ${String(P.end||"").slice(4,6)}/${String(P.end||"").slice(6)} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
     <div class="msub">슬롯 ${(sm.slot||210000)/10000}만원 기준 · 원래 ${(sm.box_slot||870000)/10000}만원의 ${((sm.scale||0.241)*100).toFixed(1)}%로 환산</div>
     <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
