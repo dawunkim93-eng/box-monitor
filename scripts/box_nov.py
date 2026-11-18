@@ -69,7 +69,21 @@ for r in recent:
                     kind=r.get("exit") or "",
                     cycles=r.get("cycles"), days=r.get("days")))
 
-_s = dict(positions=len(sel), win=round(win / len(sel) * 100, 1),
+# 최대 동시 보유 → 필요 자본
+_ev = []
+for _r in sel:
+    _e = int(_r["entry_day"]); _x = int(_r.get("exit_day") or _r["entry_day"])
+    _ev.append((_e, 1)); _ev.append((_x + 1, -1))
+_ev.sort()
+_cur = _peak = 0
+for _, _dv in _ev:
+    _cur += _dv
+    _peak = max(_peak, _cur)
+_need = _peak * LOW_SLOT
+
+_s = dict(positions=len(sel), peak_pos=_peak, need_cap=_need,
+          ret_cap=round(net_sum / _need * 100, 2) if _need else None,
+          win=round(win / len(sel) * 100, 1),
           esc=round(esc / len(sel) * 100, 1),
           avg=round(net_sum / len(sel)), total=round(net_sum),
           pct=round(net_sum / LOW_SLOT * 100, 2),

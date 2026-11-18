@@ -157,7 +157,23 @@ def main():
 
     kinds = Counter(r["kind"] for r in rows if r["status"] == "청산완료")
     recent = sorted(rows, key=lambda r: -r["exit_day"])[:12]
-    s = dict(positions=len(rows), done=len(done), holding=len(rows) - len(done),
+
+    # 최대 동시 보유(필요 자본) 계산
+    ev = []
+    for r in rows:
+        e = r.get("entry_day")
+        x = r.get("exit_day") or e
+        if e:
+            ev.append((int(e), 1))
+            ev.append((int(x) + 1, -1))
+    ev.sort()
+    cur = peak = 0
+    for _, dv in ev:
+        cur += dv
+        peak = max(peak, cur)
+    need_cap = peak * SLOT
+    s = dict(positions=len(rows), peak_pos=peak, need_cap=need_cap,
+             ret_cap=round(total / need_cap * 100, 2) if need_cap else None, done=len(done), holding=len(rows) - len(done),
              win=round(sum(1 for r in done if r["net"] > 0) / max(len(done), 1) * 100, 1),
              avg=round(total / max(len(done), 1)), total=round(total),
              pct=round(total / SLOT * 100, 2),
