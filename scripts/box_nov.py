@@ -81,7 +81,20 @@ for _, _dv in _ev:
     _peak = max(_peak, _cur)
 _need = _peak * LOW_SLOT
 
+
+# 평균 동시 보유 → 평균 자본
+_m = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
+_p0 = min(int(r["entry_day"]) for r in sel)
+_p1 = max(int(r.get("exit_day") or r["entry_day"]) for r in sel)
+_days = [int(d.strftime("%Y%m%d")) for d in _m.index if _p0 <= int(d.strftime("%Y%m%d")) <= _p1]
+_cnt = [sum(1 for r in sel
+            if int(r["entry_day"]) <= d <= int(r.get("exit_day") or r["entry_day"]))
+        for d in _days]
+_avg_pos = round(sum(_cnt) / max(len(_cnt), 1), 1)
+_avg_cap = int(_avg_pos * LOW_SLOT)
+
 _s = dict(positions=len(sel), peak_pos=_peak, need_cap=_need,
+          avg_pos=_avg_pos, avg_cap=_avg_cap,
           ret_cap=round(net_sum / _need * 100, 2) if _need else None,
           win=round(win / len(sel) * 100, 1),
           esc=round(esc / len(sel) * 100, 1),

@@ -172,7 +172,16 @@ def main():
         cur += dv
         peak = max(peak, cur)
     need_cap = peak * SLOT
+    _m = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
+    _p0 = min(r["entry_day"] for r in rows)
+    _p1 = max(r.get("exit_day") or r["entry_day"] for r in rows)
+    _days = [int(d.strftime("%Y%m%d")) for d in _m.index if _p0 <= int(d.strftime("%Y%m%d")) <= _p1]
+    _cnt = [sum(1 for r in rows if r["entry_day"] <= d <= (r.get("exit_day") or r["entry_day"]))
+            for d in _days]
+    _avg_pos = round(sum(_cnt) / max(len(_cnt), 1), 1)
+    _avg_cap = int(_avg_pos * SLOT)
     s = dict(positions=len(rows), peak_pos=peak, need_cap=need_cap,
+             avg_pos=_avg_pos, avg_cap=_avg_cap,
              ret_cap=round(total / need_cap * 100, 2) if need_cap else None, done=len(done), holding=len(rows) - len(done),
              win=round(sum(1 for r in done if r["net"] > 0) / max(len(done), 1) * 100, 1),
              avg=round(total / max(len(done), 1)), total=round(total),

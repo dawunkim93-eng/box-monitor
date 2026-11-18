@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-18 16:43",
+ "updated_at": "2026-11-18 16:48",
  "entries_by_day": [
   {
    "d": 20260901,
@@ -168,6 +168,8 @@
   "positions": 154,
   "peak_pos": 29,
   "need_cap": 6090000,
+  "avg_pos": 5.5,
+  "avg_cap": 1155000,
   "ret_cap": 0.97,
   "win": 89.0,
   "esc": 81.8,

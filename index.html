@@ -2372,7 +2372,7 @@ async function init(){
   head.innerHTML=`<div class="pmuted">진입 ${String(P.start||"").slice(4,6)}/${String(P.start||"").slice(6)} ~ 청산 ${String(P.end||"").slice(4,6)}/${String(P.end||"").slice(6)} · ${sm.positions||0}건 · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 탈출 <b>${fx(sm.esc)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
     <div class="msub">슬롯 ${(sm.slot||210000)/10000}만원 기준 · 원래 ${(sm.box_slot||870000)/10000}만원의 ${((sm.scale||0.241)*100).toFixed(1)}%로 환산</div>
-    <div class="msub"><b>최대 동시 ${sm.peak_pos||0}건 → 필요 자본 ${f(sm.need_cap)}원</b> · 자본 대비 ${fx(sm.ret_cap,2)}%</div>
+    <div class="msub"><b>최대 동시 ${sm.peak_pos||0}건 → 필요 자본 ${f(sm.need_cap)}원</b> · 평균 ${fx(sm.avg_pos,1)}건 → ${f(sm.avg_cap)}원 · 자본 대비 ${fx(sm.ret_cap,2)}%</div>
     <div class="msub">${d.note||""} · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
   const beb=(d.entries_by_day||[]).map(x=>`${String(x.d).slice(4,6)}/${String(x.d).slice(6)} ${x.n}`).join(" · ");
@@ -2413,7 +2413,7 @@ async function init(){
   const sm=d.summary||{}, P=d.period||{}, K=sm.kinds||{};
   head.innerHTML=`<div class="pmuted">진입 ${String(P.start||"").slice(4,6)}/${String(P.start||"").slice(6)} ~ 청산 ${String(P.end||"").slice(4,6)}/${String(P.end||"").slice(6)} · ${sm.positions||0}건 · 완료 ${sm.done||0} · 보유 ${sm.holding||0} · 갱신 ${d.updated_at||"-"}</div>
     <div class="mrow" style="margin-top:6px">승률 <b>${fx(sm.win)}%</b> · 건당 <b>${f(sm.avg)}원</b> (${fx(sm.avg_pct,3)}%) · 합계 <b>${f(sm.total)}원</b> (${fx(sm.pct,2)}%)</div>
-    <div class="msub"><b>최대 동시 ${sm.peak_pos||0}건 → 필요 자본 ${f(sm.need_cap)}원</b> · 자본 대비 ${fx(sm.ret_cap,2)}%</div>
+    <div class="msub"><b>최대 동시 ${sm.peak_pos||0}건 → 필요 자본 ${f(sm.need_cap)}원</b> · 평균 ${fx(sm.avg_pos,1)}건 → ${f(sm.avg_cap)}원 · 자본 대비 ${fx(sm.ret_cap,2)}%</div>
     <div class="msub">${d.note||""} · 슬롯 ${(sm.slot||210000)/10000}만원 · 최고 ${f(sm.best)}원 · 최악 ${f(sm.worst)}원</div>`;
   const kl=Object.keys(K).length?`청산 유형: `+Object.entries(K).map(([k,v])=>`${k} ${v}`).join(" · "):"";
   const C=d.daily||[], mx=Math.max(...C.map(x=>Math.abs(x.cum)),1);
