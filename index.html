@@ -2394,7 +2394,7 @@ async function init(){
         <td class="${r.net>0?"up":"deep"}">${f(r.net)}원</td></tr>`).join("")
     + `</tbody></table>` : "";
   document.getElementById("bn-body").innerHTML=
-    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + bday + curve + rt;
+    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
@@ -2436,7 +2436,7 @@ async function init(){
   const ls=live&&live.summary;
   const liveNote = ls? `<div class="msub" style="margin-top:12px"><b>실시간 모의 기록</b>(11/13 시작) — 진입 ${ls.entries||0}건 · 완료 ${ls.done||0} · 보유 ${ls.holding||0} · 승률 ${fx(ls.win)}% · 누적 ${fx(ls.tot,2)}%</div>` : "";
   document.getElementById("dp-body").innerHTML=
-    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + dayNote + curve + rt + liveNote
+    (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt + liveNote
     + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산. 최대 3일 보유.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
