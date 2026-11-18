@@ -75,7 +75,7 @@ def trade(df, i):
             for k in list(held):
                 realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
                 del held[k]
-            kind = "시간손절"
+            kind = "손절선 청산"
             break
         if not held:
             kind = kind or "전량익절"
@@ -84,7 +84,7 @@ def trade(df, i):
         j = min(i + HOLD, len(df) - 1)
         for k in list(held):
             realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
-        kind = kind or ("기간청산" if i + HOLD <= len(df) - 1 else "보유중")
+        kind = kind or ("만기 청산" if i + HOLD <= len(df) - 1 else "보유중")
         exit_day = int(df.index[j].strftime("%Y%m%d"))
     return dict(status=("보유중" if kind == "보유중" else "청산완료"),
                 net=realised, kind=kind or "전량익절",

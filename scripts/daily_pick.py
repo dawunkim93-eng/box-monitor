@@ -171,7 +171,7 @@ def evaluate(code, df, sig, limit):
                 if held[k]:
                     net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
                     held[k] = False
-            exit_kind = "시간손절"
+            exit_kind = "손절선 청산"
             break
         if not any(held):
             exit_kind = exit_kind or "전량익절"
@@ -182,7 +182,7 @@ def evaluate(code, df, sig, limit):
             for k in range(3):
                 if held[k]:
                     net += AMTS[k] * 10_000 * (float(c[full]) / lv[k] - 1 - FEE)
-            exit_kind = exit_kind or "기간청산"
+            exit_kind = exit_kind or "만기 청산"
             exit_day = int(df.index[full].strftime("%Y%m%d"))
         else:                               # 아직 보유 중 — 평가손익만
             j = len(df) - 1
@@ -217,9 +217,23 @@ def main():
     today = None
     added = []
     scanned = []
+    # 이미 보유 중(청산 전)인 종목은 신규 신호에서 제외
+    open_codes = set()
+    for _p in picks:
+        _d = load(_p["code"])
+        if _d is None:
+            continue
+        _r = evaluate(_p["code"], _d, _p["sig"], float(_p["limit"]))
+        if _r and _r.get("status") == "보유중":
+            open_codes.add(_p["code"])
+    if open_codes:
+        print(f"[INFO] 보유중 제외 {len(open_codes)}종목")
+
     cand = []
     for code in codes:
         if code[-1] in PREF_TAIL:      # 우선주 제외
+            continue
+        if code in open_codes:         # 보유중 종목 제외
             continue
         df = load(code)
         if df is None:
