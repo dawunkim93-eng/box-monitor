@@ -65,16 +65,25 @@ def cond_score(amt, pos, atr):
     return None
 
 
-def naver_close(code):
-    """네이버 현재가(장 마감 후엔 확정 종가) — PIT 종가 지연 보정용."""
+def naver_close(code, day=None):
+    """네이버 일봉의 확정 종가 (day=YYYYMMDD 없으면 마지막 봉)."""
+    import re
     import urllib.request
     try:
-        req = urllib.request.Request(
-            f"https://m.stock.naver.com/api/stock/{code}/basic",
-            headers={"User-Agent": "Mozilla/5.0"})
-        d = json.loads(urllib.request.urlopen(req, timeout=6).read().decode("utf-8"))
-        v = str(d.get("closePrice") or "").replace(",", "")
-        return float(v) if v else None
+        end = pd.Timestamp.now()
+        st = (end - pd.Timedelta(days=20)).strftime("%Y%m%d")
+        url = ("https://api.finance.naver.com/siseJson.naver?"
+               f"symbol={code}&requestType=1&startTime={st}&endTime={end:%Y%m%d}&timeframe=day")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        raw = urllib.request.urlopen(req, timeout=8).read().decode("utf-8", "ignore")
+        rows = re.findall(r'\["(\d{8})",\s*[\d.]+,\s*[\d.]+,\s*[\d.]+,\s*([\d.]+)', raw)
+        if not rows:
+            return None
+        if day is not None:
+            for d, c in rows:
+                if int(d) == int(day):
+                    return float(c)
+        return float(rows[-1][1])
     except Exception:
         return None
 
@@ -245,7 +254,7 @@ def main():
         scanned.append(sig)
         # PIT 종가가 확정 전 값일 수 있음 → 최신 거래일이면 네이버 확정가로 보정
         if sig == market_date:
-            real = naver_close(code)
+            real = naver_close(code, sig)
             if real and abs(real - f["close"]) > 0.5:
                 f["close"] = real
                 lo, hi = min(f["lo30"], real), max(f["hi30"], real)
@@ -279,13 +288,19 @@ def main():
         picks = [p for p in picks if p["sig"] != today]
     PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    # 최신일 후보의 지정가를 확정 종가로 보정 (PIT 지연 대비)
+    # 모든 후보의 지정가를 신호일 종가로 재확인 (PIT 확정값 기준)
     fixed = 0
     for p in picks:
-        if p["sig"] != market_date:
+        d = load(p["code"])
+        if d is None:
             continue
-        real = naver_close(p["code"])
-        if real and abs(real - float(p["limit"])) > 0.5:
+        days = [int(x.strftime("%Y%m%d")) for x in d.index]
+        if p["sig"] not in days:
+            continue
+        real = float(d["Close"].values[days.index(p["sig"])])
+        if p["sig"] == market_date:            # 당일이면 네이버 실시간 종가 우선
+            real = naver_close(p["code"], p["sig"]) or real
+        if abs(real - float(p["limit"])) > 0.5:
             p["limit"] = round(real)
             fixed += 1
     if fixed:
