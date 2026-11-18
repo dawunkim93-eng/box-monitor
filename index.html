@@ -2383,7 +2383,6 @@ async function init(){
     + C.slice(-12).map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
         <span style="display:inline-block;width:96px;text-align:right">진입 ${x.ein||0} · 청산 ${x.n}</span>
-        <span style="display:inline-block;width:78px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.net)/mx*100}%;background:${x.net>=0?"var(--green)":"var(--red)"}"></i></span>
         <span style="margin-left:6px" class="${x.net>=0?"up":"deep"}">당일 ${x.net>=0?"+":""}${f(x.net)}원 (${fx((x.net/(sm.slot||210000))*100,2)}%)</span></div>`).join("")
     : "";
   const R=d.recent||[];
@@ -2424,7 +2423,6 @@ async function init(){
     + C.slice(-12).map(x=>`<div class="mrow" style="font-size:11px;line-height:1.55">
         <span style="display:inline-block;width:52px">${String(x.d).slice(4,6)}/${String(x.d).slice(6)}</span>
         <span style="display:inline-block;width:96px;text-align:right">진입 ${x.ein||0} · 청산 ${x.n}</span>
-        <span style="display:inline-block;width:70px;margin-left:6px"><i style="display:inline-block;height:7px;width:${Math.abs(x.net)/mx*100}%;background:${x.net>=0?"var(--green)":"var(--red)"}"></i></span>
         <span style="margin-left:6px" class="${x.net>=0?"up":"deep"}">당일 ${x.net>=0?"+":""}${f(x.net)}원 (${fx((x.net/(sm.slot||210000))*100,2)}%)</span></div>`).join("")
     : `<div class="msub" style="margin-top:8px">아직 청산이 끝난 거래가 없습니다.</div>`;
   const R=d.recent||[];
