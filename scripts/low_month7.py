@@ -143,8 +143,9 @@ import json as _j
 month = defaultdict(lambda: dict(n=0, win=0, net=0.0, cap=[]))
 cnt = defaultdict(int)
 for t in taken:
+    _end = t["exit"] if t["exit"] > t["sig"] else t["sig"] + 1
     for d in calib:
-        if t["sig"] <= d <= t["exit"]:
+        if t["sig"] <= d < _end:          # 청산일 종가에 슬롯이 비므로 < 로 셈
             cnt[d] += 1
 _mx = max(cnt.values()) if cnt else 0
 print(f"[DEBUG] 동시보유 최대 {_mx} · 일수 {len(calib)} · 평균 {sum(cnt.values())/max(len(calib),1):.2f}")
