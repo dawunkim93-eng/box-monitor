@@ -183,7 +183,9 @@ def evaluate(code, df, sig, limit):
         return None
     i = days.index(sig)
     if i + 1 >= len(df):
-        return None
+        # 신호일 종가에 매수했고 아직 다음 거래일이 없음 → 보유중(평가 0)
+        return dict(status="보유중", net=0.0, days=0, entry=sig,
+                    exit=None, kind="보유중")
     c = df["Close"].values.astype(float)
     h = df["High"].values.astype(float)
     l = df["Low"].values.astype(float)

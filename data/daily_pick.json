@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-19 18:36",
+ "updated_at": "2026-11-19 18:40",
  "closed_today": [
   {
    "code": "128540",
@@ -288,8 +288,8 @@
      "atr": 6.16,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -307,8 +307,8 @@
      "atr": 5.55,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -326,15 +326,15 @@
      "atr": 5.43,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "140430",
      "name": "카티스",
-     "limit": 2440,
-     "stop": 2367,
+     "limit": 2450,
+     "stop": 2377,
      "cur": null,
      "under": null,
      "hold": null,
@@ -345,8 +345,8 @@
      "atr": 13.03,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -364,8 +364,8 @@
      "atr": 3.93,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -383,8 +383,8 @@
      "atr": 4.02,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -402,15 +402,15 @@
      "atr": 4.51,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "206650",
      "name": "유바이오로직스",
-     "limit": 8890,
-     "stop": 8625,
+     "limit": 8880,
+     "stop": 8616,
      "cur": null,
      "under": null,
      "hold": null,
@@ -421,8 +421,8 @@
      "atr": 4.8,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -440,8 +440,8 @@
      "atr": 3.54,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -459,8 +459,8 @@
      "atr": 7.04,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -478,8 +478,8 @@
      "atr": 5.06,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -497,15 +497,15 @@
      "atr": 8.38,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "067920",
      "name": "이글루",
-     "limit": 6750,
-     "stop": 6549,
+     "limit": 6760,
+     "stop": 6559,
      "cur": null,
      "under": null,
      "hold": null,
@@ -516,15 +516,15 @@
      "atr": 7.63,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "323350",
      "name": "다원넥스뷰",
-     "limit": 15340,
-     "stop": 14883,
+     "limit": 15270,
+     "stop": 14815,
      "cur": null,
      "under": null,
      "hold": null,
@@ -535,8 +535,8 @@
      "atr": 11.01,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -554,8 +554,8 @@
      "atr": 9.05,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -573,8 +573,8 @@
      "atr": 9.08,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -592,8 +592,8 @@
      "atr": 7.53,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -611,8 +611,8 @@
      "atr": 3.99,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -630,15 +630,15 @@
      "atr": 4.9,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "039130",
      "name": "하나투어",
-     "limit": 36000,
-     "stop": 34928,
+     "limit": 36100,
+     "stop": 35025,
      "cur": null,
      "under": null,
      "hold": null,
@@ -649,8 +649,8 @@
      "atr": 4.99,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -668,15 +668,15 @@
      "atr": 4.98,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "086900",
      "name": "메디톡스",
-     "limit": 72500,
-     "stop": 70341,
+     "limit": 72600,
+     "stop": 70438,
      "cur": null,
      "under": null,
      "hold": null,
@@ -687,15 +687,15 @@
      "atr": 4.42,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "079160",
      "name": "CJ CGV",
-     "limit": 5280,
-     "stop": 5123,
+     "limit": 5270,
+     "stop": 5113,
      "cur": null,
      "under": null,
      "hold": null,
@@ -706,8 +706,8 @@
      "atr": 3.79,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -725,15 +725,15 @@
      "atr": 4.93,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "298050",
      "name": "HS효성첨단소재",
-     "limit": 162100,
-     "stop": 157273,
+     "limit": 162000,
+     "stop": 157176,
      "cur": null,
      "under": null,
      "hold": null,
@@ -744,8 +744,8 @@
      "atr": 4.83,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -763,8 +763,8 @@
      "atr": 4.07,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -782,8 +782,8 @@
      "atr": 4.47,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     },
     {
@@ -801,8 +801,8 @@
      "atr": 2.9,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "보유중",
      "net": 0.0
     }
    ],
@@ -817,7 +817,7 @@
      "name": "유바이오로직스",
      "limit": 8560,
      "stop": 8305,
-     "cur": 8890,
+     "cur": 8880,
      "under": false,
      "hold": 2,
      "score": 100.0,
@@ -836,7 +836,7 @@
      "name": "화천기계",
      "limit": 3725,
      "stop": 3614,
-     "cur": 3600,
+     "cur": 3605,
      "under": false,
      "hold": 2,
      "score": 96.2,
@@ -855,7 +855,7 @@
      "name": "포메탈",
      "limit": 3655,
      "stop": 3546,
-     "cur": 3270,
+     "cur": 3275,
      "under": true,
      "hold": 2,
      "score": 92.3,
@@ -1026,7 +1026,7 @@
      "name": "디어유",
      "limit": 23600,
      "stop": 22897,
-     "cur": 23200,
+     "cur": 23150,
      "under": false,
      "hold": 2,
      "score": 61.5,
@@ -1045,7 +1045,7 @@
      "name": "다원넥스뷰",
      "limit": 14160,
      "stop": 13738,
-     "cur": 15340,
+     "cur": 15270,
      "under": false,
      "hold": 2,
      "score": 61.5,
@@ -1121,7 +1121,7 @@
      "name": "하나투어",
      "limit": 35450,
      "stop": 34394,
-     "cur": 36000,
+     "cur": 36100,
      "under": false,
      "hold": 2,
      "score": 57.7,
@@ -1140,7 +1140,7 @@
      "name": "롯데관광개발",
      "limit": 11140,
      "stop": 10808,
-     "cur": 10890,
+     "cur": 10910,
      "under": false,
      "hold": 2,
      "score": 53.8,
@@ -1159,7 +1159,7 @@
      "name": "CJ ENM",
      "limit": 47000,
      "stop": 45601,
-     "cur": 52500,
+     "cur": 52400,
      "under": false,
      "hold": 2,
      "score": 53.8,
@@ -1178,7 +1178,7 @@
      "name": "모두투어",
      "limit": 10720,
      "stop": 10401,
-     "cur": 10340,
+     "cur": 10350,
      "under": true,
      "hold": 2,
      "score": 53.8,
@@ -1337,7 +1337,7 @@
      "name": "디어유",
      "limit": 18970,
      "stop": 18405,
-     "cur": 23200,
+     "cur": 23150,
      "under": false,
      "hold": 3,
      "score": 61.5,
@@ -1356,7 +1356,7 @@
      "name": "다원넥스뷰",
      "limit": 11900,
      "stop": 11546,
-     "cur": 15340,
+     "cur": 15270,
      "under": false,
      "hold": 3,
      "score": 61.5,
@@ -1432,7 +1432,7 @@
      "name": "에코캡",
      "limit": 1262,
      "stop": 1224,
-     "cur": 1081,
+     "cur": 1078,
      "under": true,
      "hold": 3,
      "score": null,
@@ -1451,7 +1451,7 @@
      "name": "진양폴리",
      "limit": 4425,
      "stop": 4293,
-     "cur": 4145,
+     "cur": 4140,
      "under": true,
      "hold": 3,
      "score": null,
@@ -1470,7 +1470,7 @@
      "name": "셀트리온제약",
      "limit": 41100,
      "stop": 39876,
-     "cur": 41450,
+     "cur": 41500,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1489,7 +1489,7 @@
      "name": "모두투어",
      "limit": 9870,
      "stop": 9576,
-     "cur": 10340,
+     "cur": 10350,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1546,7 +1546,7 @@
      "name": "케이뱅크",
      "limit": 5450,
      "stop": 5288,
-     "cur": 5430,
+     "cur": 5420,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1603,7 +1603,7 @@
      "name": "포메탈",
      "limit": 3530,
      "stop": 3425,
-     "cur": 3270,
+     "cur": 3275,
      "under": true,
      "hold": 3,
      "score": null,
@@ -1641,7 +1641,7 @@
      "name": "하나투어",
      "limit": 30500,
      "stop": 29592,
-     "cur": 36000,
+     "cur": 36100,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1698,7 +1698,7 @@
      "name": "유바이오로직스",
      "limit": 8700,
      "stop": 8441,
-     "cur": 8890,
+     "cur": 8880,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1738,17 +1738,17 @@
  "sig_date": 20261119,
  "summary": {
   "picks": 96,
-  "entries": 68,
-  "filled": 68,
+  "entries": 96,
+  "filled": 96,
   "done": 63,
-  "holding": 5,
-  "fill_rate": 70.8,
+  "holding": 33,
+  "fill_rate": 100.0,
   "win": 88.9,
   "avg": 0.678,
   "tot": 42.7,
   "period": {
    "start": 20261113,
-   "end": 20261118
+   "end": 20261119
   },
   "kinds": {
    "전량익절": 52,
@@ -1781,7 +1781,7 @@
   {
    "code": "039130",
    "name": "하나투어",
-   "limit": 36000,
+   "limit": 36100,
    "cond": "A+B",
    "amt": 34.4,
    "pos": 99.4,
@@ -1790,11 +1790,11 @@
    "open": 37100,
    "gap": 4.65,
    "rungs": [
-    36000,
-    35460,
-    34928
+    36100,
+    35558,
+    35025
    ],
-   "stop": 34928
+   "stop": 35025
   },
   {
    "code": "032500",
@@ -1925,7 +1925,7 @@
   {
    "code": "067920",
    "name": "이글루",
-   "limit": 6750,
+   "limit": 6760,
    "cond": "A",
    "amt": 21.9,
    "pos": 100.0,
@@ -1934,11 +1934,11 @@
    "open": 6340,
    "gap": 1.6,
    "rungs": [
-    6750,
-    6649,
-    6549
+    6760,
+    6659,
+    6559
    ],
-   "stop": 6549
+   "stop": 6559
   },
   {
    "code": "073490",
@@ -1961,7 +1961,7 @@
   {
    "code": "079160",
    "name": "CJ CGV",
-   "limit": 5280,
+   "limit": 5270,
    "cond": "A+B",
    "amt": 18.4,
    "pos": 100.0,
@@ -1970,11 +1970,11 @@
    "open": 5160,
    "gap": 0.98,
    "rungs": [
-    5280,
-    5201,
-    5123
+    5270,
+    5191,
+    5113
    ],
-   "stop": 5123
+   "stop": 5113
   },
   {
    "code": "489460",
@@ -2015,7 +2015,7 @@
   {
    "code": "323350",
    "name": "다원넥스뷰",
-   "limit": 15340,
+   "limit": 15270,
    "cond": "A",
    "amt": 17.8,
    "pos": 97.2,
@@ -2024,16 +2024,16 @@
    "open": 14440,
    "gap": 1.98,
    "rungs": [
-    15340,
-    15110,
-    14883
+    15270,
+    15041,
+    14815
    ],
-   "stop": 14883
+   "stop": 14815
   },
   {
    "code": "086900",
    "name": "메디톡스",
-   "limit": 72500,
+   "limit": 72600,
    "cond": "A+B",
    "amt": 16.6,
    "pos": 100.0,
@@ -2042,16 +2042,16 @@
    "open": 70000,
    "gap": 0.29,
    "rungs": [
-    72500,
-    71412,
-    70341
+    72600,
+    71511,
+    70438
    ],
-   "stop": 70341
+   "stop": 70438
   },
   {
    "code": "298050",
    "name": "HS효성첨단소재",
-   "limit": 162100,
+   "limit": 162000,
    "cond": "A+B",
    "amt": 15.4,
    "pos": 95.2,
@@ -2060,11 +2060,11 @@
    "open": 155600,
    "gap": -0.06,
    "rungs": [
-    162100,
-    159668,
-    157273
+    162000,
+    159570,
+    157176
    ],
-   "stop": 157273
+   "stop": 157176
   },
   {
    "code": "058850",
@@ -2177,7 +2177,7 @@
   {
    "code": "140430",
    "name": "카티스",
-   "limit": 2440,
+   "limit": 2450,
    "cond": "A",
    "amt": 11.4,
    "pos": 91.9,
@@ -2186,11 +2186,11 @@
    "open": 2375,
    "gap": 0.64,
    "rungs": [
-    2440,
-    2403,
-    2367
+    2450,
+    2413,
+    2377
    ],
-   "stop": 2367
+   "stop": 2377
   },
   {
    "code": "145720",
@@ -2213,7 +2213,7 @@
   {
    "code": "206650",
    "name": "유바이오로직스",
-   "limit": 8890,
+   "limit": 8880,
    "cond": "A+B",
    "amt": 10.5,
    "pos": 100.0,
@@ -2222,11 +2222,11 @@
    "open": 8510,
    "gap": -0.58,
    "rungs": [
-    8890,
-    8757,
-    8625
+    8880,
+    8747,
+    8616
    ],
-   "stop": 8625
+   "stop": 8616
   },
   {
    "code": "002350",
@@ -2278,11 +2278,12 @@
    "open": 70300,
    "gap": 0.57,
    "score": 15.4,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "032500",
@@ -2296,11 +2297,12 @@
    "open": 19990,
    "gap": 0.71,
    "score": 76.9,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "002790",
@@ -2314,11 +2316,12 @@
    "open": 27600,
    "gap": 0.18,
    "score": 57.7,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "280360",
@@ -2332,11 +2335,12 @@
    "open": 139300,
    "gap": 0.07,
    "score": 57.7,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "298690",
@@ -2350,11 +2354,12 @@
    "open": 1901,
    "gap": 1.71,
    "score": 76.9,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "365330",
@@ -2368,11 +2373,12 @@
    "open": 1411,
    "gap": -1.05,
    "score": 76.9,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "002900",
@@ -2386,17 +2392,18 @@
    "open": 7240,
    "gap": -0.14,
    "score": 46.2,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "067920",
    "name": "이글루",
    "sig": 20261119,
-   "limit": 6750,
+   "limit": 6760,
    "cond": "A",
    "amt": 21.9,
    "pos": 100.0,
@@ -2404,17 +2411,18 @@
    "open": 6340,
    "gap": 1.6,
    "score": 65.4,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "323350",
    "name": "다원넥스뷰",
    "sig": 20261119,
-   "limit": 15340,
+   "limit": 15270,
    "cond": "A",
    "amt": 17.8,
    "pos": 97.2,
@@ -2422,11 +2430,12 @@
    "open": 14440,
    "gap": 1.98,
    "score": 65.4,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "050110",
@@ -2440,17 +2449,18 @@
    "open": 6410,
    "gap": 0.0,
    "score": 65.4,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "086900",
    "name": "메디톡스",
    "sig": 20261119,
-   "limit": 72500,
+   "limit": 72600,
    "cond": "A+B",
    "amt": 16.6,
    "pos": 100.0,
@@ -2458,11 +2468,12 @@
    "open": 70000,
    "gap": 0.29,
    "score": 46.2,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   },
   {
    "code": "094850",
@@ -2476,11 +2487,12 @@
    "open": 4395,
    "gap": 8.52,
    "score": 65.4,
-   "status": "대기",
+   "status": "보유중",
    "net": 0.0,
    "days": 0,
-   "entry": null,
-   "exit": null
+   "entry": 20261119,
+   "exit": null,
+   "kind": "보유중"
   }
  ],
  "rule": {
