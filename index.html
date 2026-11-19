@@ -2278,7 +2278,7 @@ async function init(){
     let hidden=0;
     const before=items.length;
     if(gi===0){
-      items=items.filter(x=>!(x.status==="청산완료"&&(x.kind||"").includes("전량익절")));
+      /* 오늘은 익절 포함 전체 표시 */
     }else{
       items=items.filter(x=>x.status==="보유중");                    // 보유중 전체
     }
@@ -2292,7 +2292,6 @@ async function init(){
         <b>${lbl}${dash(g.sig)} 신호</b> · ${items.length}건${tagTxt?` <span class="sub">${tagTxt}</span>`:""}`
         + (gi===0&&nCl?` · 청산 ${nCl}`:"") + (gi===0&&nHold?` · 보유 ${nHold}`:"")
         + (gi===0&&nCl?` · 실현 <span class="${netAll>=0?"up":"deep"}">${netAll>0?"+":""}${fx(netAll,2)}%</span>`:"")
-        + (gi===0&&hidden>0?` <span class="sub">· 전량익절 ${hidden}건 생략</span>`:"")
         + (gi>0&&items.length===0?` <span class="sub">— 없음</span>`:"")
         + `</div>`;
     if(items.length===0){
