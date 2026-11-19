@@ -7,6 +7,7 @@
 """
 import json
 import os
+import re
 import urllib.parse
 import urllib.request
 from datetime import datetime
@@ -20,6 +21,7 @@ STATE = HERE / "data" / "low_alert_state.json"
 PIT = Path("/home/lucky/backtest/data/pit")
 ENV = Path("/home/lucky/magicsplit-safe-strategy/backtest/.env")
 
+UA = {"User-Agent": "Mozilla/5.0"}
 GAP = 0.015
 AMTS = [6, 6, 9]
 HOLD = 3
@@ -62,6 +64,24 @@ def now_price(code):
         return None
 
 
+def today_bar(code):
+    """네이버에서 오늘 봉 (날짜, 시가, 고가, 저가, 종가) — 없으면 None"""
+    try:
+        end = pd.Timestamp.now()
+        st = (end - pd.Timedelta("10D")).strftime("%Y%m%d")
+        url = ("https://api.finance.naver.com/siseJson.naver?"
+               f"symbol={code}&requestType=1&startTime={st}&endTime={end:%Y%m%d}&timeframe=day")
+        raw = urllib.request.urlopen(urllib.request.Request(
+            url, headers=UA), timeout=8).read().decode("utf-8", "ignore")
+        rows = re.findall(r'\["(\d{8})",\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)', raw)
+        if not rows:
+            return None
+        d, o, h, l, c = rows[-1]
+        return int(d), float(o), float(h), float(l), float(c)
+    except Exception:
+        return None
+
+
 def load(code):
     try:
         df = pd.read_pickle(PIT / f"{code}.pkl")
@@ -74,7 +94,6 @@ def load(code):
 
 def prev_close(code):
     """전일 종가 (당일 등락률 표시용)"""
-    import re
     try:
         end = pd.Timestamp.now()
         st = (end - pd.Timedelta("10D")).strftime("%Y%m%d")
@@ -106,6 +125,12 @@ def main():
         df = load(p["code"])
         if df is None:
             continue
+        tb = today_bar(p["code"])
+        if tb and tb[0] > int(df.index[-1].strftime("%Y%m%d")):
+            row = pd.DataFrame([{"Open": tb[1], "High": tb[2], "Low": tb[3],
+                                 "Close": tb[4], "Volume": 1.0}],
+                               index=pd.DatetimeIndex([pd.Timestamp(str(tb[0]))]))
+            df = pd.concat([df, row])
         days = [int(d.strftime("%Y%m%d")) for d in df.index]
         if p["sig"] not in days:
             continue
