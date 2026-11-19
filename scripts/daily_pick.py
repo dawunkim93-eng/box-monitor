@@ -177,7 +177,7 @@ def features(df):
 
 
 def evaluate(code, df, sig, limit):
-    """신호 이후 결과 계산. dict 또는 None(미체결)."""
+    """신호일 종가 매수 기준 결과 계산."""
     days = [int(x.strftime("%Y%m%d")) for x in df.index]
     if sig not in days:
         return None
@@ -187,11 +187,9 @@ def evaluate(code, df, sig, limit):
     c = df["Close"].values.astype(float)
     h = df["High"].values.astype(float)
     l = df["Low"].values.astype(float)
-    if float(l[i + 1]) > limit:
-        return dict(status="미체결", net=0.0, days=0, entry=None, exit=None)
     lv = [limit * (1 - GAP) ** k for k in range(3)]
     tg = [x * (1 + GAP) for x in lv]
-    held = [True, False, False]
+    held = [True, False, False]    # 1차는 신호일 종가 매수
     net = 0.0
     exit_kind = None
     for dd in range(HOLD):

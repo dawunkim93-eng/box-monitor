@@ -299,7 +299,7 @@
   </table>
   <div id="mobile-holds" class="mob-list"></div>
   <div class="sub" id="hold-mismatch" hidden style="margin:4px 0 8px;color:var(--amber)"></div>
-  <h2 class="sec" id="lowlive-sec">🎯 저변동 후보 (오늘 종가 지정가)</h2>
+  <h2 class="sec" id="lowlive-sec">🎯 저변동 후보 (오늘 종가 매수)</h2>
   <div class="sub" id="lowlive-note">로딩 중…</div>
   <div id="lowlive"></div>
 
@@ -324,7 +324,7 @@
   <table id="main-tbl">
     <thead><tr>
       <th class="nm">☑ 종목</th><th>점수</th><th>탈출율</th><th class="mhide">아침</th><th>현재가</th><th class="mhide">당일</th><th class="hidem">ATR</th>
-      <th>위치</th><th>하단대비</th><th>지정가</th>
+      <th>위치</th><th>하단대비</th><th>매수가</th>
       <th class="hidem">갭</th>
     </tr></thead>
     <tbody id="rows"><tr><td colspan="10">로딩 중…</td></tr></tbody>
@@ -2307,10 +2307,10 @@ async function init(){
         + `<td>${t.under?'<span class="deep">손절</span>':stCell(t)}</td></tr>`;
     }).join("");
     return head + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th>`
-      + `<th>지정가</th><th title="3차 매수가 = 손절선 (-3%)">3차<br><span class="sub" style="font-size:8.5px">손절선</span></th><th class="mhide">시가</th><th>갭</th><th>결과</th>`
+      + `<th>매수가</th><th title="3차 매수가 = 손절선 (-3%)">3차<br><span class="sub" style="font-size:8.5px">손절선</span></th><th class="mhide">시가</th><th>갭</th><th>결과</th>`
       + `</tr></thead><tbody>` + rows + `</tbody></table>`;
   }).join("");
-  box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선(-3%). 시가는 진입일 시가, 갭은 지정가 대비 시가입니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
+  box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 15:20에 후보를 확인하고 신호일 종가 동시호가로 매수합니다. 3차는 -3% 손절선. 시가·갭은 다음날 참고용입니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
@@ -2343,7 +2343,7 @@ async function init(){
     + `</tbody></table>`;
   const P=(pick&&pick.today||[]).filter(t=>t.score!=null).sort((a,b2)=>b2.score-a.score);
   const pt=P.length? `<div class="msub" style="margin:10px 0 4px"><b>오늘 후보 점수</b> (${pick.sig_date})</div>
-    <table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th></tr></thead><tbody>`
+    <table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>매수가</th></tr></thead><tbody>`
     + P.slice(0,10).map(t=>`<tr><td><b>${fx(t.score)}</b></td>
         <td class="nm">${t.name}</td><td>${f(t.limit)}</td></tr>`).join("")
     + `</tbody></table>` : "";
