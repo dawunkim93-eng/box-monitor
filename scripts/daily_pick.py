@@ -413,6 +413,33 @@ def main():
     summary["best"] = round(max([r["net"] for r in done], default=0), 2)
     summary["worst"] = round(min([r["net"] for r in done], default=0), 2)
 
+    # 최근 3개 신호일 후보 묶음 (위에서 아래로 최신)
+    _sigs = sorted({p["sig"] for p in picks}, reverse=True)[:3]
+    days_out = []
+    for _sg in _sigs:
+        items = []
+        for p in [x for x in picks if x["sig"] == _sg]:
+            r = next((x for x in rows if x["code"] == p["code"] and x["sig"] == _sg), None)
+            d0 = load(p["code"])
+            op = gp = None
+            if d0 is not None:
+                ds = [int(x.strftime("%Y%m%d")) for x in d0.index]
+                if _sg in ds:
+                    i0 = ds.index(_sg)
+                    if i0 + 1 < len(d0):
+                        op = float(d0["Open"].values[i0 + 1])
+                        gp = round((op / float(p["limit"]) - 1) * 100, 2)
+            items.append(dict(code=p["code"], name=p["name"], limit=p["limit"],
+                              stop=round(float(p["limit"]) * 0.970225),
+                              score=p.get("score"), cond=p.get("cond"),
+                              amt=p.get("amt"), pos=p.get("pos"), atr=p.get("atr"),
+                              open=(round(op) if op else None), gap=gp,
+                              status=(r or {}).get("status", "대기"),
+                              kind=(r or {}).get("kind"),
+                              net=round((r or {}).get("net", 0), 2)))
+        items.sort(key=lambda x: (-(x["score"] or 0)))
+        days_out.append(dict(sig=_sg, n=len(items), items=items))
+
     # 오늘 청산된 종목 (표 음영용)
     _td = int(pd.Timestamp.now().strftime("%Y%m%d"))
     _ct = {}
@@ -428,6 +455,7 @@ def main():
 
     out = dict(updated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
                closed_today=closed_today,
+               days=days_out,
                cooldown=dict(on=bool(cool_on), pct=cool_pct, thr=-3.0),
                curve=curve[-40:],
                sig_date=today, summary=summary,

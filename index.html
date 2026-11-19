@@ -2253,32 +2253,41 @@ async function init(){
   const note=document.getElementById("lowlive-note");
   if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
   const cd=d.cooldown||{}, sm=d.summary||{};
-  const P=(d.today||[]).slice().sort((a,b)=>((b.score==null?-1:b.score)-(a.score==null?-1:a.score)));
-  // 원장 상태 맵
-  const st={};
-  const CLOSED={}; (d.closed_today||[]).forEach(x=>{CLOSED[x.code]=x;});
-  const LBL={"청산완료":"청산","보유중":"보유중","미체결":"미체결"};
-  for(const r of (d.recent||[])) if(LBL[r.status]) st[r.code]=LBL[r.status];
+  const DAYS=(d.days&&d.days.length)?d.days:[{sig:d.sig_date,n:(d.today||[]).length,items:(d.today||[])}];
   if(note){
-    note.innerHTML=`신호일 ${d.sig_date||"-"} · 후보 ${P.length}건 전체 · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
+    note.innerHTML=`신호일 ${d.sig_date||"-"} · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
       + (cd.on?` · <span style="color:var(--amber)">⛔ 급락 쿨다운 — 오늘 신규 진입 없음</span>`:"");
   }
-  if(!P.length){ box.innerHTML='<div class="sub">오늘 조건에 맞는 종목이 없습니다.</div>'; return; }
-  box.innerHTML=`<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th>3차</th><th>시가</th><th>갭</th><th class="mhide">거래대금</th><th class="mhide">위치</th></tr></thead><tbody>`
-    + P.map(t=>{
-        const s3=Math.round((t.stop||t.limit*0.97));
-        const tag=st[t.code];
-        const gp=(t.gap==null?"-":`${t.gap>0?"<span class=\"up\">▲":(t.gap<0?"<span class=\"deep\">▼":"<span class=\"sub\">-")}${t.gap>0?"+":""}${fx(t.gap,2)}%</span>`);
-        const cl=CLOSED[t.code];
-        const closedTag=cl?` <span class="wait" title="오늘 청산 완료: ${(cl.kinds||[]).join("·")}">🔒 청산</span>`:"";
-        return `<tr${cl?' class="closed"':""}><td><b>${t.score==null?"-":fx(t.score)}</b></td>
-          <td class="nm">${t.name}${tag?` <span class="sub">${tag}</span>`:""}${closedTag}</td>
-          <td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>
-          <td>${f(t.open)}</td><td>${gp}</td>
-          <td class="mhide">${fx(t.amt,0)}억</td><td class="mhide">${fx(t.pos,1)}%</td></tr>`;
-      }).join("")
-    + `</tbody></table>`
-    + `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선. 시가는 그날 시가, 갭은 전일 종가 대비 시가입니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다. 다음날 그 가격 이하로 내려오면 체결되고, 진입일 종가가 3차 아래면 그날 청산합니다.</div>`;
+  const dash=n=>`${String(n).slice(4,6)}/${String(n).slice(6)}`;
+  const gpCell=g=>(g==null?"-":`${g>0?'<span class="up">▲':(g<0?'<span class="deep">▼':'<span class="sub">-')}${g>0?"+":""}${fx(g,2)}%</span>`);
+  const stCell=x=>{
+    if(x.status==="청산완료") return `<span class="up">${x.kind||"청산"}</span><div class="sub">${x.net>0?"+":""}${fx(x.net,2)}%</div>`;
+    if(x.status==="보유중") return `<span class="wait">보유중</span><div class="sub">${x.net>0?"+":""}${fx(x.net,2)}%</div>`;
+    if(x.status==="미체결") return `<span class="sub">미체결</span>`;
+    return `<span class="sub">대기</span>`;
+  };
+  box.innerHTML = DAYS.map((g,gi)=>{
+    const items=g.items.slice().sort((a,b)=>((b.score==null?-1:b.score)-(a.score==null?-1:a.score)));
+    const nCl=items.filter(x=>x.status==="청산완료").length;
+    const nHold=items.filter(x=>x.status==="보유중").length;
+    const netAll=items.reduce((a,x)=>a+(x.status==="청산완료"?(x.net||0):0),0);
+    return `<div class="msub" style="margin:${gi?"12px":"2px"} 0 4px">
+        <b>${gi===0?"오늘 ":""}${dash(g.sig)} 신호</b> · ${items.length}건
+        ${nCl?` · 청산 ${nCl}`:""}${nHold?` · 보유 ${nHold}`:""}
+        ${nCl?` · 실현 <span class="${netAll>=0?"up":"deep"}">${netAll>0?"+":""}${fx(netAll,2)}%</span>`:""}</div>`
+      + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th>3차</th><th>시가</th><th>갭</th><th>결과</th></tr></thead><tbody>`
+      + items.map(t=>{
+          const s3=Math.round((t.stop||t.limit*0.97));
+          const cls=(t.status==="청산완료")?" class=\"closed\"":"";
+          return `<tr${cls}><td><b>${t.score==null?"-":fx(t.score)}</b></td>
+            <td class="nm">${t.name}</td>
+            <td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>
+            <td>${f(t.open)}</td><td>${gpCell(t.gap)}</td>
+            <td>${stCell(t)}</td></tr>`;
+        }).join("")
+      + `</tbody></table>`;
+  }).join("");
+    box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선(-3%). 시가는 진입일 시가, 갭은 지정가 대비 시가입니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
