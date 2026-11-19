@@ -499,8 +499,12 @@ def main():
                                 if _l <= _lv[_k]:
                                     _held[_k] = _lv[_k]
                                     _filled += 1
+                            # 갭상승 출발(시가>지정가)이면 고가가 시가일 수 있어
+                            # 종가가 목표를 넘긴 경우만 당일 매도 인정
                             for _k in list(_held):
-                                if _h >= _held[_k] * 1.015:
+                                _tgt = _held[_k] * 1.015
+                                _ok = (_c >= _tgt) if _o > _lim else (_h >= _tgt)
+                                if _ok:
                                     del _held[_k]
                                     _sold += 1
                         _cur = _c

@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-19 16:36",
+ "updated_at": "2026-11-19 16:45",
  "closed_today": [
   {
    "code": "489460",
@@ -117,7 +117,7 @@
      "limit": 7270,
      "stop": 7054,
      "cur": 7040,
-     "under": false,
+     "under": true,
      "hold": 1,
      "score": 92.3,
      "cond": "A",
@@ -126,8 +126,8 @@
      "atr": 7.22,
      "open": null,
      "gap": null,
-     "status": "청산완료",
-     "kind": "전량익절",
+     "status": "보유중",
+     "kind": "손절선 청산",
      "net": 0.0
     },
     {
@@ -221,8 +221,8 @@
      "atr": 4.02,
      "open": null,
      "gap": null,
-     "status": "청산완료",
-     "kind": "전량익절",
+     "status": "보유중",
+     "kind": null,
      "net": 0.0
     },
     {
@@ -240,8 +240,8 @@
      "atr": 4.98,
      "open": null,
      "gap": null,
-     "status": "청산완료",
-     "kind": "전량익절",
+     "status": "보유중",
+     "kind": null,
      "net": 0.0
     },
     {
@@ -354,8 +354,8 @@
      "atr": 4.51,
      "open": null,
      "gap": null,
-     "status": "청산완료",
-     "kind": "전량익절",
+     "status": "보유중",
+     "kind": null,
      "net": 0.0
     },
     {
@@ -373,8 +373,8 @@
      "atr": 5.7,
      "open": null,
      "gap": null,
-     "status": "청산완료",
-     "kind": "전량익절",
+     "status": "보유중",
+     "kind": null,
      "net": 0.0
     },
     {
@@ -411,8 +411,8 @@
      "atr": 7.18,
      "open": null,
      "gap": null,
-     "status": "청산완료",
-     "kind": "전량익절",
+     "status": "보유중",
+     "kind": null,
      "net": 0.0
     },
     {
