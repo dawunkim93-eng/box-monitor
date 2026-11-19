@@ -2271,7 +2271,7 @@ async function init(){
     if(x.status==="청산완료") return `<span class="up">${x.kind||"청산"}</span><div class="sub">${x.net>0?"+":""}${fx(x.net,2)}%</div>`;
     if(x.status==="보유중") return `<span class="wait">보유중</span><div class="sub">${x.net>0?"+":""}${fx(x.net,2)}%</div>`;
     if(x.status==="미체결") return `<span class="sub">미체결</span>`;
-    return `<span class="sub">대기</span>`;
+    return `<span class="sub">매수 예정</span>`;
   };
   box.innerHTML = DAYS.map((g,gi)=>{
     let items=g.items.slice().sort((a,b)=>((b.score==null?-1:b.score)-(a.score==null?-1:a.score)));

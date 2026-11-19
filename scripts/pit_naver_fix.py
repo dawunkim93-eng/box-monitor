@@ -64,9 +64,8 @@ def main():
         add = pd.DataFrame(cols, index=pd.DatetimeIndex(idx))
         df = df[~df.index.isin(add.index)]
         df = pd.concat([df, add]).sort_index()
-        if len(df) != len(before) or not df.tail(1).equals(before.tail(1)):
-            df.to_pickle(p)
-            fixed += 1
+        df.to_pickle(p)
+        fixed += 1
         ok += 1
         if i % 100 == 0:
             print(f"  {i}/{len(codes)} · 갱신 {fixed}", flush=True)
