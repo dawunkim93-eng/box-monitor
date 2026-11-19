@@ -223,18 +223,19 @@ def main():
     master = pd.read_pickle(PIT / "master.pkl")
     names = dict(zip(master["code"].astype(str), master["name"].astype(str)))
 
-    # 시장 최신 '완료' 거래일 (장중이면 오늘 봉 제외)
+    # 시장 최신 '완료' 거래일 — 표본 종목의 최빈 마지막 날짜 (일부만 갱신된 경우 대비)
+    from collections import Counter
     cut_intraday, today_int = _intraday_cut()
-    market_date = None
-    for ref in ("005930", "000660", "035720", "005380"):
-        d0 = load(ref)
-        if d0 is None:
+    _samp = []
+    for _c in codes[:60]:
+        d0 = load(_c)
+        if d0 is None or not len(d0):
             continue
         if cut_intraday and int(d0.index[-1].strftime("%Y%m%d")) == today_int:
             d0 = d0.iloc[:-1]
         if len(d0):
-            v = int(d0.index[-1].strftime("%Y%m%d"))
-            market_date = v if market_date is None else max(market_date, v)
+            _samp.append(int(d0.index[-1].strftime("%Y%m%d")))
+    market_date = Counter(_samp).most_common(1)[0][0] if _samp else None
 
     picks = json.loads(PICKS.read_text(encoding="utf-8")) if PICKS.exists() else []
     seen = {(p["code"], p["sig"]) for p in picks}
@@ -295,7 +296,7 @@ def main():
                          gap=round((f["open"] / max(f["prev_close"], 1e-9) - 1) * 100, 2),
                          score=cond_score(f["amt"], f["pos"], f["atr"])))
 
-    today = max(scanned) if scanned else None
+    today = Counter(scanned).most_common(1)[0][0] if scanned else market_date
     if surged:
         print(f"[INFO] 급등(3일 {SURGE_MAX:.0f}%↑) 제외 {surged}건")
     cool_on, cool_pct = market_cooldown(today)
@@ -399,7 +400,21 @@ def main():
     summary["best"] = round(max([r["net"] for r in done], default=0), 2)
     summary["worst"] = round(min([r["net"] for r in done], default=0), 2)
 
+    # 오늘 청산된 종목 (표 음영용)
+    _td = int(pd.Timestamp.now().strftime("%Y%m%d"))
+    _ct = {}
+    for r in done:
+        if r.get("exit") != _td:
+            continue
+        e = _ct.setdefault(r["code"], dict(code=r["code"], name=r["name"], net=0.0,
+                                           kinds=[], exit=r.get("exit")))
+        e["net"] = round(e["net"] + r["net"], 2)
+        if r.get("kind"):
+            e["kinds"].append(r["kind"])
+    closed_today = list(_ct.values())
+
     out = dict(updated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+               closed_today=closed_today,
                cooldown=dict(on=bool(cool_on), pct=cool_pct, thr=-3.0),
                curve=curve[-40:],
                sig_date=today, summary=summary,

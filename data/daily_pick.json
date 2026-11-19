@@ -1,5 +1,35 @@
 {
- "updated_at": "2026-11-19 14:06",
+ "updated_at": "2026-11-19 15:45",
+ "closed_today": [
+  {
+   "code": "489460",
+   "name": "바이오비쥬",
+   "net": 0.85,
+   "kinds": [
+    "전량익절"
+   ],
+   "exit": 20261119
+  },
+  {
+   "code": "119500",
+   "name": "포메탈",
+   "net": -1.4,
+   "kinds": [
+    "전량익절",
+    "손절선 청산"
+   ],
+   "exit": 20261119
+  },
+  {
+   "code": "010660",
+   "name": "화천기계",
+   "net": 1.48,
+   "kinds": [
+    "전량익절"
+   ],
+   "exit": 20261119
+  }
+ ],
  "cooldown": {
   "on": false,
   "pct": 1.99,
@@ -21,12 +51,12 @@
  ],
  "sig_date": 20261118,
  "summary": {
-  "picks": 68,
+  "picks": 69,
   "entries": 46,
   "filled": 46,
   "done": 38,
   "holding": 8,
-  "fill_rate": 67.6,
+  "fill_rate": 66.7,
   "win": 81.6,
   "avg": 0.722,
   "tot": 27.4,
@@ -461,6 +491,24 @@
  ],
  "recent": [
   {
+   "code": "010660",
+   "name": "화천기계",
+   "sig": 20261119,
+   "limit": 3715,
+   "cond": "A+B",
+   "amt": 11.3,
+   "pos": 94.3,
+   "atr": 5.8,
+   "open": 3650,
+   "gap": -2.01,
+   "score": 100.0,
+   "status": "대기",
+   "net": 0.0,
+   "days": 0,
+   "entry": null,
+   "exit": null
+  },
+  {
    "code": "032350",
    "name": "롯데관광개발",
    "sig": 20261118,
@@ -630,22 +678,6 @@
    "pos": 100.0,
    "atr": 6.0,
    "score": 61.5,
-   "status": "대기",
-   "net": 0.0,
-   "days": 0,
-   "entry": null,
-   "exit": null
-  },
-  {
-   "code": "037270",
-   "name": "YG PLUS",
-   "sig": 20261118,
-   "limit": 3675,
-   "cond": "A",
-   "amt": 33.2,
-   "pos": 97.9,
-   "atr": 6.37,
-   "score": 53.8,
    "status": "대기",
    "net": 0.0,
    "days": 0,

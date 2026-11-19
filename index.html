@@ -108,6 +108,8 @@
         font-size:9.5px;vertical-align:middle;line-height:1.55;cursor:default}
   .bw{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .blw{color:#a78bfa;border:1px solid rgba(167,139,250,.55);background:rgba(167,139,250,.10)}
+  tr.closed{background:rgba(120,120,120,.16);opacity:.72}
+  tr.closed td{color:var(--dim)}
   .bvp{color:var(--green);border:1px solid rgba(16,185,129,.55);font-weight:700}
   .bcand{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .broom{color:var(--amber);border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
@@ -2254,6 +2256,7 @@ async function init(){
   const P=(d.today||[]).slice().sort((a,b)=>((b.score==null?-1:b.score)-(a.score==null?-1:a.score)));
   // 원장 상태 맵
   const st={};
+  const CLOSED={}; (d.closed_today||[]).forEach(x=>{CLOSED[x.code]=x;});
   const LBL={"청산완료":"청산","보유중":"보유중","미체결":"미체결"};
   for(const r of (d.recent||[])) if(LBL[r.status]) st[r.code]=LBL[r.status];
   if(note){
@@ -2266,8 +2269,10 @@ async function init(){
         const s3=Math.round((t.stop||t.limit*0.97));
         const tag=st[t.code];
         const gp=(t.gap==null?"-":`${t.gap>0?"<span class=\"up\">▲":(t.gap<0?"<span class=\"deep\">▼":"<span class=\"sub\">-")}${t.gap>0?"+":""}${fx(t.gap,2)}%</span>`);
-        return `<tr><td><b>${t.score==null?"-":fx(t.score)}</b></td>
-          <td class="nm">${t.name}${tag?` <span class="sub">${tag}</span>`:""}</td>
+        const cl=CLOSED[t.code];
+        const closedTag=cl?` <span class="wait" title="오늘 청산 완료: ${(cl.kinds||[]).join("·")}">🔒 청산</span>`:"";
+        return `<tr${cl?' class="closed"':""}><td><b>${t.score==null?"-":fx(t.score)}</b></td>
+          <td class="nm">${t.name}${tag?` <span class="sub">${tag}</span>`:""}${closedTag}</td>
           <td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>
           <td>${f(t.open)}</td><td>${gp}</td>
           <td class="mhide">${fx(t.amt,0)}억</td><td class="mhide">${fx(t.pos,1)}%</td></tr>`;
