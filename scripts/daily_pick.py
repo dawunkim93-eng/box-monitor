@@ -229,13 +229,11 @@ def evaluate(code, df, sig, limit):
                 if held[k]:
                     net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
             return dict(status="보유중", net=net / SLOT * 100, days=j - i,
-                        entry=int(df.index[i + 1].strftime("%Y%m%d")),
-                        exit=None, kind="보유중")
+                        entry=sig, exit=None, kind="보유중")
     else:
         exit_day = int(df.index[min(i + HOLD, len(df) - 1)].strftime("%Y%m%d"))
     return dict(status="청산완료", net=net / SLOT * 100, days=min(HOLD, len(df) - 1 - i),
-                entry=int(df.index[i + 1].strftime("%Y%m%d")),
-                exit=exit_day, kind=exit_kind)
+                entry=sig, exit=exit_day, kind=exit_kind)
 
 
 def _market_close_min():
@@ -481,59 +479,16 @@ def main():
                         gp = round((op / float(p["limit"]) - 1) * 100, 2)
             _st = round(float(p["limit"]) * 0.970225)
             _cur = _hold = _under = None
-            _dstat = _dkinds = None
-            _today_real = int(pd.Timestamp.now().strftime("%Y%m%d"))
-            _entry = None
+            _entry = _sg                          # 신호일 종가 매수
             if d0 is not None:
                 ds2 = [int(x.strftime("%Y%m%d")) for x in d0.index]
                 if _sg in ds2:
-                    _i2 = ds2.index(_sg)
-                    if _i2 + 1 < len(d0):
-                        _entry = ds2[_i2 + 1]
-                        _hold = (len(d0) - (_i2 + 1)) + 1
-                    elif _today_real > _sg:
-                        _entry = _today_real      # PIT에 오늘 봉이 아직 없음
-                        _hold = 1
-            # 진입일이 지났으면(오늘 포함) 현재가로 손절선 이탈 판정
-            if _entry is not None and _entry <= _today_real:
-                _cur = naver_close(p["code"], _today_real) or (
-                    float(d0["Close"].values[-1]) if d0 is not None and len(d0) else None)
-                _under = bool(_cur and _cur < _st)
-                # 오늘 봉이 PIT에 없으면 장중 고저로 청산 여부까지 확인
-                if _entry == _today_real:
-                    _bar = naver_ohlc(p["code"], _today_real)
-                    if _bar:
-                        _o, _h, _l, _c = _bar
-                        _lim = float(p["limit"])
-                        _lv = [_lim * 0.985 ** k for k in range(3)]
-                        _held = {}
-                        _filled = _sold = 0
-                        if _l <= _lim:
-                            _held[0] = min(_o, _lim)
-                            _filled = 1
-                            for _k in (1, 2):
-                                if _l <= _lv[_k]:
-                                    _held[_k] = _lv[_k]
-                                    _filled += 1
-                            # 갭상승 출발(시가>지정가)이면 고가가 시가일 수 있어
-                            # 종가가 목표를 넘긴 경우만 당일 매도 인정
-                            for _k in list(_held):
-                                _tgt = _held[_k] * 1.015
-                                _ok = (_c >= _tgt) if _o > _lim else (_h >= _tgt)
-                                if _ok:
-                                    del _held[_k]
-                                    _sold += 1
-                        _cur = _c
-                        _under = bool(_held and _c < _lv[2])
-                        # 오늘 상태 판정 (PIT 지연 보완)
-                        if not _filled:
-                            _dstat = "미체결"
-                        elif not _held:
-                            _dstat = "청산완료"
-                        else:
-                            _dstat = "보유중"
-                        _dkinds = ("전량익절" if (not _held and _sold == _filled)
-                                   else ("손절선 청산" if _under else None))
+                    _hold = len(ds2) - 1 - ds2.index(_sg)
+                    _cur = float(d0["Close"].values[-1])
+            if _cur is None:
+                _cur = naver_close(p["code"], int(pd.Timestamp.now().strftime("%Y%m%d")))
+            if _cur:
+                _under = bool(_cur < _st)
             items.append(dict(code=p["code"], name=p["name"], limit=p["limit"],
                               stop=_st, cur=(round(_cur) if _cur else None),
                               under=_under, hold=_hold,
@@ -542,9 +497,9 @@ def main():
                               open=(round(op) if op else None), gap=gp,
                               held=bool(p.get("held")),
                               status=("보유중" if p.get("held") else
-                                      ("매수 예정" if _sg == today and not _dstat else
-                                       (_dstat or (r or {}).get("status", "대기")))),
-                              kind=(_dkinds or (r or {}).get("kind")),
+                                      ("매수 예정" if _hold == 0 else
+                                       (r or {}).get("status", "대기"))),
+                              kind=(r or {}).get("kind"),
                               net=round((r or {}).get("net", 0), 2)))
         items.sort(key=lambda x: (-(x["score"] or 0)))
         _why = ("급락 쿨다운" if _sg in _blocked else
