@@ -89,6 +89,32 @@ def naver_close(code, day=None):
         return None
 
 
+def naver_ohlc(code, day=None):
+    """네이버 일봉에서 (시가, 고가, 저가, 종가) — day 없으면 마지막 봉."""
+    import re
+    import urllib.request
+    try:
+        end = pd.Timestamp.now()
+        st = (end - pd.Timedelta(days=20)).strftime("%Y%m%d")
+        url = ("https://api.finance.naver.com/siseJson.naver?"
+               f"symbol={code}&requestType=1&startTime={st}&endTime={end:%Y%m%d}&timeframe=day")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        raw = urllib.request.urlopen(req, timeout=8).read().decode("utf-8", "ignore")
+        rows = re.findall(r'\["(\d{8})",\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)', raw)
+        if not rows:
+            return None
+        pick = rows[-1]
+        if day is not None:
+            for rr in rows:
+                if int(rr[0]) == int(day):
+                    pick = rr
+                    break
+        _, o, h, l, c = pick
+        return float(o), float(h), float(l), float(c)
+    except Exception:
+        return None
+
+
 def market_cooldown(sig_date, thr=-3.0):
     """신호일 KOSPI 등락 ≤ thr%이면 다음 거래일 신규 진입 중단. (True, pct) 반환."""
     import re
@@ -456,6 +482,24 @@ def main():
                 _cur = naver_close(p["code"], _today_real) or (
                     float(d0["Close"].values[-1]) if d0 is not None and len(d0) else None)
                 _under = bool(_cur and _cur < _st)
+                # 오늘 봉이 PIT에 없으면 장중 고저로 청산 여부까지 확인
+                if _entry == _today_real:
+                    _bar = naver_ohlc(p["code"], _today_real)
+                    if _bar:
+                        _o, _h, _l, _c = _bar
+                        _lim = float(p["limit"])
+                        _lv = [_lim * 0.985 ** k for k in range(3)]
+                        _held = {}
+                        if _l <= _lim:
+                            _held[0] = min(_o, _lim)
+                            for _k in (1, 2):
+                                if _l <= _lv[_k]:
+                                    _held[_k] = _lv[_k]
+                            for _k in list(_held):
+                                if _h >= _held[_k] * 1.015:
+                                    del _held[_k]
+                        _cur = _c
+                        _under = bool(_held and _c < _lv[2])
             items.append(dict(code=p["code"], name=p["name"], limit=p["limit"],
                               stop=_st, cur=(round(_cur) if _cur else None),
                               under=_under, hold=_hold,
