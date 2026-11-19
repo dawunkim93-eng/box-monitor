@@ -2273,7 +2273,7 @@ async function init(){
           <td class="mhide">${fx(t.amt,0)}억</td><td class="mhide">${fx(t.pos,1)}%</td></tr>`;
       }).join("")
     + `</tbody></table>`
-    + `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선. 시가는 그날 시가, 갭은 전일 종가 대비 시가입니다. 다음날 그 가격 이하로 내려오면 체결되고, 진입일 종가가 3차 아래면 그날 청산합니다.</div>`;
+    + `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선. 시가는 그날 시가, 갭은 전일 종가 대비 시가입니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다. 다음날 그 가격 이하로 내려오면 체결되고, 진입일 종가가 3차 아래면 그날 청산합니다.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();

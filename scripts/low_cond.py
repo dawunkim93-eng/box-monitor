@@ -25,6 +25,7 @@ SLOT = sum(AMTS) * 10_000
 HOLD = 3
 MIN_AMT, MAX_AMT = 10.0, 37.51
 PREF_TAIL = "579K"
+SURGE_MAX = 20.0
 K = 20.0
 
 AMT_B = [(10, 15), (15, 25), (25, 37.52)]
@@ -115,6 +116,8 @@ def main():
             a, t = amt20[i], atr[i]
             pos = (c[i] - lo30[i]) / max(hi30[i] - lo30[i], 1e-9) * 100
             if not (MIN_AMT <= a <= MAX_AMT) or pos < 89.47 or np.isnan(t):
+                continue
+            if i >= 3 and (c[i] / c[i - 3] - 1) * 100 > SURGE_MAX:   # 급등 제외
                 continue
             if int(df.index[i + 1].strftime("%Y%m%d")) in blk:
                 continue

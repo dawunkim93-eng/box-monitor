@@ -28,6 +28,7 @@ SLOT = sum(AMTS) * 10_000
 HOLD = 3
 MIN_AMT, MAX_AMT = 10.0, 37.51
 PREF_TAIL = "579K"
+SURGE_MAX = 20.0
 
 
 def blocked_days():
@@ -131,6 +132,8 @@ def main():
             a = amt20[i]
             pos = (c[i] - lo30[i]) / max(hi30[i] - lo30[i], 1e-9) * 100
             if not (MIN_AMT <= a <= MAX_AMT) or pos < 89.47:
+                continue
+            if i >= 3 and (c[i] / c[i - 3] - 1) * 100 > SURGE_MAX:   # 급등 제외
                 continue
             t = trade(df, i)
             if not t or t["status"] == "미체결":

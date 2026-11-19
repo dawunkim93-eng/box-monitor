@@ -35,6 +35,7 @@ HOLD = 3
 MIN_HIST = 60
 MIN_AMT = 10.0      # 실전 최소 유동성(20일 평균 거래대금, 억원)
 PREF_TAIL = "579K"  # 우선주(코드 끝자리) 제외
+SURGE_MAX = 20.0    # 3일 수익률이 이보다 크면 제외 (급등 추격 방지)
 COND = ROOT / "data" / "low_cond.json"
 
 
@@ -142,6 +143,7 @@ def features(df):
     if lo30[i] <= 0 or hi30[i] <= lo30[i]:
         return None
     return dict(close=float(c[i]), open=float(df["Open"].values[i]),
+                ret3=float((c[i] / c[i - 3] - 1) * 100) if i >= 3 else 0.0,
                 prev_close=float(c[i - 1]) if i > 0 else float(c[i]),
                 atr=float(atr[i] * 100), amt=float(amt20[i]),
                 pos=float((c[i] - lo30[i]) / (hi30[i] - lo30[i]) * 100),
@@ -210,18 +212,29 @@ def evaluate(code, df, sig, limit):
                 exit=exit_day, kind=exit_kind)
 
 
+def _intraday_cut():
+    """장 마감(15:40) 전이면 오늘 봉은 미완성 — 신호일에서 제외."""
+    now = pd.Timestamp.now()
+    return now.hour * 60 + now.minute < 15 * 60 + 40, int(now.strftime("%Y%m%d"))
+
+
 def main():
     codes = json.loads(UNIV.read_text(encoding="utf-8"))["codes"]
     master = pd.read_pickle(PIT / "master.pkl")
     names = dict(zip(master["code"].astype(str), master["name"].astype(str)))
 
-    # 시장 최신 거래일 (대형주 기준)
+    # 시장 최신 '완료' 거래일 (장중이면 오늘 봉 제외)
+    cut_intraday, today_int = _intraday_cut()
     market_date = None
     for ref in ("005930", "000660", "035720", "005380"):
         d0 = load(ref)
-        if d0 is not None:
-            d0 = int(d0.index[-1].strftime("%Y%m%d"))
-            market_date = d0 if market_date is None else max(market_date, d0)
+        if d0 is None:
+            continue
+        if cut_intraday and int(d0.index[-1].strftime("%Y%m%d")) == today_int:
+            d0 = d0.iloc[:-1]
+        if len(d0):
+            v = int(d0.index[-1].strftime("%Y%m%d"))
+            market_date = v if market_date is None else max(market_date, v)
 
     picks = json.loads(PICKS.read_text(encoding="utf-8")) if PICKS.exists() else []
     seen = {(p["code"], p["sig"]) for p in picks}
@@ -241,6 +254,7 @@ def main():
         print(f"[INFO] 보유중 제외 {len(open_codes)}종목")
 
     cand = []
+    surged = 0
     for code in codes:
         if code[-1] in PREF_TAIL:      # 우선주 제외
             continue
@@ -249,6 +263,8 @@ def main():
         df = load(code)
         if df is None:
             continue
+        if cut_intraday and int(df.index[-1].strftime("%Y%m%d")) == today_int:
+            df = df.iloc[:-1]                  # 미완성 당일 봉 제외
         f = features(df)
         if not f:
             continue
@@ -261,6 +277,9 @@ def main():
                 f["close"] = real
                 lo, hi = min(f["lo30"], real), max(f["hi30"], real)
                 f["pos"] = (real - lo) / max(hi - lo, 1e-9) * 100
+        if f["ret3"] > SURGE_MAX:          # 급등 추격 제외
+            surged += 1
+            continue
         cond = []
         if f["amt"] >= MIN_AMT and f["amt"] <= 37.51 and f["pos"] >= 89.47:
             cond.append("A")
@@ -277,6 +296,8 @@ def main():
                          score=cond_score(f["amt"], f["pos"], f["atr"])))
 
     today = max(scanned) if scanned else None
+    if surged:
+        print(f"[INFO] 급등(3일 {SURGE_MAX:.0f}%↑) 제외 {surged}건")
     cool_on, cool_pct = market_cooldown(today)
     # 최신 거래일 신호만 등록 (거래정지·데이터 미갱신 종목의 옛 신호 배제)
     for rec in ([] if cool_on else cand):
@@ -288,6 +309,8 @@ def main():
     # 최근 30일 밖 신호는 정리
     cutoff = int((pd.Timestamp.now() - pd.Timedelta(days=30)).strftime("%Y%m%d"))
     picks = [p for p in picks if p["sig"] >= cutoff and p["code"][-1] not in PREF_TAIL]
+    if cut_intraday:   # 장중 실행 시 당일(미완성) 후보 제거
+        picks = [p for p in picks if p["sig"] != today_int]
     if cool_on:      # 쿨다운 날 신호는 원장에서 제외
         picks = [p for p in picks if p["sig"] != today]
     PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
