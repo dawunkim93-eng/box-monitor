@@ -2243,8 +2243,11 @@ const f=n=>(n==null?"-":Math.round(Number(n)).toLocaleString("ko-KR"));
 const fx=(n,d)=>n==null?"-":Number(n).toFixed(d==null?1:d);
 async function init(){
   const box=document.getElementById("lowlive"); if(!box) return;
-  let d=null;
+  let d=null, og=null;
   try{const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) d=await r.json();}catch(e){}
+  try{const r=await fetch("data/low_open.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) og=await r.json();}catch(e){}
+  if(og&&og.items){const m={}; og.items.forEach(x=>{m[x.code]=x;});
+    (d&&d.today||[]).forEach(t=>{ if(m[t.code]){ t.open=m[t.code].open; t.gap=m[t.code].gap; } });}
   const note=document.getElementById("lowlive-note");
   if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
   const cd=d.cooldown||{}, sm=d.summary||{};
