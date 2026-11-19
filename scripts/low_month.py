@@ -104,10 +104,9 @@ print(f"[INFO] 거래 {len(trades):,}건 · 기간 {trades[0]['sig']}~{trades[-1
 calib = sorted({int(x.strftime("%Y%m%d")) for x in cal if x >= start})
 open_cnt = defaultdict(int)
 for t in trades:
+    _end = t["exit"] if t["exit"] > t["sig"] else t["sig"] + 1
     for d in calib:
-        if t["sig"] < d <= t["exit"]:
-            open_cnt[d] += 1
-        elif d == t["sig"]:
+        if t["sig"] <= d < _end:          # 청산일 종가에 자본이 빠지므로 < 로 셈
             open_cnt[d] += 1
 
 month = defaultdict(lambda: dict(n=0, win=0, net=0.0, cap=[], exits=0))

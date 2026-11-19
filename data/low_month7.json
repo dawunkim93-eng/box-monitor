@@ -233,6 +233,7 @@
   "net": 813675,
   "plus": 21,
   "months": 25,
-  "cap_peak": 1470000
+  "skipped": 15494,
+  "signals": 17861
  }
 }
