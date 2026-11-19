@@ -42,11 +42,9 @@ def blocked():
 
 def trade(c, h, l, o, i):
     lim = float(c[i])
-    if float(l[i + 1]) > lim:
-        return None
-    gapup = float(o[i + 1]) > lim      # 시가가 지정가 위 = 체결이 늦음
+    # 종가 매수 — 항상 체결
     lv = [lim * (1 - GAP) ** k for k in range(3)]
-    held = {0: min(float(o[i + 1]), lim)}
+    held = {0: lim}
     net = 0.0
     for dd in range(HOLD):
         j = i + 1 + dd
@@ -56,9 +54,7 @@ def trade(c, h, l, o, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            _tgt = held[k] * (1 + GAP)
-            _hit = (float(c[j]) >= _tgt) if (dd == 0 and gapup) else (float(h[j]) >= _tgt)
-            if _hit:
+            if float(h[j]) >= held[k] * (1 + GAP):
                 net += AMTS[k] * 10_000 * (GAP - FEE)
                 del held[k]
         if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
@@ -122,7 +118,7 @@ def main():
                 continue
             if i >= 3 and (c[i] / c[i - 3] - 1) * 100 > SURGE_MAX:   # 급등 제외
                 continue
-            if int(df.index[i + 1].strftime("%Y%m%d")) in blk:
+            if int(df.index[i].strftime("%Y%m%d")) in blk:      # 신호일 급락 → 그날 종가 매수 금지
                 continue
             cell = cell_of(a, pos, t)
             if cell is None:

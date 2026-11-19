@@ -50,13 +50,10 @@ def trade(df, i):
     if i + 1 >= len(df):
         return None
     lim = float(c[i])
-    if float(l[i + 1]) > lim:
-        return dict(status="미체결", net=0.0)
-    entry_day = int(df.index[i + 1].strftime("%Y%m%d"))
-    gapup = float(o[i + 1]) > lim      # 시가가 지정가 위 = 체결이 늦음
+    entry_day = int(df.index[i].strftime("%Y%m%d"))     # 신호일 종가 매수
     lv = [lim * (1 - GAP) ** k for k in range(3)]
     tg = [x * (1 + GAP) for x in lv]
-    px0 = min(float(o[i + 1]), lim)
+    px0 = lim
     held = {0: px0}
     realised = 0.0
     kind = None
@@ -69,9 +66,7 @@ def trade(df, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            _tgt = held[k] * (1 + GAP)
-            _hit = (float(c[j]) >= _tgt) if (dd == 0 and gapup) else (float(h[j]) >= _tgt)
-            if _hit:
+            if float(h[j]) >= held[k] * (1 + GAP):
                 realised += AMTS[k] * 10_000 * (GAP - FEE)
                 del held[k]
         exit_day = int(df.index[min(j, len(df) - 1)].strftime("%Y%m%d"))
@@ -127,8 +122,8 @@ def main():
                 continue
             if i + 1 >= n:
                 continue
-            ed = int(df.index[i + 1].strftime("%Y%m%d"))
-            if ed in blk:                     # 쿨다운 (체결일 기준)
+            ed = int(df.index[i].strftime("%Y%m%d"))
+            if ed in blk:                     # 쿨다운 (신호일 기준)
                 continue
             if lo30[i] <= 0 or hi30[i] <= lo30[i]:
                 continue
