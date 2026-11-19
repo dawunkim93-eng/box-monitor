@@ -310,7 +310,7 @@ def main():
         if _r and _r.get("status") == "보유중":
             open_codes.add(_p["code"])
     if open_codes:
-        print(f"[INFO] 보유중 제외 {len(open_codes)}종목")
+        print(f"[INFO] 보유중 매수 제외 {len(open_codes)}종목")
 
     cand = []
     surged = 0
