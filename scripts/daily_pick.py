@@ -413,8 +413,16 @@ def main():
     summary["best"] = round(max([r["net"] for r in done], default=0), 2)
     summary["worst"] = round(min([r["net"] for r in done], default=0), 2)
 
-    # 최근 3개 신호일 후보 묶음 (위에서 아래로 최신)
-    _sigs = sorted({p["sig"] for p in picks}, reverse=True)[:3]
+    # 최근 3거래일 (신호가 없던 날도 빈 칸으로 표시)
+    _mk0 = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
+    _cal = [int(d.strftime("%Y%m%d")) for d in _mk0.index
+            if int(d.strftime("%Y%m%d")) <= (today or 0)]
+    _sigs = _cal[-3:][::-1] if _cal else []
+    # 쿨다운 차단일 (사유 표기용)
+    _mk = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
+    _md = [int(d.strftime("%Y%m%d")) for d in _mk.index]
+    _mr = _mk["Close"].pct_change() * 100
+    _blocked = {_md[i] for i in range(1, len(_md)) if _mr.iloc[i] <= -3.0}
     days_out = []
     for _sg in _sigs:
         items = []
@@ -438,7 +446,9 @@ def main():
                               kind=(r or {}).get("kind"),
                               net=round((r or {}).get("net", 0), 2)))
         items.sort(key=lambda x: (-(x["score"] or 0)))
-        days_out.append(dict(sig=_sg, n=len(items), items=items))
+        _why = ("급락 쿨다운" if _sg in _blocked else
+                ("조건 미달" if not items else ""))
+        days_out.append(dict(sig=_sg, n=len(items), items=items, why=_why))
 
     # 오늘 청산된 종목 (표 음영용)
     _td = int(pd.Timestamp.now().strftime("%Y%m%d"))
