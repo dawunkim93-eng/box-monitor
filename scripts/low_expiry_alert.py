@@ -111,6 +111,7 @@ def main():
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-send", action="store_true")
+    ap.add_argument("--force", action="store_true", help="오늘 이미 보냈어도 다시 보냄")
     a = ap.parse_args()
     load_env()
 
@@ -203,12 +204,12 @@ def main():
     if exp:
         lines.append(f"\n⏰ <b>만기 청산</b> — {HOLD}일째, 오늘 종가에 정리 ({len(exp)}건)")
         lines += [line(r) for r in exp]
-    lines.append("\n15:20~15:30에 종가 확인 후 정리하세요.")
+    lines.append("\n장 마감 20분 전까지 종가를 확인하고 정리하세요.")
     msg = "\n".join(lines)
     print(msg)
 
     st = json.loads(STATE.read_text(encoding="utf-8")) if STATE.exists() else {}
-    if st.get("last") == today:
+    if st.get("last") == today and not a.force:
         print("[INFO] 오늘 이미 알림 발송 — 생략")
         return
     if a.no_send:

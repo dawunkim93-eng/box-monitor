@@ -212,10 +212,23 @@ def evaluate(code, df, sig, limit):
                 exit=exit_day, kind=exit_kind)
 
 
-def _intraday_cut():
-    """장 마감(15:40) 전이면 오늘 봉은 미완성 — 신호일에서 제외."""
+def _market_close_min():
+    """당일 장 마감 시각(분). data/market_hours.json 로 특수일 반영."""
     now = pd.Timestamp.now()
-    return now.hour * 60 + now.minute < 15 * 60 + 40, int(now.strftime("%Y%m%d"))
+    key = now.strftime("%Y%m%d")
+    try:
+        cfg = json.loads((ROOT / "data" / "market_hours.json").read_text(encoding="utf-8"))
+        v = cfg.get(key) or {}
+        hh, mm = (v.get("close") or "15:30").split(":")
+        return int(hh) * 60 + int(mm)
+    except Exception:
+        return 15 * 60 + 30
+
+
+def _intraday_cut():
+    """장 마감 +10분 전이면 오늘 봉은 미완성 — 신호일에서 제외."""
+    now = pd.Timestamp.now()
+    return now.hour * 60 + now.minute < _market_close_min() + 10, int(now.strftime("%Y%m%d"))
 
 
 def main():
