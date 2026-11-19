@@ -437,8 +437,19 @@ def main():
                     if i0 + 1 < len(d0):
                         op = float(d0["Open"].values[i0 + 1])
                         gp = round((op / float(p["limit"]) - 1) * 100, 2)
+            _st = round(float(p["limit"]) * 0.970225)
+            _cur = _hold = _under = None
+            if (r or {}).get("status") == "보유중":
+                _cur = naver_close(p["code"], market_date) or (
+                    float(d0["Close"].values[-1]) if d0 is not None and len(d0) else None)
+                _under = bool(_cur and _cur < _st)
+                if d0 is not None:
+                    ds2 = [int(x.strftime("%Y%m%d")) for x in d0.index]
+                    if _sg in ds2:
+                        _hold = (len(d0) - (ds2.index(_sg) + 1)) + 1
             items.append(dict(code=p["code"], name=p["name"], limit=p["limit"],
-                              stop=round(float(p["limit"]) * 0.970225),
+                              stop=_st, cur=(round(_cur) if _cur else None),
+                              under=_under, hold=_hold,
                               score=p.get("score"), cond=p.get("cond"),
                               amt=p.get("amt"), pos=p.get("pos"), atr=p.get("atr"),
                               open=(round(op) if op else None), gap=gp,
