@@ -439,14 +439,23 @@ def main():
                         gp = round((op / float(p["limit"]) - 1) * 100, 2)
             _st = round(float(p["limit"]) * 0.970225)
             _cur = _hold = _under = None
-            if (r or {}).get("status") == "보유중":
-                _cur = naver_close(p["code"], market_date) or (
+            _today_real = int(pd.Timestamp.now().strftime("%Y%m%d"))
+            _entry = None
+            if d0 is not None:
+                ds2 = [int(x.strftime("%Y%m%d")) for x in d0.index]
+                if _sg in ds2:
+                    _i2 = ds2.index(_sg)
+                    if _i2 + 1 < len(d0):
+                        _entry = ds2[_i2 + 1]
+                        _hold = (len(d0) - (_i2 + 1)) + 1
+                    elif _today_real > _sg:
+                        _entry = _today_real      # PIT에 오늘 봉이 아직 없음
+                        _hold = 1
+            # 진입일이 지났으면(오늘 포함) 현재가로 손절선 이탈 판정
+            if _entry is not None and _entry <= _today_real:
+                _cur = naver_close(p["code"], _today_real) or (
                     float(d0["Close"].values[-1]) if d0 is not None and len(d0) else None)
                 _under = bool(_cur and _cur < _st)
-                if d0 is not None:
-                    ds2 = [int(x.strftime("%Y%m%d")) for x in d0.index]
-                    if _sg in ds2:
-                        _hold = (len(d0) - (ds2.index(_sg) + 1)) + 1
             items.append(dict(code=p["code"], name=p["name"], limit=p["limit"],
                               stop=_st, cur=(round(_cur) if _cur else None),
                               under=_under, hold=_hold,
