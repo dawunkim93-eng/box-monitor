@@ -2268,7 +2268,6 @@ async function init(){
   };
   box.innerHTML = DAYS.map((g,gi)=>{
     let items=g.items.slice().sort((a,b)=>((b.score==null?-1:b.score)-(a.score==null?-1:a.score)));
-    // 지난 신호일은 전량 익절 건을 생략
     let hidden=0;
     if(gi>0){ const before=items.length;
       items=items.filter(x=>!(x.status==="청산완료"&&(x.kind||"").includes("전량익절")));
@@ -2276,25 +2275,29 @@ async function init(){
     const nCl=items.filter(x=>x.status==="청산완료").length;
     const nHold=items.filter(x=>x.status==="보유중").length;
     const netAll=items.reduce((a,x)=>a+(x.status==="청산완료"?(x.net||0):0),0);
-    return `<div class="msub" style="margin:${gi?"12px":"2px"} 0 4px">
-        <b>${gi===0?"오늘 ":""}${dash(g.sig)} 신호</b> · ${items.length}건
-        ${nCl?` · 청산 ${nCl}`:""}${nHold?` · 보유 ${nHold}`:""}
-        ${nCl?` · 실현 <span class="${netAll>=0?"up":"deep"}">${netAll>0?"+":""}${fx(netAll,2)}%</span>`:""}
-        ${hidden>0?` <span class="sub">· 전량익절 ${hidden}건 생략</span>`:""}</div>`
-      + (items.length===0
-          ? `<div class="sub" style="margin:0 0 6px">${g.why?`신호 없음 (${g.why})`:"신호 없음"}</div>`
-          : `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th class="mhide">3차</th><th class="mhide">시가</th><th>갭</th><th>결과</th></tr></thead><tbody>`
-      + (items.length===0?"":items.map(t=>{
-          const s3=Math.round((t.stop||t.limit*0.97));
-          const cls=(t.status==="청산완료")?" class=\"closed\"":"";
-          return `<tr${cls}><td><b>${t.score==null?"-":fx(t.score)}</b></td>
-            <td class="nm">${t.name}</td>
-            <td><b>${f(t.limit)}</b></td><td class="deep mhide">${f(s3)}</td>
-            <td class="mhide">${f(t.open)}</td><td>${gpCell(t.gap)}</td>
-            <td>${stCell(t)}</td></tr>`;
-        }).join("") + `</tbody></table>`);
+    const head=`<div class="msub" style="margin:${gi?"12px":"2px"} 0 4px">
+        <b>${gi===0?"오늘 ":""}${dash(g.sig)} 신호</b> · ${items.length}건`
+        + (nCl?` · 청산 ${nCl}`:"") + (nHold?` · 보유 ${nHold}`:"")
+        + (nCl?` · 실현 <span class="${netAll>=0?"up":"deep"}">${netAll>0?"+":""}${fx(netAll,2)}%</span>`:"")
+        + (hidden>0?` <span class="sub">· 전량익절 ${hidden}건 생략</span>`:"")
+        + `</div>`;
+    if(items.length===0){
+      return head + `<div class="sub" style="margin:0 0 6px">${g.why?("신호 없음 ("+g.why+")"):"신호 없음"}</div>`;
+    }
+    const rows=items.map(t=>{
+      const s3=Math.round((t.stop||t.limit*0.97));
+      const cls=(t.status==="청산완료")?' class="closed"':"";
+      return `<tr${cls}><td><b>${t.score==null?"-":fx(t.score)}</b></td>`
+        + `<td class="nm">${t.name}</td>`
+        + `<td><b>${f(t.limit)}</b></td><td class="deep mhide">${f(s3)}</td>`
+        + `<td class="mhide">${f(t.open)}</td><td>${gpCell(t.gap)}</td>`
+        + `<td>${stCell(t)}</td></tr>`;
+    }).join("");
+    return head + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th>`
+      + `<th>지정가</th><th class="mhide">3차</th><th class="mhide">시가</th><th>갭</th><th>결과</th>`
+      + `</tr></thead><tbody>` + rows + `</tbody></table>`;
   }).join("");
-    box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선(-3%). 시가는 진입일 시가, 갭은 지정가 대비 시가입니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
+  box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선(-3%). 시가는 진입일 시가, 갭은 지정가 대비 시가입니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
