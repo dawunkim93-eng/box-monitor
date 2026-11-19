@@ -101,7 +101,7 @@ for code in codes:
 print(f"[INFO] 거래 {len(trades):,}건 · 기간 {trades[0]['sig']}~{trades[-1]['sig']}")
 
 # 일별 동시 보유 수 → 자본
-calib = [int(x.strftime("%Y%m%d")) for x in cal if x >= start]
+calib = sorted({int(x.strftime("%Y%m%d")) for x in cal if x >= start})
 open_cnt = defaultdict(int)
 for t in trades:
     for d in calib:
