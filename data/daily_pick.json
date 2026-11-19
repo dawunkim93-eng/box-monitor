@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-19 18:40",
+ "updated_at": "2026-11-19 18:54",
  "closed_today": [
   {
    "code": "128540",
@@ -271,7 +271,7 @@
  "days": [
   {
    "sig": 20261119,
-   "n": 28,
+   "n": 34,
    "items": [
     {
      "code": "093520",
@@ -288,7 +288,8 @@
      "atr": 6.16,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -307,15 +308,16 @@
      "atr": 5.55,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "340570",
      "name": "티앤엘",
-     "limit": 27200,
-     "stop": 26390,
+     "limit": 27300,
+     "stop": 26487,
      "cur": null,
      "under": null,
      "hold": null,
@@ -326,15 +328,16 @@
      "atr": 5.43,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "140430",
      "name": "카티스",
-     "limit": 2450,
-     "stop": 2377,
+     "limit": 2440,
+     "stop": 2367,
      "cur": null,
      "under": null,
      "hold": null,
@@ -345,7 +348,8 @@
      "atr": 13.03,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -364,7 +368,8 @@
      "atr": 3.93,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -383,15 +388,16 @@
      "atr": 4.02,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "020560",
      "name": "아시아나항공",
-     "limit": 8760,
-     "stop": 8499,
+     "limit": 8770,
+     "stop": 8509,
      "cur": null,
      "under": null,
      "hold": null,
@@ -402,15 +408,16 @@
      "atr": 4.51,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "206650",
      "name": "유바이오로직스",
-     "limit": 8880,
-     "stop": 8616,
+     "limit": 8870,
+     "stop": 8606,
      "cur": null,
      "under": null,
      "hold": null,
@@ -421,15 +428,16 @@
      "atr": 4.8,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "058850",
      "name": "KTcs",
-     "limit": 2330,
-     "stop": 2261,
+     "limit": 2335,
+     "stop": 2265,
      "cur": null,
      "under": null,
      "hold": null,
@@ -440,7 +448,8 @@
      "atr": 3.54,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -459,7 +468,8 @@
      "atr": 7.04,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -478,15 +488,16 @@
      "atr": 5.06,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "365330",
      "name": "에스와이스틸텍",
-     "limit": 1735,
-     "stop": 1683,
+     "limit": 1732,
+     "stop": 1680,
      "cur": null,
      "under": null,
      "hold": null,
@@ -497,7 +508,8 @@
      "atr": 8.38,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -516,15 +528,16 @@
      "atr": 7.63,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "323350",
      "name": "다원넥스뷰",
-     "limit": 15270,
-     "stop": 14815,
+     "limit": 15110,
+     "stop": 14660,
      "cur": null,
      "under": null,
      "hold": null,
@@ -535,15 +548,16 @@
      "atr": 11.01,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "050110",
      "name": "캠시스",
-     "limit": 7150,
-     "stop": 6937,
+     "limit": 7120,
+     "stop": 6908,
      "cur": null,
      "under": null,
      "hold": null,
@@ -554,15 +568,16 @@
      "atr": 9.05,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "094850",
      "name": "참좋은여행",
-     "limit": 4135,
-     "stop": 4012,
+     "limit": 4150,
+     "stop": 4026,
      "cur": null,
      "under": null,
      "hold": null,
@@ -573,15 +588,16 @@
      "atr": 9.08,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "073490",
      "name": "LIG아큐버",
-     "limit": 34100,
-     "stop": 33085,
+     "limit": 34150,
+     "stop": 33133,
      "cur": null,
      "under": null,
      "hold": null,
@@ -592,6 +608,47 @@
      "atr": 7.53,
      "open": null,
      "gap": null,
+     "held": false,
+     "status": "매수 예정",
+     "kind": "보유중",
+     "net": 0.0
+    },
+    {
+     "code": "003570",
+     "name": "SNT다이내믹스",
+     "limit": 29200,
+     "stop": 28331,
+     "cur": null,
+     "under": null,
+     "hold": null,
+     "score": 61.5,
+     "cond": "A",
+     "amt": 25.6,
+     "pos": 89.5,
+     "atr": 6.42,
+     "open": null,
+     "gap": null,
+     "held": false,
+     "status": "매수 예정",
+     "kind": "보유중",
+     "net": 0.0
+    },
+    {
+     "code": "376300",
+     "name": "디어유",
+     "limit": 23100,
+     "stop": 22412,
+     "cur": null,
+     "under": null,
+     "hold": null,
+     "score": 61.5,
+     "cond": "A",
+     "amt": 25.8,
+     "pos": 92.0,
+     "atr": 7.03,
+     "open": null,
+     "gap": null,
+     "held": true,
      "status": "보유중",
      "kind": "보유중",
      "net": 0.0
@@ -611,7 +668,8 @@
      "atr": 3.99,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -630,15 +688,16 @@
      "atr": 4.9,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "039130",
      "name": "하나투어",
-     "limit": 36100,
-     "stop": 35025,
+     "limit": 36050,
+     "stop": 34977,
      "cur": null,
      "under": null,
      "hold": null,
@@ -649,6 +708,27 @@
      "atr": 4.99,
      "open": null,
      "gap": null,
+     "held": false,
+     "status": "매수 예정",
+     "kind": "보유중",
+     "net": 0.0
+    },
+    {
+     "code": "068760",
+     "name": "셀트리온제약",
+     "limit": 41400,
+     "stop": 40167,
+     "cur": null,
+     "under": null,
+     "hold": null,
+     "score": 57.7,
+     "cond": "A+B",
+     "amt": 29.4,
+     "pos": 98.0,
+     "atr": 4.05,
+     "open": null,
+     "gap": null,
+     "held": true,
      "status": "보유중",
      "kind": "보유중",
      "net": 0.0
@@ -656,8 +736,8 @@
     {
      "code": "002900",
      "name": "TYM",
-     "limit": 7380,
-     "stop": 7160,
+     "limit": 7350,
+     "stop": 7131,
      "cur": null,
      "under": null,
      "hold": null,
@@ -668,15 +748,16 @@
      "atr": 4.98,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "086900",
      "name": "메디톡스",
-     "limit": 72600,
-     "stop": 70438,
+     "limit": 72300,
+     "stop": 70147,
      "cur": null,
      "under": null,
      "hold": null,
@@ -687,15 +768,16 @@
      "atr": 4.42,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "079160",
      "name": "CJ CGV",
-     "limit": 5270,
-     "stop": 5113,
+     "limit": 5290,
+     "stop": 5132,
      "cur": null,
      "under": null,
      "hold": null,
@@ -706,15 +788,16 @@
      "atr": 3.79,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "489460",
      "name": "바이오비쥬",
-     "limit": 16470,
-     "stop": 15980,
+     "limit": 16460,
+     "stop": 15970,
      "cur": null,
      "under": null,
      "hold": null,
@@ -725,15 +808,16 @@
      "atr": 4.93,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "298050",
      "name": "HS효성첨단소재",
-     "limit": 162000,
-     "stop": 157176,
+     "limit": 160700,
+     "stop": 155915,
      "cur": null,
      "under": null,
      "hold": null,
@@ -744,7 +828,8 @@
      "atr": 4.83,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -763,7 +848,8 @@
      "atr": 4.07,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
@@ -782,15 +868,16 @@
      "atr": 4.47,
      "open": null,
      "gap": null,
-     "status": "보유중",
+     "held": false,
+     "status": "매수 예정",
      "kind": "보유중",
      "net": 0.0
     },
     {
      "code": "000120",
      "name": "CJ대한통운",
-     "limit": 70900,
-     "stop": 68789,
+     "limit": 70700,
+     "stop": 68595,
      "cur": null,
      "under": null,
      "hold": null,
@@ -801,6 +888,67 @@
      "atr": 2.9,
      "open": null,
      "gap": null,
+     "held": false,
+     "status": "매수 예정",
+     "kind": "보유중",
+     "net": 0.0
+    },
+    {
+     "code": "069510",
+     "name": "에스텍",
+     "limit": 23850,
+     "stop": 23140,
+     "cur": null,
+     "under": null,
+     "hold": null,
+     "score": 15.4,
+     "cond": "A+B",
+     "amt": 31.4,
+     "pos": 100.0,
+     "atr": 3.44,
+     "open": null,
+     "gap": null,
+     "held": true,
+     "status": "보유중",
+     "kind": "보유중",
+     "net": 0.0
+    },
+    {
+     "code": "279570",
+     "name": "케이뱅크",
+     "limit": 5450,
+     "stop": 5288,
+     "cur": null,
+     "under": null,
+     "hold": null,
+     "score": 7.7,
+     "cond": "A+B",
+     "amt": 24.6,
+     "pos": 97.4,
+     "atr": 3.01,
+     "open": null,
+     "gap": null,
+     "held": true,
+     "status": "보유중",
+     "kind": "보유중",
+     "net": 0.0
+    },
+    {
+     "code": "104700",
+     "name": "한국철강",
+     "limit": 12940,
+     "stop": 12555,
+     "cur": null,
+     "under": null,
+     "hold": null,
+     "score": 7.7,
+     "cond": "A+B",
+     "amt": 21.0,
+     "pos": 100.0,
+     "atr": 2.13,
+     "open": null,
+     "gap": null,
+     "held": true,
      "status": "보유중",
      "kind": "보유중",
      "net": 0.0
@@ -817,7 +965,7 @@
      "name": "유바이오로직스",
      "limit": 8560,
      "stop": 8305,
-     "cur": 8880,
+     "cur": 8870,
      "under": false,
      "hold": 2,
      "score": 100.0,
@@ -827,6 +975,7 @@
      "atr": 5.04,
      "open": 8510,
      "gap": -0.58,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -836,7 +985,7 @@
      "name": "화천기계",
      "limit": 3725,
      "stop": 3614,
-     "cur": 3605,
+     "cur": 3610,
      "under": false,
      "hold": 2,
      "score": 96.2,
@@ -846,6 +995,7 @@
      "atr": 5.79,
      "open": 3650,
      "gap": -2.01,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -855,7 +1005,7 @@
      "name": "포메탈",
      "limit": 3655,
      "stop": 3546,
-     "cur": 3275,
+     "cur": 3310,
      "under": true,
      "hold": 2,
      "score": 92.3,
@@ -865,6 +1015,7 @@
      "atr": 8.33,
      "open": 3615,
      "gap": -1.09,
+     "held": false,
      "status": "보유중",
      "kind": "손절선 청산",
      "net": -4.84
@@ -874,7 +1025,7 @@
      "name": "태양금속",
      "limit": 3225,
      "stop": 3129,
-     "cur": 3070,
+     "cur": 3075,
      "under": true,
      "hold": 2,
      "score": 92.3,
@@ -884,6 +1035,7 @@
      "atr": 6.31,
      "open": 3190,
      "gap": -1.09,
+     "held": false,
      "status": "보유중",
      "kind": "손절선 청산",
      "net": -1.7
@@ -893,7 +1045,7 @@
      "name": "아이텍",
      "limit": 7270,
      "stop": 7054,
-     "cur": 7010,
+     "cur": 7020,
      "under": true,
      "hold": 2,
      "score": 92.3,
@@ -903,6 +1055,7 @@
      "atr": 7.22,
      "open": 7400,
      "gap": 1.79,
+     "held": false,
      "status": "보유중",
      "kind": "손절선 청산",
      "net": 1.48
@@ -922,6 +1075,7 @@
      "atr": 5.72,
      "open": 110100,
      "gap": 0.46,
+     "held": false,
      "status": "보유중",
      "kind": "전량익절",
      "net": 0.42
@@ -931,7 +1085,7 @@
      "name": "TYM",
      "limit": 7250,
      "stop": 7034,
-     "cur": 7380,
+     "cur": 7350,
      "under": false,
      "hold": 2,
      "score": 80.8,
@@ -941,6 +1095,7 @@
      "atr": 5.13,
      "open": 7240,
      "gap": -0.14,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -960,6 +1115,7 @@
      "atr": 7.28,
      "open": 19990,
      "gap": 0.71,
+     "held": false,
      "status": "보유중",
      "kind": "전량익절",
      "net": 0.85
@@ -979,6 +1135,7 @@
      "atr": 5.18,
      "open": 1901,
      "gap": 1.71,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -998,6 +1155,7 @@
      "atr": 4.02,
      "open": 27600,
      "gap": 0.18,
+     "held": false,
      "status": "보유중",
      "kind": "전량익절",
      "net": 0.85
@@ -1017,6 +1175,7 @@
      "atr": 4.98,
      "open": 139300,
      "gap": 0.07,
+     "held": false,
      "status": "보유중",
      "kind": "전량익절",
      "net": 0.85
@@ -1026,7 +1185,7 @@
      "name": "디어유",
      "limit": 23600,
      "stop": 22897,
-     "cur": 23150,
+     "cur": 23100,
      "under": false,
      "hold": 2,
      "score": 61.5,
@@ -1036,6 +1195,7 @@
      "atr": 6.66,
      "open": 23000,
      "gap": -2.54,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.51
@@ -1045,7 +1205,7 @@
      "name": "다원넥스뷰",
      "limit": 14160,
      "stop": 13738,
-     "cur": 15270,
+     "cur": 15110,
      "under": false,
      "hold": 2,
      "score": 61.5,
@@ -1055,6 +1215,7 @@
      "atr": 11.43,
      "open": 14440,
      "gap": 1.98,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1074,6 +1235,7 @@
      "atr": 6.0,
      "open": 30750,
      "gap": 5.85,
+     "held": false,
      "status": "미체결",
      "kind": "전량익절",
      "net": 0.42
@@ -1083,7 +1245,7 @@
      "name": "LIG아큐버",
      "limit": 32950,
      "stop": 31969,
-     "cur": 34100,
+     "cur": 34150,
      "under": false,
      "hold": 2,
      "score": 61.5,
@@ -1093,6 +1255,7 @@
      "atr": 8.01,
      "open": 32950,
      "gap": 0.0,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -1102,7 +1265,7 @@
      "name": "바이오비쥬",
      "limit": 15710,
      "stop": 15242,
-     "cur": 16470,
+     "cur": 16460,
      "under": false,
      "hold": 2,
      "score": 61.5,
@@ -1112,6 +1275,7 @@
      "atr": 5.13,
      "open": 15880,
      "gap": 1.08,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1121,7 +1285,7 @@
      "name": "하나투어",
      "limit": 35450,
      "stop": 34394,
-     "cur": 36100,
+     "cur": 36050,
      "under": false,
      "hold": 2,
      "score": 57.7,
@@ -1131,6 +1295,7 @@
      "atr": 4.51,
      "open": 37100,
      "gap": 4.65,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -1140,7 +1305,7 @@
      "name": "롯데관광개발",
      "limit": 11140,
      "stop": 10808,
-     "cur": 10910,
+     "cur": 10950,
      "under": false,
      "hold": 2,
      "score": 53.8,
@@ -1150,6 +1315,7 @@
      "atr": 5.7,
      "open": 11510,
      "gap": 3.32,
+     "held": false,
      "status": "보유중",
      "kind": "전량익절",
      "net": 0.85
@@ -1159,7 +1325,7 @@
      "name": "CJ ENM",
      "limit": 47000,
      "stop": 45601,
-     "cur": 52400,
+     "cur": 52800,
      "under": false,
      "hold": 2,
      "score": 53.8,
@@ -1169,6 +1335,7 @@
      "atr": 7.01,
      "open": 47000,
      "gap": 0.0,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1178,7 +1345,7 @@
      "name": "모두투어",
      "limit": 10720,
      "stop": 10401,
-     "cur": 10350,
+     "cur": 10370,
      "under": true,
      "hold": 2,
      "score": 53.8,
@@ -1188,6 +1355,7 @@
      "atr": 7.18,
      "open": 11360,
      "gap": 5.97,
+     "held": false,
      "status": "보유중",
      "kind": "손절선 청산",
      "net": 1.48
@@ -1197,7 +1365,7 @@
      "name": "YG PLUS",
      "limit": 3675,
      "stop": 3566,
-     "cur": 3410,
+     "cur": 3425,
      "under": false,
      "hold": 2,
      "score": 53.8,
@@ -1207,6 +1375,7 @@
      "atr": 6.37,
      "open": 3660,
      "gap": -0.41,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1226,6 +1395,7 @@
      "atr": 4.08,
      "open": 6060,
      "gap": -0.33,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1245,6 +1415,7 @@
      "atr": 4.19,
      "open": 41300,
      "gap": 1.23,
+     "held": false,
      "status": "보유중",
      "kind": "전량익절",
      "net": 0.42
@@ -1261,7 +1432,7 @@
      "name": "아이텍",
      "limit": 6700,
      "stop": 6501,
-     "cur": 7010,
+     "cur": 7020,
      "under": false,
      "hold": 3,
      "score": 92.3,
@@ -1271,6 +1442,7 @@
      "atr": 7.39,
      "open": 6900,
      "gap": 2.99,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1290,6 +1462,7 @@
      "atr": 5.75,
      "open": 103900,
      "gap": -1.61,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1299,7 +1472,7 @@
      "name": "TYM",
      "limit": 7100,
      "stop": 6889,
-     "cur": 7380,
+     "cur": 7350,
      "under": false,
      "hold": 3,
      "score": 80.8,
@@ -1309,6 +1482,7 @@
      "atr": 5.26,
      "open": 7130,
      "gap": 0.42,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1328,6 +1502,7 @@
      "atr": 4.98,
      "open": 133300,
      "gap": -1.19,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -1337,7 +1512,7 @@
      "name": "디어유",
      "limit": 18970,
      "stop": 18405,
-     "cur": 23150,
+     "cur": 23100,
      "under": false,
      "hold": 3,
      "score": 61.5,
@@ -1347,6 +1522,7 @@
      "atr": 6.68,
      "open": 18760,
      "gap": -1.11,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1356,7 +1532,7 @@
      "name": "다원넥스뷰",
      "limit": 11900,
      "stop": 11546,
-     "cur": 15270,
+     "cur": 15110,
      "under": false,
      "hold": 3,
      "score": 61.5,
@@ -1366,6 +1542,7 @@
      "atr": 12.45,
      "open": 12220,
      "gap": 2.69,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -1385,6 +1562,7 @@
      "atr": 6.04,
      "open": 22200,
      "gap": -0.67,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1394,7 +1572,7 @@
      "name": "YG PLUS",
      "limit": 2945,
      "stop": 2857,
-     "cur": 3410,
+     "cur": 3425,
      "under": false,
      "hold": 3,
      "score": 61.5,
@@ -1404,6 +1582,7 @@
      "atr": 6.35,
      "open": 2990,
      "gap": 1.53,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1413,7 +1592,7 @@
      "name": "KTcs",
      "limit": 2290,
      "stop": 2222,
-     "cur": 2330,
+     "cur": 2335,
      "under": false,
      "hold": 3,
      "score": 42.3,
@@ -1423,6 +1602,7 @@
      "atr": 3.75,
      "open": 2290,
      "gap": 0.0,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -1442,6 +1622,7 @@
      "atr": 14.17,
      "open": 1201,
      "gap": -4.83,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1451,7 +1632,7 @@
      "name": "진양폴리",
      "limit": 4425,
      "stop": 4293,
-     "cur": 4140,
+     "cur": 4090,
      "under": true,
      "hold": 3,
      "score": null,
@@ -1461,6 +1642,7 @@
      "atr": 7.78,
      "open": 4450,
      "gap": 0.56,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1470,7 +1652,7 @@
      "name": "셀트리온제약",
      "limit": 41100,
      "stop": 39876,
-     "cur": 41500,
+     "cur": 41400,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1480,6 +1662,7 @@
      "atr": 4.28,
      "open": 40650,
      "gap": -1.09,
+     "held": false,
      "status": "보유중",
      "kind": "보유중",
      "net": 1.09
@@ -1489,7 +1672,7 @@
      "name": "모두투어",
      "limit": 9870,
      "stop": 9576,
-     "cur": 10350,
+     "cur": 10370,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1499,6 +1682,7 @@
      "atr": 6.24,
      "open": 9900,
      "gap": 0.3,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1518,6 +1702,7 @@
      "atr": 5.06,
      "open": 1874,
      "gap": -0.27,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1527,7 +1712,7 @@
      "name": "에스텍",
      "limit": 23850,
      "stop": 23140,
-     "cur": 23900,
+     "cur": 23850,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1537,6 +1722,7 @@
      "atr": 3.75,
      "open": 23800,
      "gap": -0.21,
+     "held": false,
      "status": "보유중",
      "kind": "보유중",
      "net": 0.06
@@ -1546,7 +1732,7 @@
      "name": "케이뱅크",
      "limit": 5450,
      "stop": 5288,
-     "cur": 5420,
+     "cur": 5450,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1556,6 +1742,7 @@
      "atr": 2.66,
      "open": 5400,
      "gap": -0.92,
+     "held": false,
      "status": "보유중",
      "kind": "보유중",
      "net": 0.9
@@ -1575,6 +1762,7 @@
      "atr": 2.45,
      "open": 12930,
      "gap": -0.08,
+     "held": false,
      "status": "보유중",
      "kind": "보유중",
      "net": -0.0
@@ -1584,7 +1772,7 @@
      "name": "바이오비쥬",
      "limit": 14960,
      "stop": 14515,
-     "cur": 16470,
+     "cur": 16460,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1594,6 +1782,7 @@
      "atr": 5.08,
      "open": 15000,
      "gap": 0.27,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -1603,7 +1792,7 @@
      "name": "포메탈",
      "limit": 3530,
      "stop": 3425,
-     "cur": 3275,
+     "cur": 3310,
      "under": true,
      "hold": 3,
      "score": null,
@@ -1613,6 +1802,7 @@
      "atr": 8.09,
      "open": 3615,
      "gap": 2.41,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1622,7 +1812,7 @@
      "name": "아시아나항공",
      "limit": 8540,
      "stop": 8286,
-     "cur": 8760,
+     "cur": 8770,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1632,6 +1822,7 @@
      "atr": 4.59,
      "open": 8540,
      "gap": 0.0,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1641,7 +1832,7 @@
      "name": "하나투어",
      "limit": 30500,
      "stop": 29592,
-     "cur": 36100,
+     "cur": 36050,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1651,6 +1842,7 @@
      "atr": 3.83,
      "open": 31000,
      "gap": 1.64,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1670,6 +1862,7 @@
      "atr": 6.67,
      "open": 29450,
      "gap": 0.86,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.42
@@ -1689,6 +1882,7 @@
      "atr": 4.03,
      "open": 5840,
      "gap": -3.31,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 1.48
@@ -1698,7 +1892,7 @@
      "name": "유바이오로직스",
      "limit": 8700,
      "stop": 8441,
-     "cur": 8880,
+     "cur": 8870,
      "under": false,
      "hold": 3,
      "score": null,
@@ -1708,6 +1902,7 @@
      "atr": 5.07,
      "open": 8740,
      "gap": 0.46,
+     "held": false,
      "status": "청산완료",
      "kind": "전량익절",
      "net": 0.85
@@ -1737,11 +1932,11 @@
  ],
  "sig_date": 20261119,
  "summary": {
-  "picks": 96,
-  "entries": 96,
-  "filled": 96,
+  "picks": 102,
+  "entries": 102,
+  "filled": 102,
   "done": 63,
-  "holding": 33,
+  "holding": 39,
   "fill_rate": 100.0,
   "win": 88.9,
   "avg": 0.678,
@@ -1763,7 +1958,7 @@
   {
    "code": "365330",
    "name": "에스와이스틸텍",
-   "limit": 1735,
+   "limit": 1732,
    "cond": "A",
    "amt": 36.8,
    "pos": 100.0,
@@ -1772,16 +1967,16 @@
    "open": 1411,
    "gap": -1.05,
    "rungs": [
-    1735,
-    1709,
-    1683
+    1732,
+    1706,
+    1680
    ],
-   "stop": 1683
+   "stop": 1680
   },
   {
    "code": "039130",
    "name": "하나투어",
-   "limit": 36100,
+   "limit": 36050,
    "cond": "A+B",
    "amt": 34.4,
    "pos": 99.4,
@@ -1790,11 +1985,11 @@
    "open": 37100,
    "gap": 4.65,
    "rungs": [
-    36100,
-    35558,
-    35025
+    36050,
+    35509,
+    34977
    ],
-   "stop": 35025
+   "stop": 34977
   },
   {
    "code": "032500",
@@ -1815,9 +2010,27 @@
    "stop": 19502
   },
   {
+   "code": "069510",
+   "name": "에스텍",
+   "limit": 23850,
+   "cond": "A+B",
+   "amt": 31.4,
+   "pos": 100.0,
+   "atr": 3.44,
+   "score": 15.4,
+   "open": 23900,
+   "gap": 0.0,
+   "rungs": [
+    23850,
+    23492,
+    23140
+   ],
+   "stop": 23140
+  },
+  {
    "code": "000120",
    "name": "CJ대한통운",
-   "limit": 70900,
+   "limit": 70700,
    "cond": "A+B",
    "amt": 29.8,
    "pos": 100.0,
@@ -1826,11 +2039,29 @@
    "open": 70300,
    "gap": 0.57,
    "rungs": [
-    70900,
-    69836,
-    68789
+    70700,
+    69640,
+    68595
    ],
-   "stop": 68789
+   "stop": 68595
+  },
+  {
+   "code": "068760",
+   "name": "셀트리온제약",
+   "limit": 41400,
+   "cond": "A+B",
+   "amt": 29.4,
+   "pos": 98.0,
+   "atr": 4.05,
+   "score": 57.7,
+   "open": 40250,
+   "gap": -0.98,
+   "rungs": [
+    41400,
+    40779,
+    40167
+   ],
+   "stop": 40167
   },
   {
    "code": "280360",
@@ -1887,9 +2118,63 @@
    "stop": 27069
   },
   {
+   "code": "376300",
+   "name": "디어유",
+   "limit": 23100,
+   "cond": "A",
+   "amt": 25.8,
+   "pos": 92.0,
+   "atr": 7.03,
+   "score": 61.5,
+   "open": 23000,
+   "gap": -2.54,
+   "rungs": [
+    23100,
+    22754,
+    22412
+   ],
+   "stop": 22412
+  },
+  {
+   "code": "003570",
+   "name": "SNT다이내믹스",
+   "limit": 29200,
+   "cond": "A",
+   "amt": 25.6,
+   "pos": 89.5,
+   "atr": 6.42,
+   "score": 61.5,
+   "open": 28800,
+   "gap": -1.2,
+   "rungs": [
+    29200,
+    28762,
+    28331
+   ],
+   "stop": 28331
+  },
+  {
+   "code": "279570",
+   "name": "케이뱅크",
+   "limit": 5450,
+   "cond": "A+B",
+   "amt": 24.6,
+   "pos": 97.4,
+   "atr": 3.01,
+   "score": 7.7,
+   "open": 5380,
+   "gap": -0.37,
+   "rungs": [
+    5450,
+    5368,
+    5288
+   ],
+   "stop": 5288
+  },
+  {
    "code": "002900",
    "name": "TYM",
-   "limit": 7380,
+   "limit": 7350,
    "cond": "A+B",
    "amt": 24.5,
    "pos": 98.4,
@@ -1898,16 +2183,16 @@
    "open": 7240,
    "gap": -0.14,
    "rungs": [
-    7380,
-    7269,
-    7160
+    7350,
+    7240,
+    7131
    ],
-   "stop": 7160
+   "stop": 7131
   },
   {
    "code": "094850",
    "name": "참좋은여행",
-   "limit": 4135,
+   "limit": 4150,
    "cond": "A",
    "amt": 22.9,
    "pos": 100.0,
@@ -1916,11 +2201,11 @@
    "open": 4395,
    "gap": 8.52,
    "rungs": [
-    4135,
-    4073,
-    4012
+    4150,
+    4088,
+    4026
    ],
-   "stop": 4012
+   "stop": 4026
   },
   {
    "code": "067920",
@@ -1941,9 +2226,27 @@
    "stop": 6559
   },
   {
+   "code": "104700",
+   "name": "한국철강",
+   "limit": 12940,
+   "cond": "A+B",
+   "amt": 21.0,
+   "pos": 100.0,
+   "atr": 2.13,
+   "score": 7.7,
+   "open": 12930,
+   "gap": 0.0,
+   "rungs": [
+    12940,
+    12746,
+    12555
+   ],
+   "stop": 12555
+  },
+  {
    "code": "073490",
    "name": "LIG아큐버",
-   "limit": 34100,
+   "limit": 34150,
    "cond": "A",
    "amt": 19.0,
    "pos": 100.0,
@@ -1952,16 +2255,16 @@
    "open": 32950,
    "gap": 0.0,
    "rungs": [
-    34100,
-    33588,
-    33085
+    34150,
+    33638,
+    33133
    ],
-   "stop": 33085
+   "stop": 33133
   },
   {
    "code": "079160",
    "name": "CJ CGV",
-   "limit": 5270,
+   "limit": 5290,
    "cond": "A+B",
    "amt": 18.4,
    "pos": 100.0,
@@ -1970,16 +2273,16 @@
    "open": 5160,
    "gap": 0.98,
    "rungs": [
-    5270,
-    5191,
-    5113
+    5290,
+    5211,
+    5132
    ],
-   "stop": 5113
+   "stop": 5132
   },
   {
    "code": "489460",
    "name": "바이오비쥬",
-   "limit": 16470,
+   "limit": 16460,
    "cond": "A+B",
    "amt": 18.3,
    "pos": 100.0,
@@ -1988,16 +2291,16 @@
    "open": 15880,
    "gap": 1.08,
    "rungs": [
-    16470,
-    16223,
-    15980
+    16460,
+    16213,
+    15970
    ],
-   "stop": 15980
+   "stop": 15970
   },
   {
    "code": "050110",
    "name": "캠시스",
-   "limit": 7150,
+   "limit": 7120,
    "cond": "A",
    "amt": 18.0,
    "pos": 100.0,
@@ -2006,16 +2309,16 @@
    "open": 6410,
    "gap": 0.0,
    "rungs": [
-    7150,
-    7043,
-    6937
+    7120,
+    7013,
+    6908
    ],
-   "stop": 6937
+   "stop": 6908
   },
   {
    "code": "323350",
    "name": "다원넥스뷰",
-   "limit": 15270,
+   "limit": 15110,
    "cond": "A",
    "amt": 17.8,
    "pos": 97.2,
@@ -2024,16 +2327,16 @@
    "open": 14440,
    "gap": 1.98,
    "rungs": [
-    15270,
-    15041,
-    14815
+    15110,
+    14883,
+    14660
    ],
-   "stop": 14815
+   "stop": 14660
   },
   {
    "code": "086900",
    "name": "메디톡스",
-   "limit": 72600,
+   "limit": 72300,
    "cond": "A+B",
    "amt": 16.6,
    "pos": 100.0,
@@ -2042,16 +2345,16 @@
    "open": 70000,
    "gap": 0.29,
    "rungs": [
-    72600,
-    71511,
-    70438
+    72300,
+    71216,
+    70147
    ],
-   "stop": 70438
+   "stop": 70147
   },
   {
    "code": "298050",
    "name": "HS효성첨단소재",
-   "limit": 162000,
+   "limit": 160700,
    "cond": "A+B",
    "amt": 15.4,
    "pos": 95.2,
@@ -2060,16 +2363,16 @@
    "open": 155600,
    "gap": -0.06,
    "rungs": [
-    162000,
-    159570,
-    157176
+    160700,
+    158290,
+    155915
    ],
-   "stop": 157176
+   "stop": 155915
   },
   {
    "code": "058850",
    "name": "KTcs",
-   "limit": 2330,
+   "limit": 2335,
    "cond": "A+B",
    "amt": 15.0,
    "pos": 100.0,
@@ -2078,16 +2381,16 @@
    "open": 2300,
    "gap": 0.22,
    "rungs": [
-    2330,
-    2295,
-    2261
+    2335,
+    2300,
+    2265
    ],
-   "stop": 2261
+   "stop": 2265
   },
   {
    "code": "340570",
    "name": "티앤엘",
-   "limit": 27200,
+   "limit": 27300,
    "cond": "A+B",
    "amt": 14.2,
    "pos": 91.4,
@@ -2096,16 +2399,16 @@
    "open": 27450,
    "gap": -1.26,
    "rungs": [
-    27200,
-    26792,
-    26390
+    27300,
+    26890,
+    26487
    ],
-   "stop": 26390
+   "stop": 26487
   },
   {
    "code": "020560",
    "name": "아시아나항공",
-   "limit": 8760,
+   "limit": 8770,
    "cond": "A+B",
    "amt": 13.7,
    "pos": 99.0,
@@ -2114,11 +2417,11 @@
    "open": 8660,
    "gap": 2.73,
    "rungs": [
-    8760,
-    8629,
-    8499
+    8770,
+    8638,
+    8509
    ],
-   "stop": 8499
+   "stop": 8509
   },
   {
    "code": "215200",
@@ -2177,7 +2480,7 @@
   {
    "code": "140430",
    "name": "카티스",
-   "limit": 2450,
+   "limit": 2440,
    "cond": "A",
    "amt": 11.4,
    "pos": 91.9,
@@ -2186,11 +2489,11 @@
    "open": 2375,
    "gap": 0.64,
    "rungs": [
-    2450,
-    2413,
-    2377
+    2440,
+    2403,
+    2367
    ],
-   "stop": 2377
+   "stop": 2367
   },
   {
    "code": "145720",
@@ -2213,7 +2516,7 @@
   {
    "code": "206650",
    "name": "유바이오로직스",
-   "limit": 8880,
+   "limit": 8870,
    "cond": "A+B",
    "amt": 10.5,
    "pos": 100.0,
@@ -2222,11 +2525,11 @@
    "open": 8510,
    "gap": -0.58,
    "rungs": [
-    8880,
-    8747,
-    8616
+    8870,
+    8737,
+    8606
    ],
-   "stop": 8616
+   "stop": 8606
   },
   {
    "code": "002350",
@@ -2270,7 +2573,7 @@
    "code": "000120",
    "name": "CJ대한통운",
    "sig": 20261119,
-   "limit": 70900,
+   "limit": 70700,
    "cond": "A+B",
    "amt": 29.8,
    "pos": 100.0,
@@ -2365,7 +2668,7 @@
    "code": "365330",
    "name": "에스와이스틸텍",
    "sig": 20261119,
-   "limit": 1735,
+   "limit": 1732,
    "cond": "A",
    "amt": 36.8,
    "pos": 100.0,
@@ -2384,7 +2687,7 @@
    "code": "002900",
    "name": "TYM",
    "sig": 20261119,
-   "limit": 7380,
+   "limit": 7350,
    "cond": "A+B",
    "amt": 24.5,
    "pos": 98.4,
@@ -2422,7 +2725,7 @@
    "code": "323350",
    "name": "다원넥스뷰",
    "sig": 20261119,
-   "limit": 15270,
+   "limit": 15110,
    "cond": "A",
    "amt": 17.8,
    "pos": 97.2,
@@ -2441,7 +2744,7 @@
    "code": "050110",
    "name": "캠시스",
    "sig": 20261119,
-   "limit": 7150,
+   "limit": 7120,
    "cond": "A",
    "amt": 18.0,
    "pos": 100.0,
@@ -2460,7 +2763,7 @@
    "code": "086900",
    "name": "메디톡스",
    "sig": 20261119,
-   "limit": 72600,
+   "limit": 72300,
    "cond": "A+B",
    "amt": 16.6,
    "pos": 100.0,
@@ -2479,7 +2782,7 @@
    "code": "094850",
    "name": "참좋은여행",
    "sig": 20261119,
-   "limit": 4135,
+   "limit": 4150,
    "cond": "A",
    "amt": 22.9,
    "pos": 100.0,

@@ -317,8 +317,7 @@ def main():
     for code in codes:
         if code[-1] in PREF_TAIL:      # 우선주 제외
             continue
-        if code in open_codes:         # 보유중 종목 제외
-            continue
+        _held = code in open_codes     # 보유중이면 표시만 하고 매수 안 함
         df = load(code)
         if df is None:
             continue
@@ -347,7 +346,7 @@ def main():
         if "A" not in cond or (code, sig) in seen:   # 모의는 A(밴드 상단)만 추적
             continue
         cand.append(dict(code=code, name=names.get(code, code), sig=sig,
-                         limit=round(f["close"]), cond="+".join(cond),
+                         limit=round(f["close"]), cond="+".join(cond), held=_held,
                          amt=round(f["amt"], 1), pos=round(f["pos"], 1),
                          atr=round(f["atr"], 2),
                          open=round(f["open"]),
@@ -461,7 +460,15 @@ def main():
     days_out = []
     for _sg in _sigs:
         items = []
-        for p in [x for x in picks if x["sig"] == _sg]:
+        _extra = []
+        if _sg == today:
+            _extra = [dict(code=c["code"], name=c["name"], sig=c["sig"], limit=c["limit"],
+                           cond=c.get("cond"), amt=c.get("amt"), pos=c.get("pos"),
+                           atr=c.get("atr"), score=c.get("score"), held=True)
+                      for c in cand if c["sig"] == _sg and c.get("held")]
+        _seen_codes = {x["code"] for x in picks if x["sig"] == _sg}
+        _extra = [c for c in _extra if c["code"] not in _seen_codes]
+        for p in [x for x in picks if x["sig"] == _sg] + _extra:
             r = next((x for x in rows if x["code"] == p["code"] and x["sig"] == _sg), None)
             d0 = load(p["code"])
             op = gp = None
@@ -533,7 +540,10 @@ def main():
                               score=p.get("score"), cond=p.get("cond"),
                               amt=p.get("amt"), pos=p.get("pos"), atr=p.get("atr"),
                               open=(round(op) if op else None), gap=gp,
-                              status=(_dstat or (r or {}).get("status", "대기")),
+                              held=bool(p.get("held")),
+                              status=("보유중" if p.get("held") else
+                                      ("매수 예정" if _sg == today and not _dstat else
+                                       (_dstat or (r or {}).get("status", "대기")))),
                               kind=(_dkinds or (r or {}).get("kind")),
                               net=round((r or {}).get("net", 0), 2)))
         items.sort(key=lambda x: (-(x["score"] or 0)))
