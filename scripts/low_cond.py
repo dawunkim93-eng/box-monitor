@@ -44,6 +44,7 @@ def trade(c, h, l, o, i):
     lim = float(c[i])
     if float(l[i + 1]) > lim:
         return None
+    gapup = float(o[i + 1]) > lim      # 시가가 지정가 위 = 체결이 늦음
     lv = [lim * (1 - GAP) ** k for k in range(3)]
     held = {0: min(float(o[i + 1]), lim)}
     net = 0.0
@@ -55,7 +56,9 @@ def trade(c, h, l, o, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            if float(h[j]) >= held[k] * (1 + GAP):
+            _tgt = held[k] * (1 + GAP)
+            _hit = (float(c[j]) >= _tgt) if (dd == 0 and gapup) else (float(h[j]) >= _tgt)
+            if _hit:
                 net += AMTS[k] * 10_000 * (GAP - FEE)
                 del held[k]
         if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산

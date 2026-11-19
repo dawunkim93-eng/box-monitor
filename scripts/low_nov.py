@@ -53,6 +53,7 @@ def trade(df, i):
     if float(l[i + 1]) > lim:
         return dict(status="미체결", net=0.0)
     entry_day = int(df.index[i + 1].strftime("%Y%m%d"))
+    gapup = float(o[i + 1]) > lim      # 시가가 지정가 위 = 체결이 늦음
     lv = [lim * (1 - GAP) ** k for k in range(3)]
     tg = [x * (1 + GAP) for x in lv]
     px0 = min(float(o[i + 1]), lim)
@@ -68,7 +69,9 @@ def trade(df, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            if float(h[j]) >= held[k] * (1 + GAP):
+            _tgt = held[k] * (1 + GAP)
+            _hit = (float(c[j]) >= _tgt) if (dd == 0 and gapup) else (float(h[j]) >= _tgt)
+            if _hit:
                 realised += AMTS[k] * 10_000 * (GAP - FEE)
                 del held[k]
         exit_day = int(df.index[min(j, len(df) - 1)].strftime("%Y%m%d"))
