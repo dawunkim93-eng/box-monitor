@@ -1,0 +1,151 @@
+"""저변동 전략 2년 월별 성과 (종가 매수 기준)
+
+월별: 건수, 승률, 건당 수익률, 합계(원), 평균 투입자본, 자본 대비 수익률
+"""
+import json
+from collections import defaultdict
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+ROOT = Path("/home/lucky/box-monitor")
+PIT = Path("/home/lucky/backtest/data/pit")
+UNIV = ROOT / "data" / "daily_universe.json"
+GAP, FEE = 0.015, 0.00015
+AMTS = [6, 6, 9]
+SLOT = sum(AMTS) * 10_000          # 21만원
+HOLD = 3
+MIN_AMT, MAX_AMT = 10.0, 37.51
+POS_MIN = 89.47
+SURGE = 20.0
+PREF_TAIL = "579K"
+MONTHS = 24
+
+
+def cooldown_days():
+    m = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
+    dn = [int(d.strftime("%Y%m%d")) for d in m.index]
+    ret = m["Close"].pct_change() * 100
+    return {dn[i] for i in range(1, len(dn)) if ret.iloc[i] <= -3.0}, m.index
+
+
+def trade(c, h, l, i):
+    """반환: (순익 원, 청산 인덱스)"""
+    lim = c[i]
+    lv = [lim * (1 - GAP) ** k for k in range(3)]
+    held = {0: lim}
+    net = 0.0
+    for dd in range(HOLD):
+        j = i + 1 + dd
+        if j >= len(c):
+            break
+        for k in (1, 2):
+            if k not in held and l[j] <= lv[k]:
+                held[k] = lv[k]
+        for k in list(held):
+            if h[j] >= held[k] * (1 + GAP):
+                net += AMTS[k] * 10_000 * (GAP - FEE)
+                del held[k]
+        if held and c[j] < lv[2]:
+            for k in list(held):
+                net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE)
+                del held[k]
+            return net, j
+    if held:
+        j = min(i + HOLD, len(c) - 1)
+        for k in list(held):
+            net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE)
+        return net, j
+    return net, i + HOLD
+
+
+codes = json.loads(UNIV.read_text(encoding="utf-8"))["codes"]
+blk, cal = cooldown_days()
+start = pd.Timestamp.now().normalize() - pd.DateOffset(months=MONTHS)
+trades = []
+
+for code in codes:
+    if code[-1] in PREF_TAIL:
+        continue
+    try:
+        df = pd.read_pickle(PIT / f"{code}.pkl")
+    except Exception:
+        continue
+    df = df[~df.index.duplicated(keep="last")].sort_index()
+    df = df[df["Volume"] > 0]
+    if len(df) < 320:
+        continue
+    c = df["Close"].values.astype(float); h = df["High"].values.astype(float)
+    l = df["Low"].values.astype(float); v = df["Volume"].values.astype(float)
+    n = len(df)
+    cs = pd.Series(c)
+    lo30 = cs.rolling(30).min().values; hi30 = cs.rolling(30).max().values
+    amt20 = pd.Series(c * v).rolling(20).mean().values / 1e8
+    for i in range(270, n - 1):
+        if df.index[i] < start or lo30[i] <= 0 or hi30[i] <= lo30[i]:
+            continue
+        a = amt20[i]
+        pos = (c[i] - lo30[i]) / max(hi30[i] - lo30[i], 1e-9) * 100
+        if not (MIN_AMT <= a <= MAX_AMT) or pos < POS_MIN:
+            continue
+        if (c[i] / c[i - 3] - 1) * 100 > SURGE:
+            continue
+        d0 = int(df.index[i].strftime("%Y%m%d"))
+        if d0 in blk:
+            continue
+        net, jx = trade(c, h, l, i)
+        trades.append(dict(sig=d0, exit=int(df.index[min(jx, n - 1)].strftime("%Y%m%d")),
+                           net=net, pct=net / SLOT * 100))
+
+print(f"[INFO] 거래 {len(trades):,}건 · 기간 {trades[0]['sig']}~{trades[-1]['sig']}")
+
+# 일별 동시 보유 수 → 자본
+calib = [int(x.strftime("%Y%m%d")) for x in cal if x >= start]
+open_cnt = defaultdict(int)
+for t in trades:
+    for d in calib:
+        if t["sig"] < d <= t["exit"]:
+            open_cnt[d] += 1
+        elif d == t["sig"]:
+            open_cnt[d] += 1
+
+month = defaultdict(lambda: dict(n=0, win=0, net=0.0, cap=[], exits=0))
+for d in calib:
+    m = d // 100
+    month[m]["cap"].append(open_cnt[d] * SLOT)
+for t in trades:
+    m = t["sig"] // 100
+    month[m]["n"] += 1
+    month[m]["win"] += 1 if t["net"] > 0 else 0
+    month[m]["net"] += t["net"]
+    month[t["exit"] // 100]["exits"] += 1
+
+rows = []
+for m in sorted(month):
+    x = month[m]
+    if x["n"] == 0:
+        continue
+    cap = float(np.mean(x["cap"])) if x["cap"] else 0.0
+    rows.append(dict(month=f"{m//100}-{m%100:02d}",
+                     n=x["n"], win=round(x["win"] / x["n"] * 100, 1),
+                     avg=round(x["net"] / x["n"] / SLOT * 100, 3),
+                     net=round(x["net"]),
+                     cap=round(cap),
+                     ret=round(x["net"] / cap * 100, 2) if cap else 0.0))
+
+tot_net = sum(r["net"] for r in rows)
+peak = max(r["cap"] for r in rows)
+out = dict(months=rows, total=dict(n=sum(r["n"] for r in rows), net=round(tot_net),
+                                   cap_peak=peak,
+                                   months=len(rows),
+                                   plus=sum(1 for r in rows if r["net"] > 0)),
+           window=dict(start=str(start.date()), slot=SLOT, hold=HOLD))
+(ROOT / "data" / "low_month.json").write_text(json.dumps(out, ensure_ascii=False, indent=1),
+                                              encoding="utf-8")
+
+print(f"\n{'월':<9}{'건수':>6}{'승률':>7}{'건당':>8}{'합계(원)':>12}{'평균자본':>12}{'수익률':>8}")
+for r in rows:
+    print(f"{r['month']:<9}{r['n']:>6,}{r['win']:>6.1f}%{r['avg']:>+8.3f}{r['net']:>+12,}{r['cap']:>12,}{r['ret']:>+7.2f}%")
+print(f"\n[INFO] {len(rows)}개월 · 합계 {tot_net:+,.0f}원 · 플러스 "
+      f"{out['total']['plus']}/{len(rows)}개월 · 최대 자본 {peak:,}원")

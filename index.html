@@ -556,6 +556,10 @@
     <div class="pcard" id="dp-head"><div class="pmuted">모의매매 데이터 불러오는 중…</div></div>
     <div id="dp-body"></div>
 
+    <h2 class="sec">📅 저변동 월별 성과 (최근 2년)</h2>
+    <div class="pcard" id="lm-head"><div class="pmuted">월별 데이터 불러오는 중…</div></div>
+    <div id="lm-body"></div>
+
     <h2 class="sec">🎚️ 저변동 조건 점수</h2>
     <div class="pcard" id="lc-head"><div class="pmuted">조건 점수 불러오는 중…</div></div>
     <div id="lc-body"></div>
@@ -2477,6 +2481,8 @@ async function init(){
     + `</tbody></table>` : "";
   const ls=live&&live.summary;
   const liveNote = ls? `<div class="msub" style="margin-top:12px"><b>실시간 모의 기록</b>(11/13 시작) — 진입 ${ls.entries||0}건 · 완료 ${ls.done||0} · 보유 ${ls.holding||0} · 승률 ${fx(ls.win)}% · 누적 ${fx(ls.tot,2)}%</div>` : "";
+  loadMonth();
+
   document.getElementById("dp-body").innerHTML=
     (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt + liveNote
     + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산. 최대 3일 보유.</div>`;
@@ -2894,4 +2900,25 @@ window.revInit=init;
 })();
 </script>
 </body>
-</html>
+</htmlasync function loadMonth(){
+  const head=document.getElementById("lm-head"), body=document.getElementById("lm-body");
+  if(!head||!body) return;
+  let d;
+  try{ d=await (await fetch("data/low_month.json?t="+Date.now())).json(); }
+  catch(e){ head.innerHTML='<div class="pmuted">월별 데이터를 불러오지 못했습니다.</div>'; return; }
+  const t=d.total, rows=d.months||[];
+  const kr=n=>n.toLocaleString();
+  head.innerHTML=`<div class="prow"><span>${t.months}개월 · ${kr(t.n)}건 · 플러스 ${t.plus}/${t.months}개월</span>
+      <b>${t.net>=0?"+":""}${kr(t.net)}원</b></div>
+    <div class="pmuted">21만원 슬롯 기준. 평균자본은 그 달 동시 보유분의 평균 투입금액입니다. 최대 ${kr(t.cap_peak)}원</div>`;
+  body.innerHTML=`<div class="tw"><table class="pt">
+    <thead><tr><th>월</th><th>건수</th><th>승률</th><th>건당</th><th>합계</th><th>평균자본</th><th>수익률</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${r.month.slice(2)}</td><td>${kr(r.n)}</td><td>${r.win.toFixed(1)}%</td>
+      <td class="${r.avg>0?'up':'dn'}">${r.avg>0?"+":""}${r.avg.toFixed(3)}%</td>
+      <td class="${r.net>0?'up':'dn'}">${r.net>0?"+":""}${kr(r.net)}</td>
+      <td class="sub">${kr(r.cap)}</td>
+      <td class="${r.ret>0?'up':'dn'}">${r.ret>0?"+":""}${r.ret.toFixed(2)}%</td></tr>`).join("")}</tbody>
+  </table></div>`;
+}
+
+>
