@@ -255,6 +255,25 @@ def _intraday_cut():
     return now.hour * 60 + now.minute < _market_close_min() + 10, int(now.strftime("%Y%m%d"))
 
 
+def fix_limits(picks, market_date):
+    """모든 후보의 매수가를 신호일 확정 종가로 재확인."""
+    fixed = 0
+    for p in picks:
+        d = load(p["code"])
+        if d is None:
+            continue
+        days = [int(x.strftime("%Y%m%d")) for x in d.index]
+        if p["sig"] not in days:
+            continue
+        real = float(d["Close"].values[days.index(p["sig"])])
+        if p["sig"] == market_date:
+            real = naver_close(p["code"], p["sig"]) or real
+        if abs(real - float(p["limit"])) > 0.5:
+            p["limit"] = round(real)
+            fixed += 1
+    return fixed
+
+
 def main():
     codes = json.loads(UNIV.read_text(encoding="utf-8"))["codes"]
     master = pd.read_pickle(PIT / "master.pkl")
@@ -353,24 +372,10 @@ def main():
         picks = [p for p in picks if p["sig"] != today]
     PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    # 모든 후보의 지정가를 신호일 종가로 재확인 (PIT 확정값 기준)
-    fixed = 0
-    for p in picks:
-        d = load(p["code"])
-        if d is None:
-            continue
-        days = [int(x.strftime("%Y%m%d")) for x in d.index]
-        if p["sig"] not in days:
-            continue
-        real = float(d["Close"].values[days.index(p["sig"])])
-        if p["sig"] == market_date:            # 당일이면 네이버 실시간 종가 우선
-            real = naver_close(p["code"], p["sig"]) or real
-        if abs(real - float(p["limit"])) > 0.5:
-            p["limit"] = round(real)
-            fixed += 1
+    fixed = fix_limits(picks, market_date)
     if fixed:
-        print(f"[INFO] 지정가 보정 {fixed}건 (네이버 확정 종가)")
         PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"[INFO] 지정가 보정 {fixed}건 (신호일 확정 종가)")
 
     rows = []
     for p in picks:
