@@ -2254,6 +2254,13 @@ async function init(){
   if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
   const cd=d.cooldown||{}, sm=d.summary||{};
   const DAYS=(d.days&&d.days.length)?d.days:[{sig:d.sig_date,n:(d.today||[]).length,items:(d.today||[])}];
+  // 진입일 시가·갭 보강 (09:05 수집분)
+  if(og&&og.items){
+    const m={}; og.items.forEach(x=>{m[x.code]=x;});
+    DAYS.forEach(g=>{ (g.items||[]).forEach(t=>{
+      if(m[t.code]&&(t.gap==null||t.open==null)){ t.open=m[t.code].open; t.gap=m[t.code].gap; }
+    });});
+  }
   if(note){
     note.innerHTML=`신호일 ${d.sig_date||"-"} · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
       + (cd.on?` · <span style="color:var(--amber)">⛔ 급락 쿨다운 — 오늘 신규 진입 없음</span>`:"");
