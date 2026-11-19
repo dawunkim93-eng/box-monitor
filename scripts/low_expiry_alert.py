@@ -72,6 +72,22 @@ def load(code):
     return df if len(df) > 30 else None
 
 
+def prev_close(code):
+    """전일 종가 (당일 등락률 표시용)"""
+    import re
+    try:
+        end = pd.Timestamp.now()
+        st = (end - pd.Timedelta("10D")).strftime("%Y%m%d")
+        url = ("https://api.finance.naver.com/siseJson.naver?"
+               f"symbol={code}&requestType=1&startTime={st}&endTime={end:%Y%m%d}&timeframe=day")
+        raw = urllib.request.urlopen(urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0"}), timeout=8).read().decode("utf-8", "ignore")
+        rows = re.findall(r'\["(\d{8})",\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)', raw)
+        return float(rows[-2][4]) if len(rows) >= 2 else None
+    except Exception:
+        return None
+
+
 def main():
     import argparse
     ap = argparse.ArgumentParser()
@@ -85,7 +101,7 @@ def main():
     picks = json.loads(PICKS.read_text(encoding="utf-8"))
     today = datetime.now().strftime("%Y%m%d")
 
-    exp, cut = [], []
+    rows = []
     for p in picks:
         df = load(p["code"])
         if df is None:
@@ -118,32 +134,50 @@ def main():
         cur = now_price(p["code"])
         if cur is None:
             continue
+        for k in (1, 2):                     # 오늘 현재가로 추가 체결 추정
+            if k not in held and cur <= lv[k]:
+                held[k] = lv[k]
+        if not held:
+            continue
+        pc = prev_close(p["code"])
         base = sum(AMTS[k] * 10_000 for k in held)
         pnl = sum(AMTS[k] * 10_000 * (cur / held[k] - 1) for k in held)
         row = dict(name=p["name"], code=p["code"], limit=lim, cur=cur,
                    stop=round(lv[2]), left=len(held), pnl=round(pnl),
                    pct=round(pnl / base * 100, 2) if base else 0,
-                   hold=hold_days, sig=p["sig"])
-        if hold_days == HOLD:
-            exp.append(row)
-        elif cur < lv[2]:
-            cut.append(row)
+                   hold=hold_days, sig=p["sig"],
+                   chg=round((cur / pc - 1) * 100, 2) if pc else None,
+                   depth=round((cur / lv[2] - 1) * 100, 2),
+                   under=cur < lv[2], exp=(hold_days >= HOLD))
+        if row["under"] or row["exp"]:
+            rows.append(row)
 
-    if not exp and not cut:
-        print(f"[INFO] {today} 청산 임박 없음")
+    if not rows:
+        today_s = today
+        print(f"[INFO] {today_s} 청산 임박 없음")
         return
 
+    rows.sort(key=lambda r: (r["depth"], -r["pnl"]))
+    cut = [r for r in rows if r["under"] and not r["exp"]]
+    both = [r for r in rows if r["under"] and r["exp"]]
+    exp = [r for r in rows if r["exp"] and not r["under"]]
+
+    def line(r):
+        chg = f"{r['chg']:+.1f}%" if r["chg"] is not None else "-"
+        return (f"· <b>{r['name']}</b> 현재 {r['cur']:,.0f} ({chg}) · "
+                f"3차 {r['stop']:,} 대비 {r['depth']:+.1f}% · 남은 {r['left']}차 · "
+                f"{r['pct']:+.1f}%")
+
     lines = [f"⏰ <b>저변동 청산 임박</b> ({datetime.now():%m/%d %H:%M})"]
-    if exp:
-        lines.append(f"\n<b>만기 청산</b> — {HOLD}일째, 오늘 종가에 정리 ({len(exp)}건)")
-        for r in exp:
-            lines.append(f"· <b>{r['name']}</b> 3차 {r['stop']:,} · 현재 {r['cur']:,.0f} "
-                         f"({r['pct']:+.1f}%) · 남은 {r['left']}차")
     if cut:
-        lines.append(f"\n<b>손절선 아래</b> — 종가가 3차 밑이면 청산 ({len(cut)}건)")
-        for r in cut:
-            lines.append(f"· <b>{r['name']}</b> 3차 {r['stop']:,} · 현재 {r['cur']:,.0f} "
-                         f"({r['pct']:+.1f}%) · 남은 {r['left']}차")
+        lines.append(f"\n⛔ <b>손절선 아래</b> — 종가도 3차 밑이면 오늘 청산 ({len(cut)}건)")
+        lines += [line(r) for r in cut]
+    if both:
+        lines.append(f"\n⛔⏰ <b>손절선 아래 + 만기</b> — 오늘 반드시 정리 ({len(both)}건)")
+        lines += [line(r) for r in both]
+    if exp:
+        lines.append(f"\n⏰ <b>만기 청산</b> — {HOLD}일째, 오늘 종가에 정리 ({len(exp)}건)")
+        lines += [line(r) for r in exp]
     lines.append("\n15:20~15:30에 종가 확인 후 정리하세요.")
     msg = "\n".join(lines)
     print(msg)
