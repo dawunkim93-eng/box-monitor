@@ -2275,14 +2275,14 @@ async function init(){
         <b>${gi===0?"오늘 ":""}${dash(g.sig)} 신호</b> · ${items.length}건
         ${nCl?` · 청산 ${nCl}`:""}${nHold?` · 보유 ${nHold}`:""}
         ${nCl?` · 실현 <span class="${netAll>=0?"up":"deep"}">${netAll>0?"+":""}${fx(netAll,2)}%</span>`:""}</div>`
-      + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th>3차</th><th>시가</th><th>갭</th><th>결과</th></tr></thead><tbody>`
+      + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th class="mhide">3차</th><th class="mhide">시가</th><th>갭</th><th>결과</th></tr></thead><tbody>`
       + items.map(t=>{
           const s3=Math.round((t.stop||t.limit*0.97));
           const cls=(t.status==="청산완료")?" class=\"closed\"":"";
           return `<tr${cls}><td><b>${t.score==null?"-":fx(t.score)}</b></td>
             <td class="nm">${t.name}</td>
-            <td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>
-            <td>${f(t.open)}</td><td>${gpCell(t.gap)}</td>
+            <td><b>${f(t.limit)}</b></td><td class="deep mhide">${f(s3)}</td>
+            <td class="mhide">${f(t.open)}</td><td>${gpCell(t.gap)}</td>
             <td>${stCell(t)}</td></tr>`;
         }).join("")
       + `</tbody></table>`;
