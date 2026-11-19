@@ -441,7 +441,11 @@ def main():
     _mk0 = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
     _cal = [int(d.strftime("%Y%m%d")) for d in _mk0.index
             if int(d.strftime("%Y%m%d")) <= (today or 0)]
-    _sigs = _cal[-3:][::-1] if _cal else []
+    _base_sigs = list(_cal[-3:][::-1]) if _cal else []
+    # 아직 보유중인 포지션이 있으면 그 신호일도 포함 (오래돼도 표시)
+    _open_sigs = sorted({r["sig"] for r in rows if r.get("status") == "보유중"},
+                        reverse=True)
+    _sigs = sorted(set(_base_sigs) | set(_open_sigs), reverse=True)[:6]
     # 쿨다운 차단일 (사유 표기용)
     _mk = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
     _md = [int(d.strftime("%Y%m%d")) for d in _mk.index]
