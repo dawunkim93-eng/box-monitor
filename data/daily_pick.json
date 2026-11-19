@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-19 16:33",
+ "updated_at": "2026-11-19 16:36",
  "closed_today": [
   {
    "code": "489460",
@@ -50,8 +50,8 @@
      "atr": 5.04,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -88,7 +88,7 @@
      "atr": 8.33,
      "open": 3615,
      "gap": -1.09,
-     "status": "청산완료",
+     "status": "보유중",
      "kind": "손절선 청산",
      "net": -2.88
     },
@@ -107,8 +107,8 @@
      "atr": 6.31,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "보유중",
+     "kind": "손절선 청산",
      "net": 0.0
     },
     {
@@ -126,8 +126,8 @@
      "atr": 7.22,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -145,8 +145,8 @@
      "atr": 5.72,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -164,8 +164,8 @@
      "atr": 5.13,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -183,8 +183,8 @@
      "atr": 7.28,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -202,8 +202,8 @@
      "atr": 5.18,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -221,8 +221,8 @@
      "atr": 4.02,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -240,8 +240,8 @@
      "atr": 4.98,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -259,8 +259,8 @@
      "atr": 6.66,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -278,8 +278,8 @@
      "atr": 11.43,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -297,8 +297,8 @@
      "atr": 6.0,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "미체결",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -316,8 +316,8 @@
      "atr": 8.01,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -335,8 +335,8 @@
      "atr": 5.13,
      "open": 15880,
      "gap": 1.08,
-     "status": "보유중",
-     "kind": "보유중",
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.23
     },
     {
@@ -354,8 +354,8 @@
      "atr": 4.51,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -373,8 +373,8 @@
      "atr": 5.7,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -392,8 +392,8 @@
      "atr": 7.01,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -411,8 +411,8 @@
      "atr": 7.18,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -430,8 +430,8 @@
      "atr": 6.37,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -449,8 +449,8 @@
      "atr": 4.08,
      "open": null,
      "gap": null,
-     "status": "대기",
-     "kind": null,
+     "status": "청산완료",
+     "kind": "전량익절",
      "net": 0.0
     },
     {
@@ -458,7 +458,7 @@
      "name": "메가스터디교육",
      "limit": 40800,
      "stop": 39585,
-     "cur": 41050,
+     "cur": 41300,
      "under": false,
      "hold": 1,
      "score": 42.3,
@@ -468,7 +468,7 @@
      "atr": 4.19,
      "open": null,
      "gap": null,
-     "status": "대기",
+     "status": "보유중",
      "kind": null,
      "net": 0.0
     }

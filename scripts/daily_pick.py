@@ -465,6 +465,7 @@ def main():
                         gp = round((op / float(p["limit"]) - 1) * 100, 2)
             _st = round(float(p["limit"]) * 0.970225)
             _cur = _hold = _under = None
+            _dstat = _dkinds = None
             _today_real = int(pd.Timestamp.now().strftime("%Y%m%d"))
             _entry = None
             if d0 is not None:
@@ -490,24 +491,37 @@ def main():
                         _lim = float(p["limit"])
                         _lv = [_lim * 0.985 ** k for k in range(3)]
                         _held = {}
+                        _filled = _sold = 0
                         if _l <= _lim:
                             _held[0] = min(_o, _lim)
+                            _filled = 1
                             for _k in (1, 2):
                                 if _l <= _lv[_k]:
                                     _held[_k] = _lv[_k]
+                                    _filled += 1
                             for _k in list(_held):
                                 if _h >= _held[_k] * 1.015:
                                     del _held[_k]
+                                    _sold += 1
                         _cur = _c
                         _under = bool(_held and _c < _lv[2])
+                        # 오늘 상태 판정 (PIT 지연 보완)
+                        if not _filled:
+                            _dstat = "미체결"
+                        elif not _held:
+                            _dstat = "청산완료"
+                        else:
+                            _dstat = "보유중"
+                        _dkinds = ("전량익절" if (not _held and _sold == _filled)
+                                   else ("손절선 청산" if _under else None))
             items.append(dict(code=p["code"], name=p["name"], limit=p["limit"],
                               stop=_st, cur=(round(_cur) if _cur else None),
                               under=_under, hold=_hold,
                               score=p.get("score"), cond=p.get("cond"),
                               amt=p.get("amt"), pos=p.get("pos"), atr=p.get("atr"),
                               open=(round(op) if op else None), gap=gp,
-                              status=(r or {}).get("status", "대기"),
-                              kind=(r or {}).get("kind"),
+                              status=(_dstat or (r or {}).get("status", "대기")),
+                              kind=(_dkinds or (r or {}).get("kind")),
                               net=round((r or {}).get("net", 0), 2)))
         items.sort(key=lambda x: (-(x["score"] or 0)))
         _why = ("급락 쿨다운" if _sg in _blocked else
