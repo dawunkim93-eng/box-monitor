@@ -2258,17 +2258,19 @@ async function init(){
       + (cd.on?` · <span style="color:var(--amber)">⛔ 급락 쿨다운 — 오늘 신규 진입 없음</span>`:"");
   }
   if(!P.length){ box.innerHTML='<div class="sub">오늘 조건에 맞는 종목이 없습니다.</div>'; return; }
-  box.innerHTML=`<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th>3차</th><th class="mhide">거래대금</th><th class="mhide">위치</th>${cd.on?"":""}</tr></thead><tbody>`
+  box.innerHTML=`<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th><th>지정가</th><th>3차</th><th>시가</th><th>갭</th><th class="mhide">거래대금</th><th class="mhide">위치</th></tr></thead><tbody>`
     + P.map(t=>{
         const s3=Math.round((t.stop||t.limit*0.97));
         const tag=st[t.code];
+        const gp=(t.gap==null?"-":`${t.gap>0?"<span class=\"up\">▲":(t.gap<0?"<span class=\"deep\">▼":"<span class=\"sub\">-")}${t.gap>0?"+":""}${fx(t.gap,2)}%</span>`);
         return `<tr><td><b>${t.score==null?"-":fx(t.score)}</b></td>
           <td class="nm">${t.name}${tag?` <span class="sub">${tag}</span>`:""}</td>
           <td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>
+          <td>${f(t.open)}</td><td>${gp}</td>
           <td class="mhide">${fx(t.amt,0)}억</td><td class="mhide">${fx(t.pos,1)}%</td></tr>`;
       }).join("")
     + `</tbody></table>`
-    + `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선. 다음날 그 가격 이하로 내려오면 체결되고, 진입일 종가가 3차 아래면 그날 청산합니다.</div>`;
+    + `<div class="sub" style="font-size:11px">점수 높은 순입니다. 지정가는 신호일 종가, 3차는 -3% 손절선. 시가는 그날 시가, 갭은 전일 종가 대비 시가입니다. 다음날 그 가격 이하로 내려오면 체결되고, 진입일 종가가 3차 아래면 그날 청산합니다.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();

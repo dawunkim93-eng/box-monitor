@@ -141,7 +141,9 @@ def features(df):
     i = n - 1
     if lo30[i] <= 0 or hi30[i] <= lo30[i]:
         return None
-    return dict(close=float(c[i]), atr=float(atr[i] * 100), amt=float(amt20[i]),
+    return dict(close=float(c[i]), open=float(df["Open"].values[i]),
+                prev_close=float(c[i - 1]) if i > 0 else float(c[i]),
+                atr=float(atr[i] * 100), amt=float(amt20[i]),
                 pos=float((c[i] - lo30[i]) / (hi30[i] - lo30[i]) * 100),
                 lo30=float(lo30[i]), hi30=float(hi30[i]))
 
@@ -270,6 +272,8 @@ def main():
                          limit=round(f["close"]), cond="+".join(cond),
                          amt=round(f["amt"], 1), pos=round(f["pos"], 1),
                          atr=round(f["atr"], 2),
+                         open=round(f["open"]),
+                         gap=round((f["open"] / max(f["prev_close"], 1e-9) - 1) * 100, 2),
                          score=cond_score(f["amt"], f["pos"], f["atr"])))
 
     today = max(scanned) if scanned else None
@@ -331,11 +335,17 @@ def main():
                     end=max((r["sig"] for r in fills), default=None)))
 
     # 오늘 후보
-    keys = ("code", "name", "limit", "cond", "amt", "pos", "atr", "score")
+    keys = ("code", "name", "limit", "cond", "amt", "pos", "atr", "score", "open", "gap")
     todays = [{k: r.get(k) for k in keys} for r in rows if r["sig"] == today]
-    for t in todays:                      # 원장에 점수가 없으면 즉석 계산
+    for t in todays:                      # 원장에 없는 값은 즉석 계산
         if t.get("score") is None:
             t["score"] = cond_score(t["amt"], t["pos"], t["atr"])
+        if t.get("open") is None:
+            _d = load(t["code"])
+            _f = features(_d) if _d is not None else None
+            if _f:
+                t["open"] = round(_f["open"])
+                t["gap"] = round((_f["open"] / max(_f["prev_close"], 1e-9) - 1) * 100, 2)
     if not todays and cool_on:     # 쿨다운 날은 참고용으로만 표시
         todays = [{k: c.get(k) for k in keys} for c in cand if c["sig"] == today]
     todays.sort(key=lambda t: ("A" not in t["cond"], -t["amt"]))
