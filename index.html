@@ -2279,17 +2279,15 @@ async function init(){
     const before=items.length;
     if(gi===0){
       items=items.filter(x=>!(x.status==="청산완료"&&(x.kind||"").includes("전량익절")));
-    }else if(gi===1){
-      items=items.filter(x=>x.status==="보유중"&&x.under===true);   // 오늘 손절 대상
     }else{
-      items=items.filter(x=>x.status==="보유중");                    // 살아있는 종목
+      items=items.filter(x=>x.status==="보유중");                    // 보유중 전체
     }
     hidden=before-items.length;
     const nCl=items.filter(x=>x.status==="청산완료").length;
     const nHold=items.filter(x=>x.status==="보유중").length;
     const netAll=items.reduce((a,x)=>a+(x.status==="청산완료"?(x.net||0):0),0);
     const lbl=(gi===0?"오늘 ":(gi===1?"하루 전 ":"2일 전 "));
-    const tagTxt=(gi===0?"":(gi===1?"오늘 손절 대상":"살아있는 종목"));
+    const tagTxt=(gi===0?"":(gi===1?"보유중 · 손절은 음영":"보유중"));
     const head=`<div class="msub" style="margin:${gi?"12px":"2px"} 0 4px">
         <b>${lbl}${dash(g.sig)} 신호</b> · ${items.length}건${tagTxt?` <span class="sub">${tagTxt}</span>`:""}`
         + (gi===0&&nCl?` · 청산 ${nCl}`:"") + (gi===0&&nHold?` · 보유 ${nHold}`:"")
