@@ -38,6 +38,7 @@ MIN_HIST = 60
 MIN_AMT = 10.0      # 실전 최소 유동성(20일 평균 거래대금, 억원)
 PREF_TAIL = "579K"  # 우선주(코드 끝자리) 제외
 SURGE_MAX = 20.0    # 3일 수익률이 이보다 크면 제외 (급등 추격 방지)
+COOLDOWN = False    # 아침 매수에서는 급락 쿨다운 효과 없음 (2년 검증)
 COND = ROOT / "data" / "low_cond.json"
 
 
@@ -218,25 +219,38 @@ def features(df):
 
 
 def evaluate(code, df, sig, limit):
-    """신호일 종가 매수 기준 결과 계산."""
+    """다음 거래일 아침 매수 기준 결과 계산.
+
+    시가 < 전일 종가 → 시가 체결 / 그 외 → 전일 종가 지정가(저가 닿으면 체결)
+    """
     days = [int(x.strftime("%Y%m%d")) for x in df.index]
     if sig not in days:
         return None
     i = days.index(sig)
-    if i + 1 >= len(df):
-        # 신호일 종가에 매수했고 아직 다음 거래일이 없음 → 보유중(평가 0)
-        return dict(status="보유중", net=0.0, days=0, entry=sig,
-                    exit=None, kind="보유중")
+    e = i + 1
+    if e >= len(df):
+        return dict(status="매수 대기", net=0.0, days=0, entry=None,
+                    exit=None, kind=None)
+    o = df["Open"].values.astype(float)
     c = df["Close"].values.astype(float)
     h = df["High"].values.astype(float)
     l = df["Low"].values.astype(float)
-    lv = [limit * (1 - GAP) ** k for k in range(3)]
+    prev = float(limit)
+    if float(o[e]) < prev:
+        px = float(o[e])
+    elif float(l[e]) <= prev:
+        px = prev
+    else:
+        return dict(status="미체결", net=0.0, days=0, entry=None,
+                    exit=None, kind="미체결")
+    lv = [px * (1 - GAP) ** k for k in range(3)]
     tg = [x * (1 + GAP) for x in lv]
-    held = [True, False, False]    # 1차는 신호일 종가 매수
+    held = [True, False, False]
     net = 0.0
     exit_kind = None
+    exit_day = None
     for dd in range(HOLD):
-        j = i + 1 + dd
+        j = e + dd
         if j >= len(df):
             break
         for k in range(1, 3):
@@ -246,35 +260,38 @@ def evaluate(code, df, sig, limit):
             if held[k] and float(h[j]) >= tg[k]:
                 held[k] = False
                 net += AMTS[k] * 10_000 * (GAP - FEE)
-        if any(held) and float(c[j]) < lv[2]:      # 매일 종가 3차 이탈 → 그날 청산
+                exit_day = int(df.index[j].strftime("%Y%m%d"))
+        if any(held) and float(c[j]) < lv[2]:      # 종가가 3차 아래면 그날 청산
             for k in range(3):
                 if held[k]:
                     net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
                     held[k] = False
             exit_kind = "손절선 청산"
+            exit_day = int(df.index[j].strftime("%Y%m%d"))
             break
         if not any(held):
             exit_kind = exit_kind or "전량익절"
             break
     if any(held):
-        full = i + HOLD                     # 기간청산 예정일
-        if full <= len(df) - 1:             # 3거래일이 지났으면 종가 청산 확정
+        full = e + HOLD - 1                 # 만기 (매수일 포함 3거래일)
+        if full <= len(df) - 1:
             for k in range(3):
                 if held[k]:
                     net += AMTS[k] * 10_000 * (float(c[full]) / lv[k] - 1 - FEE)
             exit_kind = exit_kind or "만기 청산"
             exit_day = int(df.index[full].strftime("%Y%m%d"))
-        else:                               # 아직 보유 중 — 평가손익만
+        else:
             j = len(df) - 1
             for k in range(3):
                 if held[k]:
                     net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
-            return dict(status="보유중", net=net / SLOT * 100, days=j - i,
-                        entry=sig, exit=None, kind="보유중")
-    else:
-        exit_day = int(df.index[min(i + HOLD, len(df) - 1)].strftime("%Y%m%d"))
-    return dict(status="청산완료", net=net / SLOT * 100, days=min(HOLD, len(df) - 1 - i),
-                entry=sig, exit=exit_day, kind=exit_kind)
+            return dict(status="보유중", net=net / SLOT * 100, days=j - e,
+                        entry=int(df.index[e].strftime("%Y%m%d")),
+                        exit=None, kind="보유중")
+    return dict(status="청산완료", net=net / SLOT * 100,
+                days=min(HOLD, len(df) - 1 - e),
+                entry=int(df.index[e].strftime("%Y%m%d")),
+                exit=exit_day, kind=exit_kind or "전량익절")
 
 
 def _market_close_min():
@@ -431,7 +448,7 @@ def main():
     today = Counter(scanned).most_common(1)[0][0] if scanned else market_date
     if surged:
         print(f"[INFO] 급등(3일 {SURGE_MAX:.0f}%↑) 제외 {surged}건")
-    cool_on, cool_pct = market_cooldown(today)
+    cool_on, cool_pct = (COOLDOWN and market_cooldown(today)) or (False, None)
     # 15:18에 확정된 날은 저녁 실행에서 신규 매수 추가 금지
     seal = {}
     if SEAL.exists():
@@ -443,11 +460,12 @@ def main():
         seal[str(today)] = "preclose"
         SEAL.write_text(json.dumps(seal, ensure_ascii=False), encoding="utf-8")
     _sealed = (not PRECLOSE) and today and seal.get(str(today)) == "preclose"
+    _past = today != int(pd.Timestamp.now().strftime("%Y%m%d"))   # 지난 날짜 소급 등록 금지
     # 최신 거래일 신호만 등록 (거래정지·데이터 미갱신 종목의 옛 신호 배제)
     for rec in ([] if cool_on else cand):
         if rec["sig"] != today or (rec["code"], rec["sig"]) in seen:
             continue
-        if _sealed:            # 15:20에 사지 않은 종목이 저녁에 끼어드는 것 방지
+        if _sealed or _past:   # 확정된 날 / 지난 날짜는 신규 등록 안 함
             continue
         picks.append(rec)
         added.append(rec)
@@ -601,7 +619,7 @@ def main():
                               open=(round(op) if op else None), gap=gp,
                               held=bool(p.get("held")),
                               status=("보유중" if p.get("held") else
-                                      ("매수 예정" if (_hold == 0 and not _closed) else
+                                      ("매수 예정" if (_hold is None or (_hold == 0 and not _closed)) else
                                        (r or {}).get("status", "대기"))),
                               kind=(r or {}).get("kind"),
                               net=round((r or {}).get("net", 0), 2)))

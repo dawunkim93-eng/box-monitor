@@ -402,7 +402,7 @@
       <div class="rulebox" style="border-color:rgba(16,185,129,.5)">
         <b>✅ 하루 체크리스트</b>
         <ul>
-          <li><b>살 때</b>: 전일 종가 기준 신호 + 현재가가 <b>지정가 이하</b>일 때만 (지정가 위면 추격 금지)</li>
+          <li><b>살 때</b>: 전일 종가 기준 신호 + 현재가가 <b>매수가 이하</b>일 때만 (매수가 위면 추격 금지)</li>
           <li><b>팔 때</b>: <b>종가</b>가 밴드 하단×1.02 아래 (장중 흔들림으로 팔지 않음)</li>
           <li><b>기록</b>: 16:40 복기에서 규칙 위반 여부 확인 · 2026-11-06~13 복기 결과 손실 6건이 모두 여지 6% 미달 진입</li>
         </ul>
@@ -456,9 +456,9 @@
       <div class="rulebox">
         <ul>
           <li>08:15 알림 확인 → 다음 거래일 <b>시가</b> 진입 (매수존 유지 시)</li>
-          <li>시가가 존 상단이면 <b>지정가</b>(신호 종가 또는 경계+3%)로 대기 · 미체결 시 스킵</li>
-          <li>슬롯이 장중에 비면 <b>다음날 시가</b>가 원칙 · 굳이 그날 사려면 전일 종가 이하 <b>지정가</b>만 (늦게 사면 −26% 실측)</li>
-          <li>진입=지정가 · 그리드 매도=지정가 · 긴급 청산=시장가</li>
+          <li>시가가 존 상단이면 <b>매수가</b>(신호 종가 또는 경계+3%)로 대기 · 미체결 시 스킵</li>
+          <li>슬롯이 장중에 비면 <b>다음날 시가</b>가 원칙 · 굳이 그날 사려면 전일 종가 이하 <b>매수가</b>만 (늦게 사면 −26% 실측)</li>
+          <li>진입=매수가 · 그리드 매도=매수가 · 긴급 청산=시장가</li>
         </ul>
       </div>
 
@@ -800,7 +800,7 @@
 
   <details class="stamp" id="foot" style="text-align:left">
     <summary>도움말 · 규칙/색상/조작 설명</summary>
-  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~8% = 관찰 · <b>+8% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(6주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 풀에서 제외<br>청산 기준(13년 백테스트 최적): <b>종가</b>가 <b>하단×1.02</b> 아래면 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · <b>✅ 진입</b>=전일 종가 기준 신호 성립 · <b>지정가</b>=초록이면 지금 그 가격 이하(주문 가능), 주황이면 지정가 위(추격 금지) · <span style="color:var(--green)">×2</span>=박스 하단이 250일 매물대 위(금액 2배) · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~8%(여지 6% 미만, 매수 제외) · <b>여지</b>=청산선(하단×1.02) 대비 거리 — 하단대비 −2%p로 계산, <b>6% 이상이면 진입 가능</b>(하단대비 8% 이상) · <span style="color:var(--red)">📏 남은 차수</span>=보유 종목의 청산선까지 여지를 1.5% 간격으로 나눈 값 · <b>0~1개면 추가 매수 금지</b>(그 아래 차수는 청산선 아래라 의미 없음) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
+  <div><span style="color:var(--red)">●</span>하단대비 +2% 미만 = 청산 구역 · +2~8% = 관찰 · <b>+8% 이상 = 매수존</b> · <span style="color:var(--blue)">●</span>매수존(타입별 하위 구간) · ■ 중립 · <span style="color:var(--green)">●</span>85%+ 상단부 · 형태: <span class="btyp bw">주봉</span>=주봉박스(6주 종가 밴드) — 상승저점(A박스)은 2026-11-06부터 풀에서 제외<br>청산 기준(13년 백테스트 최적): <b>종가</b>가 <b>하단×1.02</b> 아래면 청산(진입일 포함) · 이탈 확정=긴급 · 박스 소멸 · -15% 백스톱 — 위치 항목은 <b>타입별 박스 범위</b> 기준 (주봉=종가 밴드 · 상승=추세선~구조 고점)<br>60초마다 자동 새로고침 · <b>✅ 진입</b>=전일 종가 기준 신호 성립 · <b>매수가</b>=초록이면 지금 그 가격 이하(주문 가능), 주황이면 매수가 위(추격 금지) · <span style="color:var(--green)">×2</span>=박스 하단이 250일 매물대 위(금액 2배) · <span style="color:var(--amber)">🕒 여지부족</span>=경계 +2~8%(여지 6% 미만, 매수 제외) · <b>여지</b>=청산선(하단×1.02) 대비 거리 — 하단대비 −2%p로 계산, <b>6% 이상이면 진입 가능</b>(하단대비 8% 이상) · <span style="color:var(--red)">📏 남은 차수</span>=보유 종목의 청산선까지 여지를 1.5% 간격으로 나눈 값 · <b>0~1개면 추가 매수 금지</b>(그 아래 차수는 청산선 아래라 의미 없음) · ⏳ 대기=조건 미충족(관찰) · ☑ 보유 체크=체크한 종목 코드→복사·텔레그램→보유파일 · 보유 현황=holdings.txt 상태(구조 이탈은 🚨 알림) · 📋 보유=후보 제외 · ☑=보유 체크(로컬) · 행 탭=점수 성분 상세 · [☑ 복사]→텔레그램 전송=보유 갱신 · 본 정보는 관찰 전용이며 진입 권장 아님</div>
   <div class="stamp" style="margin-top:4px">📁 이력은 참고용 — 개별 표본 적으므로 점수 그룹 배지가 판단 근거</div>
   <div class="stamp" style="margin-top:4px">🟢 재무강화: 부채&lt;200%·ROE&gt;0·수익성 3/4 이상 · ⚠재무위험: 부채&gt;150%+영업적자 · 점수 = W/A 8점 만점 (S4)(나이 제외 · 탈출% 배지는 W/A 실측)</div>
   </details>
@@ -1199,7 +1199,7 @@ function mobileRowHTML(r){
     <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
     <div class="mrow">하단 ${pl} · ${atr} · ${esc}</div>
     ${(r.held&&r.rungs_left!=null)?`<div class="mrow" style="color:${r.rungs_left<=1?"var(--red)":"var(--dim)"}">📏 청산선 ${fmt(r.exit_line)}원 · 남은 차수 <b>${r.rungs_left}개</b>${r.rungs_left<=1?" — 추가 매수 금지(청산선 바로 위)":""}</div>`:(r.holdoff?`<div class="mrow" style="color:var(--red)">⚠ 하단 15% 이내 — 추가 차수 보류 (13년 이 자리 당일붕괴 163건 전부 손실 · 건당 -7,052원)</div>`:"")}
-    ${r.cand&&r.limit?`<div class="mrow" style="color:${r.price<=r.limit?"var(--green)":"var(--amber)"}">🎯 지정가 <b>${fmt(r.limit)}원</b>${r.limit_date?` <span class="sub">(${r.limit_date} 종가)</span>`:""} ${r.price<=r.limit?"✅ 지금 지정가 이하":"⛔ 현재가가 지정가 위 — 추격 금지"}</div>`:""}
+    ${r.cand&&r.limit?`<div class="mrow" style="color:${r.price<=r.limit?"var(--green)":"var(--amber)"}">🎯 매수가 <b>${fmt(r.limit)}원</b>${r.limit_date?` <span class="sub">(${r.limit_date} 종가)</span>`:""} ${r.price<=r.limit?"✅ 지금 매수가 이하":"⛔ 현재가가 매수가 위 — 추격 금지"}</div>`:""}
     ${r.amts?`<div class="mrow" style="color:${r.boost===2?"var(--green)":"var(--dim)"}">${r.boost===2?"🟢 매물대 위 ×2":"매물대 아래"} · 사다리 ${r.amts.join("·")}만원</div>`:""}
     <details class="mdet" data-c="${r.code}">
       <summary>점수 상세 · 이력</summary>
@@ -1318,7 +1318,7 @@ function rowHTML(r){
 }
 function lowRowHTML(r){
   const chk = HELD.has(r.code);
-  const st = r.cand ? '<span class="btyp bcand" title="저변동 조건 충족 — 다음 거래일 전일 종가 지정가 체결">✅ 진입</span>'
+  const st = r.cand ? '<span class="btyp bcand" title="저변동 조건 충족 — 다음 거래일 전일 종가 매수가 체결">✅ 진입</span>'
                     : '<span class="wait" title="급락 쿨다운으로 오늘 신규 진입 없음">⛔ 쿨다운</span>';
   return `<tr data-code="${r.code}" tabindex="0" role="button" aria-label="${r.name} 상세 보기">
     <td class="nm"><input type="checkbox" class="heldchk" data-c="${r.code}" ${chk?"checked":""} aria-label="보유 체크">
@@ -1343,7 +1343,7 @@ function lowMobileHTML(r){
       <b>${r.name}</b> <span class="btyp blw">저변동</span>${st}
       <span style="margin-left:auto">${r.score100==null?"-":"<b>"+r.score100+"점</b>"}</span>
     </div>
-    <div class="sub" style="margin-top:3px">지정가 <b>${fmt(r.limit)}</b> · 3차 ${fmt(r.stop)} · 거래대금 ${r.amt==null?"-":Math.round(r.amt)+"억"} · 위치 ${r.pos==null?"-":r.pos.toFixed(0)+"%"} · ATR ${r.atr==null?"-":(r.atr*100).toFixed(1)+"%"}</div>
+    <div class="sub" style="margin-top:3px">매수가 <b>${fmt(r.limit)}</b> · 3차 ${fmt(r.stop)} · 거래대금 ${r.amt==null?"-":Math.round(r.amt)+"억"} · 위치 ${r.pos==null?"-":r.pos.toFixed(0)+"%"} · ATR ${r.atr==null?"-":(r.atr*100).toFixed(1)+"%"}</div>
   </div>`;
 }
 function breakdown(r){
@@ -1614,7 +1614,7 @@ async function initRules(){
     +`<div class="chip">1차 탈출 <b>${S.escape_rate==null?"-":S.escape_rate+"%"}</b></div>`
     +`<div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b>`
     +` <span class="sub">당일 재왕복 가정</span></div>`
-    +((VALID.sensitivity&&VALID.sensitivity.all)?`<div class="chip">지정가 체결 시 <b class="${VALID.sensitivity.all.net_total>=0?"up":"dn"}">${fmt(VALID.sensitivity.all.net_total)}원</b> <span class="sub">당일 재왕복 제외</span></div>`:``)
+    +((VALID.sensitivity&&VALID.sensitivity.all)?`<div class="chip">매수가 체결 시 <b class="${VALID.sensitivity.all.net_total>=0?"up":"dn"}">${fmt(VALID.sensitivity.all.net_total)}원</b> <span class="sub">당일 재왕복 제외</span></div>`:``)
     +`<div class="chip">MDD(최대 낙폭) <b class="dn">${fmt(S.mdd_won)}원</b>`
     +` <span class="sub">peak 자본 ${C.peak==null?"-":fmt(C.peak)+"원"}</span></div>`
     +`<div class="chip">적자연도 <b>${S.loss_years}/${S.n_years}</b></div>`
@@ -1639,7 +1639,7 @@ function renderValid(V){
      <div class="chip">지속 <b>${S.hold_avg}일</b> (중앙 ${S.hold_median})</div>
      <div class="chip">포지션 ${S.positions}건</div>
      <div class="chip">총손익 <b class="${S.net_total>=0?"up":"dn"}">${S.net_total>=0?"+":""}${fmt(S.net_total)}원</b> <span class="sub">당일 재왕복 가정</span></div>
-     ${(V.sensitivity&&V.sensitivity.all)?`<div class="chip">지정가 체결 시 <b class="${V.sensitivity.all.net_total>=0?"up":"dn"}">${fmt(V.sensitivity.all.net_total)}원</b> <span class="sub">재왕복 제외</span></div>`:""}
+     ${(V.sensitivity&&V.sensitivity.all)?`<div class="chip">매수가 체결 시 <b class="${V.sensitivity.all.net_total>=0?"up":"dn"}">${fmt(V.sensitivity.all.net_total)}원</b> <span class="sub">재왕복 제외</span></div>`:""}
      <div class="chip">사이클/건 ${S.cycles_avg}</div>
      <div class="chip">최대낙폭 ${fmt(S.mdd_won)}원</div>
      <div class="chip">적자연도 ${S.loss_years}/${S.n_years}</div>`;
@@ -2277,6 +2277,7 @@ async function init(){
     if(x.status==="청산완료") return `<span class="${x.kind==="전량익절"?"up":"deep"}">${x.kind||"청산"}</span>`;
     if(x.status==="보유중") return `<span class="wait">보유중</span>`;
     if(x.status==="미체결") return `<span class="sub">미체결</span>`;
+    if(x.status==="매수 대기") return `<span class="sub">매수 예정</span>`;
     return `<span class="sub">매수 예정</span>`;
   };
   box.innerHTML = DAYS.map((g,gi)=>{
@@ -2327,7 +2328,7 @@ async function init(){
       + `<th>매수가</th><th title="3차 매수가 = 손절선 (-3%)">3차<br><span class="sub" style="font-size:8.5px">손절선</span></th><th class="mhide">시가</th><th title="가장 최근 종가">현재가</th><th>결과</th>`
       + `</tr></thead><tbody>` + rows + `</tbody></table>`;
   }).join("");
-  box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 15:20에 후보를 확인하고 신호일 종가 동시호가로 매수합니다. 3차는 -3% 손절선. 시가는 매수일 시가, 현재가는 가장 최근 종가입니다. 15:05·15:18 장중 실행에서는 현재가가 3차 손절선 아래인 종목을 음영 처리합니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
+  box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 15:18에 후보가 확정되면 다음 거래일 09:00에 주문합니다. 시가가 전일 종가보다 낮으면 시장가, 높으면 전일 종가 매수가입니다. 3차는 -3% 손절선. 시가는 매수일 시가, 현재가는 가장 최근 종가입니다. 보유 중인데 현재가가 3차 아래면 음영 처리합니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
@@ -2498,7 +2499,7 @@ async function init(){
 
   document.getElementById("dp-body").innerHTML=
     (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt + liveNote
-    + `<div class="msub">지정가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산. 최대 3일 보유.</div>`;
+    + `<div class="msub">매수가는 신호일 종가입니다. 다음날 그 가격 이하로 내려오면 체결, 3차(-3%)까지 사다리. 진입일 종가가 3차 아래면 그날 청산. 최대 3일 보유.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
@@ -2618,7 +2619,7 @@ async function init(){
     + (P2.length?tb(P2):'<div class="pmuted">표본이 더 쌓이면 조합이 나옵니다.</div>')
     + `<div class="msub" style="margin:10px 0 4px"><b>단일 조건</b> — 종합 순</div>`
     + (S.length?tb(S):'')
-    + `<div class="msub">${d.note||""}<br><b>종합</b> = 체결율 × 당일 탈출률 (신호 1건이 그날 사서 그날 파는 확률) — 순위 기준 · <b>체결</b> = 지정가까지 내려와 실제로 산 비율 · <b>당일</b> = 산 것 중 1차가 당일 +1.5%에 팔린 비율 · <b>평균</b> = 탈출까지 걸린 일수.<br>
+    + `<div class="msub">${d.note||""}<br><b>종합</b> = 체결율 × 당일 탈출률 (신호 1건이 그날 사서 그날 파는 확률) — 순위 기준 · <b>체결</b> = 매수가까지 내려와 실제로 산 비율 · <b>당일</b> = 산 것 중 1차가 당일 +1.5%에 팔린 비율 · <b>평균</b> = 탈출까지 걸린 일수.<br>
        ⚠ 표본이 6~10거래일이면 조합은 우연히 튀기 쉽습니다. 표본 30건 이상·리프트 1.3 이상만 후보로 보세요.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
@@ -2654,7 +2655,7 @@ async function init(){
         <td>${fx(x.days,2)}일</td>
         <td class="mhide">${f(x.pos)}/${f(x.sig)}</td>
         <td class="deep">${fx(x.worst,1)}%</td></tr>`).join("")
-    + `</tbody></table><div class="msub"><b>신호당</b> = 신호 1건당 기대 수익(체결율 × 건당 수익) — 순위 기준 · <b>체결율</b> = 지정가까지 내려와 실제로 산 비율 · <b>탈출율</b> = 산 것 중 1차가 +1.5%에 팔린 비율 · 평균 = 탈출까지 걸린 거래일.<br>진입은 전일 종가 지정가, 시가가 더 낮으면 시가 체결. 2건 이상 체결된 종목만 표시.<br>⚠ 우선주와 초고변동 종목은 최악이 -19%까지 갑니다. 최악 열을 함께 보세요.</div>`;
+    + `</tbody></table><div class="msub"><b>신호당</b> = 신호 1건당 기대 수익(체결율 × 건당 수익) — 순위 기준 · <b>체결율</b> = 매수가까지 내려와 실제로 산 비율 · <b>탈출율</b> = 산 것 중 1차가 +1.5%에 팔린 비율 · 평균 = 탈출까지 걸린 거래일.<br>진입은 전일 종가 매수가, 시가가 더 낮으면 시가 체결. 2건 이상 체결된 종목만 표시.<br>⚠ 우선주와 초고변동 종목은 최악이 -19%까지 갑니다. 최악 열을 함께 보세요.</div>`;
 }
 document.addEventListener("DOMContentLoaded", init);
 })();
