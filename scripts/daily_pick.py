@@ -337,6 +337,30 @@ def main():
     market_date = Counter(_samp).most_common(1)[0][0] if _samp else None
 
     picks = json.loads(PICKS.read_text(encoding="utf-8")) if PICKS.exists() else []
+    # 같은 종목 중복 보유 정리 — 가장 이른 보유만 남김
+    _by_code = {}
+    for _p in picks:
+        _by_code.setdefault(_p["code"], []).append(_p)
+    _drop = set()
+    for _c, _lst in _by_code.items():
+        if len(_lst) < 2:
+            continue
+        _opens = []
+        for x in _lst:
+            _dx = load(x["code"])
+            if _dx is None:
+                continue
+            _rx = evaluate(x["code"], _dx, x["sig"], float(x["limit"]))
+            if _rx and _rx.get("status") == "보유중":
+                _opens.append(x["sig"])
+        if len(_opens) > 1:
+            _keep = min(_opens)
+            for _sg in _opens:
+                if _sg != _keep:
+                    _drop.add((_c, _sg))
+    if _drop:
+        picks = [p for p in picks if (p["code"], p["sig"]) not in _drop]
+        print(f"[INFO] 중복 보유 정리 {len(_drop)}건")
     seen = {(p["code"], p["sig"]) for p in picks}
     today = None
     added = []
@@ -350,6 +374,11 @@ def main():
         _r = evaluate(_p["code"], _d, _p["sig"], float(_p["limit"]))
         if _r and _r.get("status") == "보유중":
             open_codes.add(_p["code"])
+    _mkx = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
+    _calx = [int(d.strftime("%Y%m%d")) for d in _mkx.index]
+    _recent = {_p["code"] for _p in picks
+               if _p.get("sig") and len([d for d in _calx if d > _p["sig"]]) <= HOLD}
+    open_codes |= _recent           # 최근 HOLD일 내 매수분도 재매수 금지
     if open_codes:
         print(f"[INFO] 보유중 매수 제외 {len(open_codes)}종목")
 
