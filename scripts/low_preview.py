@@ -63,7 +63,8 @@ for code in codes:
         continue
     if f["ret3"] > SURGE_MAX:
         continue
-    rows.append(dict(code=code, name=NAMES.get(code, code), close=f["close"], amt=f["amt"],
+    rows.append(dict(code=code, name=NAMES.get(code, code), close=f["close"],
+                     open=f["open"], amt=f["amt"],
                      pos=f["pos"], atr=f["atr"], ret3=f["ret3"],
                      score=cell_score(f["amt"], f["pos"], f["atr"]),
                      held=code in held))
@@ -76,6 +77,8 @@ if rows:
     _last = int(d0.index[-1].strftime("%Y%m%d")) if d0 is not None else None
 OUTJ.write_text(json.dumps(dict(sig=_last, rows=[
     dict(name=r["name"], score=round(r["score"], 1), close=r["close"],
+         open=r["open"],
+         limit=round(r["close"]), stop=round(r["close"] * (1 - 0.015) ** 2),
          amt=round(r["amt"], 1), pos=round(r["pos"], 1), atr=round(r["atr"], 1),
          ret3=round(r["ret3"], 1), held=r["held"]) for r in rows],
     buy=sum(1 for r in rows if not r["held"])), ensure_ascii=False, indent=1),
