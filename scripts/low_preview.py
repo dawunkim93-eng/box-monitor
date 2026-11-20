@@ -69,6 +69,17 @@ for code in codes:
                      held=code in held))
 
 rows.sort(key=lambda x: -x["score"])
+OUTJ = ROOT / "data" / "low_preview.json"
+_last = None
+if rows:
+    d0 = load(rows[0]["code"])
+    _last = int(d0.index[-1].strftime("%Y%m%d")) if d0 is not None else None
+OUTJ.write_text(json.dumps(dict(sig=_last, rows=[
+    dict(name=r["name"], score=round(r["score"], 1), close=r["close"],
+         amt=round(r["amt"], 1), pos=round(r["pos"], 1), atr=round(r["atr"], 1),
+         ret3=round(r["ret3"], 1), held=r["held"]) for r in rows],
+    buy=sum(1 for r in rows if not r["held"])), ensure_ascii=False, indent=1),
+    encoding="utf-8")
 print(f"[INFO] 오늘 조건 충족 {len(rows)}건 (보유중 {sum(1 for r in rows if r['held'])})")
 print(f"{'점수':>6}{'종목':>14}{'종가':>10}{'거래대금':>9}{'위치':>8}{'ATR':>7}{'3일':>8}  보유")
 for r in rows[:25]:

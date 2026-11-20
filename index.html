@@ -2496,6 +2496,7 @@ async function init(){
   const ls=live&&live.summary;
   const liveNote = ls? `<div class="msub" style="margin-top:12px"><b>실시간 모의 기록</b>(11/13 시작) — 진입 ${ls.entries||0}건 · 완료 ${ls.done||0} · 보유 ${ls.holding||0} · 승률 ${fx(ls.win)}% · 누적 ${fx(ls.tot,2)}%</div>` : "";
   loadMonth();
+  loadPrev();
 
   document.getElementById("dp-body").innerHTML=
     (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt + liveNote
@@ -2931,6 +2932,25 @@ async function loadMonth(){
       <td class="sub">${kr(r.cap)}</td>
       <td class="${r.ret>0?'up':'dn'}">${r.ret>0?"+":""}${r.ret.toFixed(2)}%</td></tr>`).join("")}</tbody>
   </table></div>`;
+}
+
+async function loadPrev(){
+  const box=document.getElementById("lowprev");
+  if(!box) return;
+  let d;
+  try{ d=await (await fetch("data/low_preview.json?t="+Date.now())).json(); }
+  catch(e){ box.hidden=true; return; }
+  const rows=(d.rows||[]).filter(r=>!r.held);
+  if(!rows.length){ box.hidden=true; return; }
+  box.hidden=false;
+  const f=n=>Number(n).toLocaleString();
+  box.innerHTML=`<div class="msub" style="margin:12px 0 4px"><b>오늘 ${String(d.sig).slice(4,6)}/${String(d.sig).slice(6)} 조건 충족</b>
+      · ${rows.length}건 <span class="sub">매수 기록 없음 · 참고용</span></div>`
+    + `<table class="ptbl"><thead><tr><th>점수</th><th>종목</th><th>종가</th><th>거래대금</th><th>위치</th><th>ATR</th></tr></thead><tbody>`
+    + rows.map(r=>`<tr><td><b>${r.score.toFixed(1)}</b></td><td class="nm">${r.name}</td>
+        <td>${f(r.close)}</td><td class="sub">${r.amt}억</td><td>${r.pos.toFixed(1)}%</td><td>${r.atr.toFixed(1)}%</td></tr>`).join("")
+    + `</tbody></table>
+      <div class="sub" style="font-size:11px">오늘은 매수 기록이 없어 원장에 없습니다. 조건만 충족한 종목입니다.</div>`;
 }
 
 </script>
