@@ -554,6 +554,8 @@ def main():
                 if _sg in ds2:
                     _hold = len(ds2) - 1 - ds2.index(_sg)
                     _cur = float(d0["Close"].values[-1])
+            if PRECLOSE and p["code"] in LIVE:
+                _cur = LIVE[p["code"]][3]        # 장중 현재가로 손절선 판정
             if _cur is None:
                 _cur = naver_close(p["code"], int(pd.Timestamp.now().strftime("%Y%m%d")))
             if _cur:
