@@ -534,7 +534,7 @@ def main():
                            atr=c.get("atr"), score=c.get("score"), held=True)
                       for c in cand if c["sig"] == _sg and c.get("held")]
         _seen_codes = {x["code"] for x in picks if x["sig"] == _sg}
-        _extra = [c for c in _extra if c["code"] not in _seen_codes]
+        _extra = []          # 보유중 종목은 최초 매수 묶음에만 표시 (가격 중복 방지)
         for p in [x for x in picks if x["sig"] == _sg] + _extra:
             r = next((x for x in rows if x["code"] == p["code"] and x["sig"] == _sg), None)
             d0 = load(p["code"])
