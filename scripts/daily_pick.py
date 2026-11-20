@@ -518,7 +518,10 @@ def main():
     _mr = _mk["Close"].pct_change() * 100
     _blocked = {_md[i] for i in range(1, len(_md)) if _mr.iloc[i] <= -3.0}
     days_out = []
+    _cal_all = sorted(set(list(_cal) if _cal else []) | ({today} if today else set()))
     for _sg in _sigs:
+        _later = [d for d in _cal_all if d > _sg]
+        _dist = len(_later)
         items = []
         _extra = []
         if _sg == today:
@@ -575,7 +578,7 @@ def main():
         items.sort(key=lambda x: (-(x["score"] or 0)))
         _why = ("급락 쿨다운" if _sg in _blocked else
                 ("조건 미달" if not items else ""))
-        days_out.append(dict(sig=_sg, n=len(items), items=items, why=_why))
+        days_out.append(dict(sig=_sg, dist=_dist, n=len(items), items=items, why=_why))
 
     # 오늘 청산된 종목 (표 음영용)
     _td = int(pd.Timestamp.now().strftime("%Y%m%d"))
