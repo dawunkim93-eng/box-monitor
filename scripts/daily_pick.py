@@ -16,6 +16,8 @@
   data/daily_pick.json   — 오늘의 후보 + 성과 요약 + 최근 내역
 """
 import json
+import sys
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -64,6 +66,45 @@ def cond_score(amt, pos, atr):
         if (row["amt"], row["pos"], row["atr"]) == key:
             return row["score"]
     return None
+
+
+SEAL = ROOT / "data" / "preclose_seal.json"
+PRECLOSE = "--preclose" in sys.argv      # 15:05/15:18 장중 후보 생성
+
+
+def _live_quotes(codes, chunk=50):
+    """네이버 polling API로 현재가 일괄 조회 (시가/고가/저가/거래량 포함)."""
+    out = {}
+    for i in range(0, len(codes), chunk):
+        part = codes[i:i + chunk]
+        url = ("https://polling.finance.naver.com/api/realtime/domestic/stock/"
+               + ",".join(part))
+        try:
+            raw = urllib.request.urlopen(
+                urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}),
+                timeout=8).read().decode("utf-8", "ignore")
+            for x in json.loads(raw).get("datas", []):
+                c = x.get("closePriceRaw")
+                if not c:
+                    continue
+                out[x["itemCode"]] = (float(x.get("openPriceRaw") or c),
+                                      float(x.get("highPriceRaw") or c),
+                                      float(x.get("lowPriceRaw") or c),
+                                      float(c),
+                                      float(x.get("accumulatedTradingVolumeRaw") or 0))
+        except Exception:
+            continue
+    return out
+
+
+def _append_live(df, bar, day):
+    """당일 미완성 봉을 붙인다 (장중 후보 산출용)."""
+    if len(df) and int(df.index[-1].strftime("%Y%m%d")) == day:
+        return df
+    row = pd.DataFrame([bar], columns=["Open", "High", "Low", "Close", "Volume"],
+                       index=[pd.Timestamp(str(day))])
+    return pd.concat([df, row])
+
 
 
 def naver_close(code, day=None):
@@ -282,6 +323,8 @@ def main():
     # 시장 최신 '완료' 거래일 — 표본 종목의 최빈 마지막 날짜 (일부만 갱신된 경우 대비)
     from collections import Counter
     cut_intraday, today_int = _intraday_cut()
+    if PRECLOSE:
+        cut_intraday = False            # 장중 후보 생성: 오늘 봉을 신호일로 사용
     _samp = []
     for _c in codes[:60]:
         d0 = load(_c)
@@ -310,6 +353,9 @@ def main():
     if open_codes:
         print(f"[INFO] 보유중 매수 제외 {len(open_codes)}종목")
 
+    LIVE = _live_quotes(codes) if PRECLOSE else {}
+    if PRECLOSE:
+        print(f"[INFO] 장중 시세 {len(LIVE)}종목 수신")
     cand = []
     surged = 0
     for code in codes:
@@ -319,6 +365,8 @@ def main():
         df = load(code)
         if df is None:
             continue
+        if PRECLOSE and code in LIVE:
+            df = _append_live(df, LIVE[code], today_int)
         if cut_intraday and int(df.index[-1].strftime("%Y%m%d")) == today_int:
             df = df.iloc[:-1]                  # 미완성 당일 봉 제외
         f = features(df)
@@ -460,7 +508,11 @@ def main():
         items = []
         _extra = []
         if _sg == today:
-            _extra = [dict(code=c["code"], name=c["name"], sig=c["sig"], limit=c["limit"],
+            _open_map = {_p["code"]: _p for _p in picks
+                         if _p.get("sig", 0) <= _sg}
+            _extra = [dict(code=c["code"], name=c["name"],
+                           sig=_open_map.get(c["code"], {}).get("sig", c["sig"]),
+                           limit=_open_map.get(c["code"], {}).get("limit", c["limit"]),
                            cond=c.get("cond"), amt=c.get("amt"), pos=c.get("pos"),
                            atr=c.get("atr"), score=c.get("score"), held=True)
                       for c in cand if c["sig"] == _sg and c.get("held")]
