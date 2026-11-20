@@ -2953,11 +2953,16 @@ async function loadPrev(){
   const f=n=>Number(n).toLocaleString();
   box.innerHTML=`<h2 class="sec" style="margin-top:14px">📋 오늘 ${String(d.sig).slice(4,6)}/${String(d.sig).slice(6)} 조건 충족 (${rows.length}건)</h2>
     <div class="sub" style="margin:-4px 0 6px">오늘은 매수 기록이 없어 원장에 없습니다. 조건만 충족한 종목입니다.</div>`
-    + `<table class="ptbl"><thead><tr><th>점수</th><th>종목</th><th>종가</th><th>거래대금</th><th>위치</th><th>ATR</th></tr></thead><tbody>`
-    + rows.map(r=>`<tr><td><b>${r.score.toFixed(1)}</b></td><td class="nm">${r.name}</td>
-        <td>${f(r.close)}</td><td class="sub">${r.amt}억</td><td>${r.pos.toFixed(1)}%</td><td>${r.atr.toFixed(1)}%</td></tr>`).join("")
-    + `</tbody></table>
-      <div class="sub" style="font-size:11px">오늘은 매수 기록이 없어 원장에 없습니다. 조건만 충족한 종목입니다.</div>`;
+    + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th>`
+    + `<th>매수가</th><th title="3차 매수가 = 손절선 (-3%)">3차<br><span class="sub" style="font-size:8.5px">손절선</span></th>`
+    + `<th class="mhide">시가</th><th title="가장 최근 종가">현재가</th><th>결과</th>`
+    + `</tr></thead><tbody>`
+    + rows.map(r=>`<tr><td><b>${r.score.toFixed(1)}</b></td>`
+        + `<td class="nm">${r.name}</td>`
+        + `<td><b>${f(r.limit)}</b></td><td class="deep">${f(r.stop)}</td>`
+        + `<td class="mhide">${f(r.open)}</td><td>${f(r.close)}</td>`
+        + `<td><span class="wait">조건 충족</span></td></tr>`).join("")
+    + `</tbody></table>`;
 }
 
 </script>
