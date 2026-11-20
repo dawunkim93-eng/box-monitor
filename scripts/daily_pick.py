@@ -287,11 +287,11 @@ def evaluate(code, df, sig, limit):
                     net += AMTS[k] * 10_000 * (float(c[j]) / lv[k] - 1 - FEE)
             return dict(status="보유중", net=net / SLOT * 100, days=j - e,
                         entry=int(df.index[e].strftime("%Y%m%d")),
-                        exit=None, kind="보유중")
+                        exit=None, kind="보유중", px=px)
     return dict(status="청산완료", net=net / SLOT * 100,
                 days=min(HOLD, len(df) - 1 - e),
                 entry=int(df.index[e].strftime("%Y%m%d")),
-                exit=exit_day, kind=exit_kind or "전량익절")
+                exit=exit_day, kind=exit_kind or "전량익절", px=px)
 
 
 def _market_close_min():
@@ -622,6 +622,7 @@ def main():
                                       ("매수 예정" if (_hold is None or (_hold == 0 and not _closed)) else
                                        (r or {}).get("status", "대기"))),
                               kind=(r or {}).get("kind"),
+                              fill=(round((r or {}).get("px")) if (r or {}).get("px") else None),
                               net=round((r or {}).get("net", 0), 2)))
         items.sort(key=lambda x: (-(x["score"] or 0)))
         _why = ("급락 쿨다운" if _sg in _blocked else

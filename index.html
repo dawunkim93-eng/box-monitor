@@ -2320,7 +2320,7 @@ async function init(){
       }
       return `<tr${cls}><td><b>${t.score==null?"-":fx(t.score)}</b></td>`
         + `<td class="nm">${t.name}</td>`
-        + `<td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>`
+        + `<td><b>${f(t.fill||t.limit)}</b></td><td class="deep">${f(s3)}</td>`
         + `<td class="mhide">${f(t.open)}</td><td class="${t.cur&&t.limit?(t.cur>t.limit?'up':(t.cur<t.limit?'dn':'')):''}">${t.cur?f(t.cur):'-'}</td>`
         + `<td>${(t.under&&t.status==="보유중")?'<span class="deep">손절</span>':stCell(t)}</td></tr>`;
     }).join("");
