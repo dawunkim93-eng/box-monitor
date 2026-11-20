@@ -110,6 +110,8 @@
   .blw{color:#a78bfa;border:1px solid rgba(167,139,250,.55);background:rgba(167,139,250,.10)}
   tr.closed{background:rgba(120,120,120,.16);opacity:.72}
   tr.closed td{color:var(--dim)}
+  tr.winrow{background:rgba(46,204,113,.13)}
+  tr.winrow td{color:var(--dim)}
   .bvp{color:var(--green);border:1px solid rgba(16,185,129,.55);font-weight:700}
   .bcand{color:var(--blue);border:1px solid rgba(59,130,246,.45)}
   .broom{color:var(--amber);border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
@@ -2307,7 +2309,9 @@ async function init(){
     }
     const rows=items.map(t=>{
       const s3=Math.round((t.stop||t.limit*0.97));
-      const cls=(t.under||t.status==="청산완료")?' class="closed"':"";
+      let cls="";
+      if(t.under||t.kind==="손절선 청산"||t.status==="청산완료") cls=' class="closed"';
+      if(t.kind==="전량익절") cls=' class="winrow"';
       return `<tr${cls}><td><b>${t.score==null?"-":fx(t.score)}</b></td>`
         + `<td class="nm">${t.name}</td>`
         + `<td><b>${f(t.limit)}</b></td><td class="deep">${f(s3)}</td>`
