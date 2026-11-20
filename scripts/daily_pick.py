@@ -591,7 +591,8 @@ def main():
             if _cur is None:
                 _cur = naver_close(p["code"], int(pd.Timestamp.now().strftime("%Y%m%d")))
             if _cur:
-                _under = bool(_cur < _st)
+                # 아직 보유 중인 포지션만 손절선 이탈로 본다
+                _under = bool(_cur < _st and (r or {}).get("status") == "보유중")
             items.append(dict(code=p["code"], name=p["name"], limit=p["limit"],
                               stop=_st, cur=(round(_cur) if _cur else None),
                               under=_under, hold=_hold,
