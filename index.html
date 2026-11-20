@@ -2256,6 +2256,7 @@ async function init(){
   try{const r=await fetch("data/low_open.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) og=await r.json();}catch(e){}
   if(og&&og.items){const m={}; og.items.forEach(x=>{m[x.code]=x;});
     (d&&d.today||[]).forEach(t=>{ if(m[t.code]){ t.open=m[t.code].open; t.gap=m[t.code].gap; } });}
+  loadPrev();
   const note=document.getElementById("lowlive-note");
   if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
   const cd=d.cooldown||{}, sm=d.summary||{};
@@ -2935,8 +2936,14 @@ async function loadMonth(){
 }
 
 async function loadPrev(){
-  const box=document.getElementById("lowprev");
-  if(!box) return;
+  const anchor=document.getElementById("lowlive");
+  if(!anchor) return;
+  let box=document.getElementById("lowprev");
+  if(!box){
+    box=document.createElement("div");
+    box.id="lowprev";
+    anchor.parentNode.insertBefore(box, anchor.nextSibling);
+  }
   let d;
   try{ d=await (await fetch("data/low_preview.json?t="+Date.now())).json(); }
   catch(e){ box.hidden=true; return; }
