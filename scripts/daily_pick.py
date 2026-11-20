@@ -480,6 +480,9 @@ def main():
             _st = round(float(p["limit"]) * 0.970225)
             _cur = _hold = _under = None
             _entry = _sg                          # 신호일 종가 매수
+            _now = pd.Timestamp.now()
+            _closed = (_sg < int(_now.strftime("%Y%m%d")) or
+                       (_now.hour * 60 + _now.minute) >= _market_close_min())
             if d0 is not None:
                 ds2 = [int(x.strftime("%Y%m%d")) for x in d0.index]
                 if _sg in ds2:
@@ -497,7 +500,7 @@ def main():
                               open=(round(op) if op else None), gap=gp,
                               held=bool(p.get("held")),
                               status=("보유중" if p.get("held") else
-                                      ("매수 예정" if _hold == 0 else
+                                      ("매수 예정" if (_hold == 0 and not _closed) else
                                        (r or {}).get("status", "대기"))),
                               kind=(r or {}).get("kind"),
                               net=round((r or {}).get("net", 0), 2)))
