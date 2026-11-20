@@ -2286,7 +2286,8 @@ async function init(){
     if(gi===0){
       /* 오늘은 익절 포함 전체 표시 */
     }else{
-      items=items.filter(x=>x.status==="보유중");                    // 보유중 전체
+      // 보유중 + 청산(익절·손절) 전체 표시. 음영으로 결과 구분
+      items=items.filter(x=>x.status==="보유중"||x.status==="청산완료");
     }
     hidden=before-items.length;
     const nCl=items.filter(x=>x.status==="청산완료").length;
