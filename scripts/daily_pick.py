@@ -403,9 +403,22 @@ def main():
     if surged:
         print(f"[INFO] 급등(3일 {SURGE_MAX:.0f}%↑) 제외 {surged}건")
     cool_on, cool_pct = market_cooldown(today)
+    # 15:18에 확정된 날은 저녁 실행에서 신규 매수 추가 금지
+    seal = {}
+    if SEAL.exists():
+        try:
+            seal = json.loads(SEAL.read_text(encoding="utf-8"))
+        except Exception:
+            seal = {}
+    if PRECLOSE and today:
+        seal[str(today)] = "preclose"
+        SEAL.write_text(json.dumps(seal, ensure_ascii=False), encoding="utf-8")
+    _sealed = (not PRECLOSE) and today and seal.get(str(today)) == "preclose"
     # 최신 거래일 신호만 등록 (거래정지·데이터 미갱신 종목의 옛 신호 배제)
     for rec in ([] if cool_on else cand):
         if rec["sig"] != today or (rec["code"], rec["sig"]) in seen:
+            continue
+        if _sealed:            # 15:20에 사지 않은 종목이 저녁에 끼어드는 것 방지
             continue
         picks.append(rec)
         added.append(rec)
