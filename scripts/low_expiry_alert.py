@@ -22,7 +22,7 @@ PIT = Path("/home/lucky/backtest/data/pit")
 ENV = Path("/home/lucky/magicsplit-safe-strategy/backtest/.env")
 
 UA = {"User-Agent": "Mozilla/5.0"}
-GAP = 0.015
+BUY_GAP, SELL_GAP = 0.015, 0.020
 AMTS = [6, 6, 9]
 HOLD = 3
 
@@ -145,7 +145,7 @@ def main():
         hold_days = (len(df) - e) + 1             # 오늘이 몇 일째 (1=진입일)
         if hold_days > HOLD:
             continue
-        lv = [lim * (1 - GAP) ** k for k in range(3)]
+        lv = [lim * (1 - BUY_GAP) ** k for k in range(3)]
         held = {0: min(float(df["Open"].values[e]), lim)}
         for k in (1, 2):
             if float(df["Low"].values[e]) <= lv[k]:
@@ -153,7 +153,7 @@ def main():
         # 진입일 이후 매도 반영
         for j in range(e, len(df)):
             for k in list(held):
-                if float(df["High"].values[j]) >= held[k] * (1 + GAP):
+                if float(df["High"].values[j]) >= held[k] * (1 + SELL_GAP):
                     del held[k]
         if not held:
             continue                              # 이미 전량 익절

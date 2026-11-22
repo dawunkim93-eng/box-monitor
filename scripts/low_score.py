@@ -19,7 +19,7 @@ PIT = Path("/home/lucky/backtest/data/pit")
 UNIV = ROOT / "data" / "daily_universe.json"
 OUT = ROOT / "data" / "low_score.json"
 
-GAP, FEE = 0.015, 0.00015
+BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
@@ -40,7 +40,7 @@ def blocked():
 def trade(c, h, l, o, i):
     lim = float(c[i])
     # 종가 매수 — 항상 체결
-    lv = [lim * (1 - GAP) ** k for k in range(3)]
+    lv = [lim * (1 - BUY_GAP) ** k for k in range(3)]
     held = {0: lim}
     net = 0.0
     for dd in range(HOLD):
@@ -51,8 +51,8 @@ def trade(c, h, l, o, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            if float(h[j]) >= held[k] * (1 + GAP):
-                net += AMTS[k] * 10_000 * (GAP - FEE)
+            if float(h[j]) >= held[k] * (1 + SELL_GAP):
+                net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
         if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
             for k in list(held):

@@ -53,7 +53,7 @@ def main():
     for p in sorted(todays, key=lambda x: -(x.get("score") or 0)):
         st = round(float(p["limit"]) * (1 - GAP) ** 2)
         lines.append(f"· {p['name']} {p['limit']:,}원 · 3차 {st:,}원")
-    lines.append("보유 기간 3거래일 · 각 차수 +1.5% 익절 · 종가가 3차 아래면 청산")
+    lines.append("보유 기간 3거래일 · 각 차수 +2.0% 익절 · 종가가 3차 아래면 청산")
     text = "\n".join(lines)
     if "--no-send" in sys.argv:
         print(text)

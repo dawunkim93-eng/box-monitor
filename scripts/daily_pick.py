@@ -30,7 +30,7 @@ UNIV = ROOT / "data" / "daily_universe.json"
 PICKS = ROOT / "data" / "paper_picks.json"
 OUT = ROOT / "data" / "daily_pick.json"
 
-GAP, FEE = 0.015, 0.00015
+BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
@@ -243,8 +243,8 @@ def evaluate(code, df, sig, limit):
     else:
         return dict(status="미체결", net=0.0, days=0, entry=None,
                     exit=None, kind="미체결")
-    lv = [px * (1 - GAP) ** k for k in range(3)]
-    tg = [x * (1 + GAP) for x in lv]
+    lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
+    tg = [x * (1 + SELL_GAP) for x in lv]
     held = [True, False, False]
     net = 0.0
     exit_kind = None
@@ -259,7 +259,7 @@ def evaluate(code, df, sig, limit):
         for k in range(3):
             if held[k] and float(h[j]) >= tg[k]:
                 held[k] = False
-                net += AMTS[k] * 10_000 * (GAP - FEE)
+                net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 exit_day = int(df.index[j].strftime("%Y%m%d"))
         if any(held) and float(c[j]) < lv[2]:      # 종가가 3차 아래면 그날 청산
             for k in range(3):
@@ -523,9 +523,9 @@ def main():
         todays = [{k: c.get(k) for k in keys} for c in cand if c["sig"] == today]
     todays.sort(key=lambda t: ("A" not in t["cond"], -t["amt"]))
     for t in todays:
-        t["rungs"] = [round(t["limit"] * (1 - GAP) ** k)
+        t["rungs"] = [round(t["limit"] * (1 - BUY_GAP) ** k)
                       for k in range(3)]
-        t["stop"] = round(t["limit"] * (1 - GAP) ** 2)
+        t["stop"] = round(t["limit"] * (1 - BUY_GAP) ** 2)
 
     # 청산 유형 분포 + 일별 누적 곡선
     kinds = {}
@@ -650,7 +650,7 @@ def main():
                sig_date=today, summary=summary,
                today=todays,
                recent=sorted(rows, key=lambda r: -r["sig"])[:12],
-               rule=dict(gap=GAP * 100, amts=AMTS, slot=SLOT, hold=HOLD,
+               rule=dict(gap=BUY_GAP * 100, sell=SELL_GAP * 100, amts=AMTS, slot=SLOT, hold=HOLD,
                          cond_a="거래대금 ≤ 37.5억 & 밴드위치 ≥ 89.5%",
                          cond_b="거래대금 ≤ 37.5억 & ATR ≤ 5.85%",
                          min_amt=MIN_AMT,

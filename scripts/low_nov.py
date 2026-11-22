@@ -22,7 +22,7 @@ UNIV = ROOT / "data" / "daily_universe.json"
 OUT = ROOT / "data" / "low_nov.json"
 
 SINCE, UNTIL = 20260901, 20261231
-GAP, FEE = 0.015, 0.00015
+BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
@@ -51,8 +51,8 @@ def trade(df, i):
         return None
     lim = float(c[i])
     entry_day = int(df.index[i].strftime("%Y%m%d"))     # 신호일 종가 매수
-    lv = [lim * (1 - GAP) ** k for k in range(3)]
-    tg = [x * (1 + GAP) for x in lv]
+    lv = [lim * (1 - BUY_GAP) ** k for k in range(3)]
+    tg = [x * (1 + SELL_GAP) for x in lv]
     px0 = lim
     held = {0: px0}
     realised = 0.0
@@ -66,8 +66,8 @@ def trade(df, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            if float(h[j]) >= held[k] * (1 + GAP):
-                realised += AMTS[k] * 10_000 * (GAP - FEE)
+            if float(h[j]) >= held[k] * (1 + SELL_GAP):
+                realised += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
         exit_day = int(df.index[min(j, len(df) - 1)].strftime("%Y%m%d"))
         if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
