@@ -204,7 +204,7 @@ def main():
                             kind=r.get("kind", ""), net=round(r["net"]),
                             pct=round(r["net"] / SLOT * 100, 2),
                             status=r["status"]) for r in recent],
-               note=("슬롯 무제한 · 급락 쿨다운(신호일 기준) · 1.5% 3차 · 최대 3일 · "
+               note=("슬롯 무제한 · 급락 쿨다운(신호일 기준) · 매수 1.5% 3차 · 익절 +2.0% · 최대 3일 · "
                      "종가가 3차(-3%) 아래면 그날 청산 · 금액은 슬롯 21만원 기준"))
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"[INFO] 9~11월 진입 {s['positions']}건 · 완료 {s['done']} · 보유 {s['holding']} · "

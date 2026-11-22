@@ -2924,7 +2924,7 @@ async function loadMonth(){
   const kr=n=>n.toLocaleString();
   head.innerHTML=`<div class="prow"><span>${t.months}개월 · ${kr(t.n)}건 · 플러스 ${t.plus}/${t.months}개월</span>
       <b>${t.net>=0?"+":""}${kr(t.net)}원</b></div>
-    <div class="pmuted">슬롯 제한 없음 · 21만원 · 종가 매수 · 최대 보유 3일. 평균자본은 그 달 동시 보유분의 평균 투입금액입니다.</div>`;
+    <div class="pmuted">슬롯 제한 없음 · 21만원 · 다음날 09:00 매수 · 최대 보유 3일. 평균자본은 그 달 동시 보유분의 평균 투입금액입니다.</div>`;
   body.innerHTML=`<div class="tw"><table class="pt">
     <thead><tr><th>월</th><th>건수</th><th>승률</th><th>건당</th><th>합계</th><th>평균자본</th><th>수익률</th></tr></thead>
     <tbody>${rows.map(r=>`<tr><td>${r.month.slice(2)}</td><td>${kr(r.n)}</td><td>${r.win.toFixed(1)}%</td>
