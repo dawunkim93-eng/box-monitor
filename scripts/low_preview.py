@@ -49,6 +49,16 @@ if PICKS.exists():
 _u = json.loads(UNIV.read_text(encoding="utf-8"))
 NAMES = {x["code"]: x["name"] for x in _u.get("items", [])}
 codes = sorted(set(_u["codes"]))
+# 시장 기준일: 유니버스 종목들의 마지막 거래일 최빈값
+from collections import Counter
+_last_days = []
+for _c in codes:
+    _d = load(_c)
+    if _d is None or not len(_d):
+        continue
+    _last_days.append(int(_d.index[-1].strftime("%Y%m%d")))
+MARKET_DATE = Counter(_last_days).most_common(1)[0][0] if _last_days else None
+print(f"[INFO] 시장 기준일 {MARKET_DATE}")
 rows = []
 for code in codes:
     if code[-1] in PREF_TAIL:
@@ -56,6 +66,8 @@ for code in codes:
     df = load(code)
     if df is None or len(df) < 40:
         continue
+    if MARKET_DATE and int(df.index[-1].strftime("%Y%m%d")) != MARKET_DATE:
+        continue                      # 거래정지·상장폐지로 최신 봉이 없음
     f = features(df)
     if f is None:
         continue

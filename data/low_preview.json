@@ -28,60 +28,8 @@
    "held": false
   },
   {
-   "name": "인터파크",
-   "score": 80.8,
-   "close": 5020.0,
-   "open": 4575.0,
-   "limit": 5020,
-   "stop": 4871,
-   "amt": 13.6,
-   "pos": 100.0,
-   "atr": 4.5,
-   "ret3": 11.3,
-   "held": false
-  },
-  {
-   "name": "원익테라세미콘",
-   "score": 80.8,
-   "close": 16000.0,
-   "open": 15200.0,
-   "limit": 16000,
-   "stop": 15524,
-   "amt": 14.2,
-   "pos": 100.0,
-   "atr": 4.4,
-   "ret3": 9.6,
-   "held": false
-  },
-  {
-   "name": "코오롱ENP",
-   "score": 73.1,
-   "close": 15000.0,
-   "open": 14610.0,
-   "limit": 15000,
-   "stop": 14553,
-   "amt": 20.7,
-   "pos": 91.9,
-   "atr": 6.4,
-   "ret3": 9.4,
-   "held": false
-  },
-  {
-   "name": "제닉스로보틱스",
-   "score": 69.2,
-   "close": 6030.0,
-   "open": 5580.0,
-   "limit": 6030,
-   "stop": 5850,
-   "amt": 25.9,
-   "pos": 94.0,
-   "atr": 10.7,
-   "ret3": 12.3,
-   "held": false
-  },
-  {
    "name": "캠시스",
-   "score": 65.4,
+   "score": 84.6,
    "close": 7160.0,
    "open": 6900.0,
    "limit": 7160,
@@ -93,21 +41,8 @@
    "held": true
   },
   {
-   "name": "현대홈쇼핑",
-   "score": 65.4,
-   "close": 87300.0,
-   "open": 81600.0,
-   "limit": 87300,
-   "stop": 84701,
-   "amt": 18.1,
-   "pos": 100.0,
-   "atr": 5.1,
-   "ret3": 9.8,
-   "held": false
-  },
-  {
    "name": "SNT다이내믹스",
-   "score": 61.5,
+   "score": 65.4,
    "close": 29300.0,
    "open": 29050.0,
    "limit": 29300,
@@ -120,7 +55,7 @@
   },
   {
    "name": "아모레퍼시픽홀딩스",
-   "score": 57.7,
+   "score": 61.5,
    "close": 27750.0,
    "open": 27600.0,
    "limit": 27750,
@@ -133,7 +68,7 @@
   },
   {
    "name": "롯데웰푸드",
-   "score": 57.7,
+   "score": 61.5,
    "close": 142200.0,
    "open": 141000.0,
    "limit": 142200,
@@ -145,34 +80,8 @@
    "held": true
   },
   {
-   "name": "동양생명",
-   "score": 53.8,
-   "close": 8250.0,
-   "open": 8250.0,
-   "limit": 8250,
-   "stop": 8004,
-   "amt": 10.9,
-   "pos": 93.8,
-   "atr": 4.5,
-   "ret3": 0.6,
-   "held": false
-  },
-  {
-   "name": "대덕GDS",
-   "score": 46.2,
-   "close": 14200.0,
-   "open": 13800.0,
-   "limit": 14200,
-   "stop": 13777,
-   "amt": 23.1,
-   "pos": 100.0,
-   "atr": 4.2,
-   "ret3": 4.8,
-   "held": false
-  },
-  {
    "name": "CJ CGV",
-   "score": 46.2,
+   "score": 53.8,
    "close": 5320.0,
    "open": 5270.0,
    "limit": 5320,
@@ -185,7 +94,7 @@
   },
   {
    "name": "바이오비쥬",
-   "score": 46.2,
+   "score": 53.8,
    "close": 16600.0,
    "open": 16300.0,
    "limit": 16600,
@@ -197,16 +106,16 @@
    "held": true
   },
   {
-   "name": "제이시스메디칼",
-   "score": 38.5,
-   "close": 12900.0,
-   "open": 12880.0,
-   "limit": 12900,
-   "stop": 12516,
-   "amt": 13.5,
-   "pos": 100.0,
-   "atr": 0.3,
-   "ret3": 0.0,
+   "name": "제닉스로보틱스",
+   "score": 46.2,
+   "close": 6030.0,
+   "open": 5580.0,
+   "limit": 6030,
+   "stop": 5850,
+   "amt": 25.9,
+   "pos": 94.0,
+   "atr": 10.7,
+   "ret3": 12.3,
    "held": false
   },
   {
@@ -247,33 +156,7 @@
    "atr": 3.3,
    "ret3": -0.2,
    "held": true
-  },
-  {
-   "name": "코리아오토글라스",
-   "score": 7.7,
-   "close": 16550.0,
-   "open": 15900.0,
-   "limit": 16550,
-   "stop": 16057,
-   "amt": 21.7,
-   "pos": 100.0,
-   "atr": 2.7,
-   "ret3": 3.4,
-   "held": false
-  },
-  {
-   "name": "KB손해보험",
-   "score": 3.8,
-   "close": 32800.0,
-   "open": 32750.0,
-   "limit": 32800,
-   "stop": 31823,
-   "amt": 11.0,
-   "pos": 96.5,
-   "atr": 2.5,
-   "ret3": 0.6,
-   "held": false
   }
  ],
- "buy": 12
+ "buy": 3
 }
