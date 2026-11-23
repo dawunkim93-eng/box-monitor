@@ -2314,8 +2314,7 @@ async function init(){
       const s3=Math.round((t.stop||t.limit*0.97));
       let cls="";
       if(t.status==="청산완료"){
-        if(t.kind==="전량익절") cls=' class="winrow"';
-        else if(t.kind==="손절선 청산") cls=' class="closed"';
+        cls=(t.net>0)?' class="winrow"':' class="closed"';   // 손익 부호로 음영
       }else if(t.under&&t.status==="보유중"){
         cls=' class="closed"';
       }
