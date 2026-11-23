@@ -2275,7 +2275,11 @@ async function init(){
   const dash=n=>`${String(n).slice(4,6)}/${String(n).slice(6)}`;
   const gpCell=g=>(g==null?"-":`${g>0?'<span class="up">▲':(g<0?'<span class="deep">▼':'<span class="sub">-')}${g>0?"+":""}${fx(g,2)}%</span>`);
   const stCell=x=>{
-    if(x.status==="청산완료") return `<span class="${x.kind==="전량익절"?"up":"deep"}">${x.kind||"청산"}</span>`;
+    if(x.status==="청산완료"){
+      // 자동 손절이어도 1·2차 익절로 합계가 플러스면 '부분 익절'
+      const lbl=(x.kind==="자동 손절"&&x.net>0)?"부분 익절":(x.kind||"청산");
+      return `<span class="${x.net>0?"up":"deep"}">${lbl}</span>`;
+    }
     if(x.status==="보유중") return `<span class="wait">보유중</span>`;
     if(x.status==="미체결") return `<span class="sub">미체결</span>`;
     if(x.status==="매수 대기") return `<span class="sub">매수 예정</span>`;
