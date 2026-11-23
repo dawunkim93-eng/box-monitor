@@ -2279,6 +2279,7 @@ async function init(){
     if(x.status==="보유중") return `<span class="wait">보유중</span>`;
     if(x.status==="미체결") return `<span class="sub">미체결</span>`;
     if(x.status==="매수 대기") return `<span class="sub">매수 예정</span>`;
+    if(x.status==="매수 예정") return `<span class="sub">매수 예정</span>`;
     return `<span class="sub">매수 예정</span>`;
   };
   box.innerHTML = DAYS.map((g,gi)=>{
@@ -2297,8 +2298,8 @@ async function init(){
     const netAll=items.reduce((a,x)=>a+(x.status==="청산완료"?(x.net||0):0),0);
     const dist=(g.dist==null?gi:g.dist);
     const lbl=(dist===0?"오늘 ":(dist===1?"하루 전 ":(dist===2?"2일 전 ":`${dist}일 전 `)));
-    const pend=items.filter(x=>x.status==="매수 예정").length;
-    const tagTxt=(gi===0?(pend?`매수 예정 ${pend} · 보유 ${nHold}`:`매수 완료 ${items.length}`)
+    const pend=items.filter(x=>x.status==="매수 예정"||x.status==="매수 대기").length;
+    const tagTxt=(gi===0?(pend?`매수 예정 ${pend}`:`매수 완료 ${items.length}`)
                   :(dist>=3?`<span class="deep">만기 청산</span>`
                     :(gi===1?"보유중 · 손절은 음영":"보유중")));
     const head=`<div class="msub" style="margin:${gi?"12px":"2px"} 0 4px">

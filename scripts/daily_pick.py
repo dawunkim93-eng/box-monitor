@@ -480,6 +480,8 @@ def main():
             continue
         if _sealed or _past:   # 확정된 날 / 지난 날짜는 신규 등록 안 함
             continue
+        if rec.get("held"):    # 이미 보유 중인 종목은 신규 등록 금지
+            continue
         picks.append(rec)
         added.append(rec)
         seen.add((rec["code"], rec["sig"]))
@@ -609,9 +611,8 @@ def main():
             _st = round(float(p["limit"]) * 0.970225)
             _cur = _hold = _under = None
             _entry = _sg                          # 신호일 종가 매수
-            _now = pd.Timestamp.now()
-            _closed = (_sg < int(_now.strftime("%Y%m%d")) or
-                       (_now.hour * 60 + _now.minute) >= _market_close_min())
+            # 아침 매수: 신호일 다음 거래일에 사므로, 신호일 당일엔 항상 매수 예정
+            _closed = _sg < int(pd.Timestamp.now().strftime("%Y%m%d"))
             if d0 is not None:
                 ds2 = [int(x.strftime("%Y%m%d")) for x in d0.index]
                 if _sg in ds2:
