@@ -638,7 +638,7 @@ def main():
                               fill=(round((r or {}).get("px")) if (r or {}).get("px") else None),
                               net=round((r or {}).get("net", 0), 2)))
         items.sort(key=lambda x: (-(x["score"] or 0)))
-        _why = ("급락 쿨다운" if _sg in _blocked else
+        _why = ("급락일 진입 중단" if (_sg in _blocked and not items) else
                 ("조건 미달" if not items else ""))
         days_out.append(dict(sig=_sg, dist=_dist, n=len(items), items=items, why=_why))
 
