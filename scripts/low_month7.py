@@ -14,6 +14,7 @@ PIT = Path("/home/lucky/backtest/data/pit")
 UNIV = ROOT / "data" / "daily_universe.json"
 COND = ROOT / "data" / "low_cond.json"
 BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
+AUTO_STOP = 0.035
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD, SLOTS = 3, 7
@@ -47,13 +48,25 @@ def cooldown():
     return {dn[i] for i in range(1, len(dn)) if ret.iloc[i] <= -3.0}, m.index
 
 
-def trade(c, h, l, i):
-    lim = c[i]
-    lv = [lim * (1 - BUY_GAP) ** k for k in range(3)]
-    held = {0: lim}
+def trade(o, c, h, l, i):
+    """반환: (순익 원, 청산 인덱스) 또는 미체결이면 (None, None)"""
+    e = i + 1
+    if e >= len(c):
+        return None, None
+    prev = float(c[i])
+    if float(o[e]) < prev:
+        px = float(o[e])
+    elif float(l[e]) <= prev:
+        px = prev
+    else:
+        return None, None
+    lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
+    tg = [x * (1 + SELL_GAP) for x in lv]
+    stop_px = px * (1 - AUTO_STOP)
+    held = {0: px}
     net = 0.0
     for dd in range(HOLD):
-        j = i + 1 + dd
+        j = e + dd
         if j >= len(c):
             break
         for k in (1, 2):
@@ -63,17 +76,23 @@ def trade(c, h, l, i):
             if h[j] >= held[k] * (1 + SELL_GAP):
                 net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
-        if held and c[j] < lv[2]:
+        if held and l[j] <= stop_px:              # 장중 자동매도
+            fill = min(stop_px, float(o[j])) if float(o[j]) < stop_px else stop_px
+            for k in list(held):
+                net += AMTS[k] * 10_000 * (fill / held[k] - 1 - FEE)
+                del held[k]
+            return net, j
+        if held and c[j] < lv[2]:                 # 종가 3차 이탈
             for k in list(held):
                 net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE)
                 del held[k]
-            return net, int(j)
+            return net, j
     if held:
-        j = min(i + HOLD, len(c) - 1)
+        j = min(e + HOLD - 1, len(c) - 1)
         for k in list(held):
             net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE)
-        return net, int(j)
-    return net, i + HOLD
+        return net, j
+    return net, e
 
 
 codes = sorted(set(json.loads(UNIV.read_text(encoding="utf-8"))["codes"]))
@@ -93,6 +112,7 @@ for code in codes:
     df = df[df["Volume"] > 0]
     if len(df) < 320:
         continue
+    o = df["Open"].values.astype(float)
     c = df["Close"].values.astype(float); h = df["High"].values.astype(float)
     l = df["Low"].values.astype(float); v = df["Volume"].values.astype(float)
     n = len(df)
@@ -115,7 +135,9 @@ for code in codes:
         d0 = int(df.index[i].strftime("%Y%m%d"))
         if d0 in blk:
             continue
-        net, jx = trade(c, h, l, i)
+        net, jx = trade(o, c, h, l, i)
+        if net is None:
+            continue
         byday[d0].append(dict(code=code, net=net,
                               exit=int(df.index[min(jx, n - 1)].strftime("%Y%m%d")),
                               score=cell_score(a, pos, atr[i])))

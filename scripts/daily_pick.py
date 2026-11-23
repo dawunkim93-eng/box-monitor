@@ -37,6 +37,7 @@ HOLD = 3
 MIN_HIST = 60
 MIN_AMT = 10.0      # 실전 최소 유동성(20일 평균 거래대금, 억원)
 PREF_TAIL = "579K"  # 우선주(코드 끝자리) 제외
+AUTO_STOP = 0.035    # 자동매도: 1차 매수가 -3.5% (3차 -3.0% 아래)
 SURGE_MAX = 20.0    # 3일 수익률이 이보다 크면 제외 (급등 추격 방지)
 COOLDOWN = False    # 아침 매수에서는 급락 쿨다운 효과 없음 (2년 검증)
 COND = ROOT / "data" / "low_cond.json"
@@ -245,6 +246,7 @@ def evaluate(code, df, sig, limit):
                     exit=None, kind="미체결")
     lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
     tg = [x * (1 + SELL_GAP) for x in lv]
+    stop_px = px * (1 - AUTO_STOP)
     held = [True, False, False]
     net = 0.0
     exit_kind = None
@@ -261,6 +263,15 @@ def evaluate(code, df, sig, limit):
                 held[k] = False
                 net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 exit_day = int(df.index[j].strftime("%Y%m%d"))
+        if any(held) and float(l[j]) <= stop_px:   # 장중 자동매도 (-3.5%)
+            _fill = min(stop_px, float(o[j])) if float(o[j]) < stop_px else stop_px
+            for k in range(3):
+                if held[k]:
+                    net += AMTS[k] * 10_000 * (_fill / lv[k] - 1 - FEE)
+                    held[k] = False
+            exit_kind = "자동 손절"
+            exit_day = int(df.index[j].strftime("%Y%m%d"))
+            break
         if any(held) and float(c[j]) < lv[2]:      # 종가가 3차 아래면 그날 청산
             for k in range(3):
                 if held[k]:

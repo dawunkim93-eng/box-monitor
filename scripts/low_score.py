@@ -20,6 +20,7 @@ UNIV = ROOT / "data" / "daily_universe.json"
 OUT = ROOT / "data" / "low_score.json"
 
 BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
+AUTO_STOP = 0.035
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
@@ -41,6 +42,7 @@ def trade(c, h, l, o, i):
     lim = float(c[i])
     # 종가 매수 — 항상 체결
     lv = [lim * (1 - BUY_GAP) ** k for k in range(3)]
+    stop_px = lim * (1 - AUTO_STOP)
     held = {0: lim}
     net = 0.0
     for dd in range(HOLD):
@@ -54,6 +56,12 @@ def trade(c, h, l, o, i):
             if float(h[j]) >= held[k] * (1 + SELL_GAP):
                 net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
+        if held and l[j] <= stop_px:
+            _fill = min(stop_px, float(o[j])) if float(o[j]) < stop_px else stop_px
+            for k in list(held):
+                net += AMTS[k] * 10_000 * (_fill / held[k] - 1 - FEE)
+                del held[k]
+            return net, int(j)
         if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
             for k in list(held):
                 net += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)

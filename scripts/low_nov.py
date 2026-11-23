@@ -23,6 +23,7 @@ OUT = ROOT / "data" / "low_nov.json"
 
 SINCE, UNTIL = 20260901, 20261231
 BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
+AUTO_STOP = 0.035
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
@@ -47,19 +48,27 @@ def trade(df, i):
     h = df["High"].values.astype(float)
     l = df["Low"].values.astype(float)
     o = df["Open"].values.astype(float)
-    if i + 1 >= len(df):
+    e = i + 1
+    if e >= len(df):
         return None
-    lim = float(c[i])
-    entry_day = int(df.index[i].strftime("%Y%m%d"))     # 신호일 종가 매수
-    lv = [lim * (1 - BUY_GAP) ** k for k in range(3)]
+    prev = float(c[i])
+    if float(o[e]) < prev:                       # 시가가 전일 종가보다 낮으면 시가 매수
+        px = float(o[e])
+    elif float(l[e]) <= prev:                    # 아니면 전일 종가 지정가
+        px = prev
+    else:
+        return dict(status="청산완료", net=0.0, kind="미체결",
+                    entry_day=None, exit_day=None, rungs=0)
+    lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
     tg = [x * (1 + SELL_GAP) for x in lv]
-    px0 = lim
-    held = {0: px0}
+    stop_px = px * (1 - AUTO_STOP)
+    held = {0: px}
     realised = 0.0
     kind = None
+    entry_day = int(df.index[e].strftime("%Y%m%d"))
     exit_day = entry_day
     for dd in range(HOLD):
-        j = i + 1 + dd
+        j = e + dd
         if j >= len(df):
             break
         for k in (1, 2):
@@ -70,7 +79,14 @@ def trade(df, i):
                 realised += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
         exit_day = int(df.index[min(j, len(df) - 1)].strftime("%Y%m%d"))
-        if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
+        if held and float(l[j]) <= stop_px:       # 장중 자동매도 (-3.5%)
+            _fill = min(stop_px, float(o[j])) if float(o[j]) < stop_px else stop_px
+            for k in list(held):
+                realised += AMTS[k] * 10_000 * (_fill / held[k] - 1 - FEE)
+                del held[k]
+            kind = "자동 손절"
+            break
+        if held and float(c[j]) < lv[2]:          # 종가가 3차 아래면 그날 청산
             for k in list(held):
                 realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
                 del held[k]
@@ -80,14 +96,14 @@ def trade(df, i):
             kind = kind or "전량익절"
             break
     if held:
-        j = min(i + HOLD, len(df) - 1)
+        j = min(e + HOLD - 1, len(df) - 1)
         for k in list(held):
             realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
-        kind = kind or ("만기 청산" if i + HOLD <= len(df) - 1 else "보유중")
+        kind = kind or ("만기 청산" if e + HOLD - 1 <= len(df) - 1 else "보유중")
         exit_day = int(df.index[j].strftime("%Y%m%d"))
     return dict(status=("보유중" if kind == "보유중" else "청산완료"),
                 net=realised, kind=kind or "전량익절",
-                entry_day=entry_day, exit_day=exit_day, rungs=len(held) + 0)
+                entry_day=entry_day, exit_day=exit_day, rungs=3)
 
 
 def main():
@@ -139,14 +155,18 @@ def main():
             out_rows.append(dict(code=code, name=names.get(code, code), sig=day,
                                  amt=round(a, 1), pos=round(pos, 1), **t))
 
+    out_rows = [r for r in out_rows if r.get("entry_day")]
     rows = out_rows
-    done = [r for r in rows if r["status"] == "청산완료"]
+    done = [r for r in rows if r["status"] == "청산완료" and r.get("kind") != "미체결"]
     total = sum(r["net"] for r in done)
     entry_cnt = defaultdict(int)
     for r in rows:
-        entry_cnt[r["entry_day"]] += 1
+        if r.get("entry_day"):
+            entry_cnt[r["entry_day"]] += 1
     byday = defaultdict(lambda: [0, 0.0])
     for r in done:
+        if not r.get("exit_day"):
+            continue
         byday[r["exit_day"]][0] += 1
         byday[r["exit_day"]][1] += r["net"]
     daily, cum = [], 0.0
@@ -157,7 +177,8 @@ def main():
                           cum=round(cum), pct=round(cum / SLOT * 100, 2)))
 
     kinds = Counter(r["kind"] for r in rows if r["status"] == "청산완료")
-    recent = sorted(rows, key=lambda r: -r["exit_day"])[:12]
+    _ok = [r for r in rows if r.get("exit_day")]
+    recent = sorted(_ok, key=lambda r: -r["exit_day"])[:12]
 
     # 최대 동시 보유(필요 자본) 계산
     ev = []
@@ -193,7 +214,8 @@ def main():
              slot=SLOT, kinds=dict(kinds))
     entry_cnt = defaultdict(int)
     for r in rows:
-        entry_cnt[r["entry_day"]] += 1
+        if r.get("entry_day"):
+            entry_cnt[r["entry_day"]] += 1
     out = dict(updated_at=pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
                entries_by_day=[dict(d=k, n=v) for k, v in sorted(entry_cnt.items())],
                blocked=sorted(x for x in blk if x >= SINCE),

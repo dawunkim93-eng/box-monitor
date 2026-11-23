@@ -20,6 +20,7 @@ UNIV = ROOT / "data" / "daily_universe.json"
 OUT = ROOT / "data" / "low_cond.json"
 
 BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
+AUTO_STOP = 0.035
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
@@ -41,13 +42,22 @@ def blocked():
 
 
 def trade(c, h, l, o, i):
-    lim = float(c[i])
-    # 종가 매수 — 항상 체결
-    lv = [lim * (1 - BUY_GAP) ** k for k in range(3)]
-    held = {0: lim}
+    e = i + 1
+    if e >= len(c):
+        return None
+    prev = float(c[i])
+    if float(o[e]) < prev:
+        px = float(o[e])
+    elif float(l[e]) <= prev:
+        px = prev
+    else:
+        return None                                  # 미체결
+    lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
+    stop_px = px * (1 - AUTO_STOP)
+    held = {0: px}
     net = 0.0
     for dd in range(HOLD):
-        j = i + 1 + dd
+        j = e + dd
         if j >= len(c):
             break
         for k in (1, 2):
@@ -57,7 +67,13 @@ def trade(c, h, l, o, i):
             if float(h[j]) >= held[k] * (1 + SELL_GAP):
                 net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
-        if held and float(c[j]) < lv[2]:        # 매일 3차 이탈 청산
+        if held and l[j] <= stop_px:                 # 장중 자동매도
+            _fill = min(stop_px, float(o[j])) if float(o[j]) < stop_px else stop_px
+            for k in list(held):
+                net += AMTS[k] * 10_000 * (_fill / held[k] - 1 - FEE)
+                del held[k]
+            return net / SLOT * 100
+        if held and float(c[j]) < lv[2]:             # 종가 3차 이탈
             for k in list(held):
                 net += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
                 del held[k]
@@ -65,7 +81,7 @@ def trade(c, h, l, o, i):
         if not held:
             break
     if held:
-        j = min(i + HOLD, len(c) - 1)
+        j = min(e + HOLD - 1, len(c) - 1)
         for k in list(held):
             net += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
     return net / SLOT * 100

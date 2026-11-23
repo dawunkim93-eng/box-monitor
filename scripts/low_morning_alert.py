@@ -52,7 +52,8 @@ def main():
              "· 높으면 → 전일 종가 지정가 (안 내려오면 미체결)"]
     for p in sorted(todays, key=lambda x: -(x.get("score") or 0)):
         st = round(float(p["limit"]) * (1 - GAP) ** 2)
-        lines.append(f"· {p['name']} {p['limit']:,}원 · 3차 {st:,}원")
+        auto = round(float(p["limit"]) * 0.965)
+        lines.append(f"{p['name']} {p['limit']:,}원 | 3차 {st:,}원 | 자동손절 {auto:,}원")
     lines.append("보유 기간 3거래일 · 각 차수 +2.0% 익절 · 종가가 3차 아래면 청산")
     text = "\n".join(lines)
     if "--no-send" in sys.argv:
