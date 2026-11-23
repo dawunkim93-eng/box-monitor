@@ -2313,7 +2313,7 @@ async function init(){
       return head + `<div class="sub" style="margin:0 0 6px">${g.why?("신호 없음 ("+g.why+")"):"신호 없음"}</div>`;
     }
     const rows=items.map(t=>{
-      const s3=Math.round((t.stop||t.limit*0.97));
+      const s3=Math.round((t.fill||t.limit)*0.965);   // 자동매도 손절선
       let cls="";
       if(t.status==="청산완료"){
         cls=(t.net>0)?' class="winrow"':' class="closed"';   // 손익 부호로 음영
@@ -2323,12 +2323,12 @@ async function init(){
       return `<tr${cls}><td><b>${t.score==null?"-":fx(t.score)}</b></td>`
         + `<td class="nm">${t.name}</td>`
         + `<td><b>${f(t.fill||t.limit)}</b></td>`
-        + `<td class="deep">${f(s3)}<div class="sub" style="font-size:8.5px">자동 ${f(Math.round((t.fill||t.limit)*0.965))}</div></td>`
+        + `<td class="deep">${f(s3)}</td>`
         + `<td class="mhide">${f(t.open)}</td><td class="${t.cur&&t.limit?(t.cur>t.limit?'up':(t.cur<t.limit?'dn':'')):''}">${t.cur?f(t.cur):'-'}</td>`
         + `<td>${(t.under&&t.status==="보유중")?'<span class="deep">손절</span>':stCell(t)}</td></tr>`;
     }).join("");
     return head + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th>`
-      + `<th>매수가</th><th title="3차 매수가 = 손절선 (-3%)">3차<br><span class="sub" style="font-size:8.5px">손절선</span></th><th class="mhide">시가</th><th title="가장 최근 종가">현재가</th><th>결과</th>`
+      + `<th>매수가</th><th title="자동매도 주문 가격 (매수가 -3.5%)">손절선</th><th class="mhide">시가</th><th title="가장 최근 종가">현재가</th><th>결과</th>`
       + `</tr></thead><tbody>` + rows + `</tbody></table>`;
   }).join("");
   box.innerHTML += `<div class="sub" style="font-size:11px">점수 높은 순입니다. 15:18에 후보가 확정되면 다음 거래일 09:00에 주문합니다. 시가가 전일 종가보다 낮으면 시장가, 높으면 전일 종가 매수가입니다. 3차는 -3% 손절선(추가 매수), 자동매도는 1차 -3.5%, 익절은 각 차수 +2.0%. 시가는 매수일 시가, 현재가는 가장 최근 종가입니다. 보유 중인데 현재가가 3차 아래면 음영 처리합니다. 청산된 종목은 회색으로 표시하고 결과를 함께 적었습니다. 3일 수익률 20%를 넘는 급등 종목은 후보에서 제외합니다.</div>`;
@@ -2956,12 +2956,12 @@ async function loadPrev(){
   box.innerHTML=`<h2 class="sec" style="margin-top:14px">📋 오늘 ${String(d.sig).slice(4,6)}/${String(d.sig).slice(6)} 조건 충족 (${rows.length}건)</h2>
     <div class="sub" style="margin:-4px 0 6px">오늘은 매수 기록이 없어 원장에 없습니다. 조건만 충족한 종목입니다.</div>`
     + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th>`
-    + `<th>매수가</th><th title="3차 매수가 = 손절선 (-3%)">3차<br><span class="sub" style="font-size:8.5px">손절선</span></th>`
+    + `<th>매수가</th><th title="자동매도 주문 가격 (매수가 -3.5%)">손절선</th>`
     + `<th class="mhide">시가</th><th title="가장 최근 종가">현재가</th><th>결과</th>`
     + `</tr></thead><tbody>`
     + rows.map(r=>`<tr><td><b>${r.score.toFixed(1)}</b></td>`
         + `<td class="nm">${r.name}</td>`
-        + `<td><b>${f(r.limit)}</b></td><td class="deep">${f(r.stop)}</td>`
+        + `<td><b>${f(r.limit)}</b></td><td class="deep">${f(Math.round(r.limit*0.965))}</td>`
         + `<td class="mhide">${f(r.open)}</td><td>${f(r.close)}</td>`
         + `<td><span class="wait">조건 충족</span></td></tr>`).join("")
     + `</tbody></table>`;
