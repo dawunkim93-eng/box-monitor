@@ -324,7 +324,9 @@ def fix_limits(picks, market_date):
         if p["sig"] not in days:
             continue
         real = float(d["Close"].values[days.index(p["sig"])])
-        if p["sig"] == market_date:
+        # 최근 10일 이내 신호는 네이버 확정 종가로 재확인 (PIT 지연·정정 보정)
+        _recent = int((pd.Timestamp.now() - pd.Timedelta(days=10)).strftime("%Y%m%d"))
+        if p["sig"] >= _recent:
             real = naver_close(p["code"], p["sig"]) or real
         if abs(real - float(p["limit"])) > 0.5:
             p["limit"] = round(real)
