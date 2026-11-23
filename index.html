@@ -2299,9 +2299,10 @@ async function init(){
     const dist=(g.dist==null?gi:g.dist);
     const lbl=(dist===0?"오늘 ":(dist===1?"하루 전 ":(dist===2?"2일 전 ":`${dist}일 전 `)));
     const pend=items.filter(x=>x.status==="매수 예정"||x.status==="매수 대기").length;
+    const _tag=(nHold&&nCl)?`보유 ${nHold} · 청산 ${nCl}`
+                :(nHold?`보유 ${nHold}`:(nCl?`청산 ${nCl}`:""));
     const tagTxt=(gi===0?(pend?`매수 예정 ${pend}`:`매수 완료 ${items.length}`)
-                  :(dist>=3?`<span class="deep">만기 청산</span>`
-                    :(gi===1?"보유중 · 손절은 음영":"보유중")));
+                  :(dist>=3?`${_tag} · <span class="deep">만기 대상</span>`:_tag));
     const head=`<div class="msub" style="margin:${gi?"12px":"2px"} 0 4px">
         <b>${lbl}${dash(g.sig)} 신호</b> · ${items.length}건${tagTxt?` <span class="sub">${tagTxt}</span>`:""}`
         + (gi===0&&nCl?` · 청산 ${nCl}`:"") + (gi===0&&nHold?` · 보유 ${nHold}`:"")
