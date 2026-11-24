@@ -39,6 +39,7 @@ MIN_AMT = 10.0      # 실전 최소 유동성(20일 평균 거래대금, 억원)
 PREF_TAIL = "579K"  # 우선주(코드 끝자리) 제외
 AUTO_STOP = 0.035    # 자동매도: 1차 매수가 -3.5% (3차 -3.0% 아래)
 SURGE_MAX = 20.0    # 3일 수익률이 이보다 크면 제외 (급등 추격 방지)
+SURGE_1D = 15.0     # 당일 상승률이 이보다 크면 제외 (상한가 추격 방지)
 COOLDOWN = False    # 아침 매수에서는 급락 쿨다운 효과 없음 (2년 검증)
 COND = ROOT / "data" / "low_cond.json"
 
@@ -213,6 +214,7 @@ def features(df):
         return None
     return dict(close=float(c[i]), open=float(df["Open"].values[i]),
                 ret3=float((c[i] / c[i - 3] - 1) * 100) if i >= 3 else 0.0,
+                ret1=float((c[i] / c[i - 1] - 1) * 100) if i > 0 else 0.0,
                 prev_close=float(c[i - 1]) if i > 0 else float(c[i]),
                 atr=float(atr[i] * 100), amt=float(amt20[i]),
                 pos=float((c[i] - lo30[i]) / (hi30[i] - lo30[i]) * 100),
@@ -447,6 +449,9 @@ def main():
                 f["close"] = real
                 lo, hi = min(f["lo30"], real), max(f["hi30"], real)
                 f["pos"] = (real - lo) / max(hi - lo, 1e-9) * 100
+        if f.get("ret1", 0.0) > SURGE_1D:      # 당일 급등(상한가) 제외
+            surged += 1
+            continue
         if f["ret3"] > SURGE_MAX:          # 급등 추격 제외
             surged += 1
             continue
