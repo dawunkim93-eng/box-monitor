@@ -672,6 +672,10 @@ def main():
                               fill=(_mfill or (round((r or {}).get("px")) if (r or {}).get("px") else None)),
                               src=("분봉" if _mp else "일봉"),
                               net=round((_mnet if _mnet is not None else (r or {}).get("net", 0)), 2)))
+        if _sg == today:      # 오늘 표는 신호 목록 — 보유중·최근 매수도 '매수 예정'으로 통일
+            for _it in items:
+                if _it["status"] != "급등 제외":
+                    _it["status"] = "매수 대기"
         items.sort(key=lambda x: (-(x["score"] or 0)))
         _why = ("기록 없음" if not items else "")
         days_out.append(dict(sig=_sg, dist=_dist, n=len(items), items=items, why=_why))
