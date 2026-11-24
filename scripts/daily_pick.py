@@ -372,6 +372,8 @@ def main():
     market_date = Counter(_samp).most_common(1)[0][0] if _samp else None
 
     picks = json.loads(PICKS.read_text(encoding="utf-8")) if PICKS.exists() else []
+    MPICK = ROOT / "data" / "minute_picks.json"
+    minute_res = json.loads(MPICK.read_text(encoding="utf-8")) if MPICK.exists() else {}
     # 같은 종목 중복 보유 정리 — 가장 이른 보유만 남김
     _by_code = {}
     for _p in picks:
@@ -604,6 +606,13 @@ def main():
         _extra = []          # 보유중 종목은 최초 매수 묶음에만 표시 (가격 중복 방지)
         for p in [x for x in picks if x["sig"] == _sg] + _extra:
             r = next((x for x in rows if x["code"] == p["code"] and x["sig"] == _sg), None)
+            _mp = minute_res.get(f"{p['code']}:{_sg}")
+            _mfill = _mstatus = _mkind = _mnet = None
+            if _mp:
+                _mfill = _mp.get("fill")
+                _mstatus = _mp.get("status")
+                _mkind = _mp.get("kind")
+                _mnet = _mp.get("net")
             d0 = load(p["code"])
             op = gp = None
             if d0 is not None:
@@ -638,11 +647,13 @@ def main():
                               open=(round(op) if op else None), gap=gp,
                               held=bool(p.get("held")),
                               status=("보유중" if p.get("held") else
-                                      ("매수 예정" if (_hold is None or (_hold == 0 and not _closed)) else
-                                       (r or {}).get("status", "대기"))),
-                              kind=(r or {}).get("kind"),
-                              fill=(round((r or {}).get("px")) if (r or {}).get("px") else None),
-                              net=round((r or {}).get("net", 0), 2)))
+                                      (_mstatus or
+                                       ("매수 예정" if (_hold is None or (_hold == 0 and not _closed)) else
+                                        (r or {}).get("status", "대기")))),
+                              kind=(_mkind or (r or {}).get("kind")),
+                              fill=(_mfill or (round((r or {}).get("px")) if (r or {}).get("px") else None)),
+                              src=("분봉" if _mp else "일봉"),
+                              net=round((_mnet if _mnet is not None else (r or {}).get("net", 0)), 2)))
         items.sort(key=lambda x: (-(x["score"] or 0)))
         _why = ("기록 없음" if not items else "")
         days_out.append(dict(sig=_sg, dist=_dist, n=len(items), items=items, why=_why))
