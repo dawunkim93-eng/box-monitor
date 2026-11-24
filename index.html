@@ -999,7 +999,7 @@ function render(){
   const d=DATA;
   const cd=d.cooldown||{};
   $("#cdbanner").innerHTML = cd.on
-    ? `<div class="cdbanner">⛔ <b>급락 쿨다운</b> — 전일 KOSPI ${cd.pct==null?"":(cd.pct>0?"+":"")+cd.pct+"%"}${cd.date?" ("+cd.date+")":""} · <b>오늘 신규 진입 스킵</b></div>`
+    ? `<div class="cdbanner">⛔ <b>급락 쿨다운 (주봉박스)</b> — 전일 KOSPI ${cd.pct==null?"":(cd.pct>0?"+":"")+cd.pct+"%"}${cd.date?" ("+cd.date+")":""} · <b>박스 신규 진입만 쉼</b> (저변동은 별도)</div>`
     : "";
   if(HELD_NEEDS_UNION){
     const H=d.holdings||{};
