@@ -62,6 +62,7 @@ def trade(df, i):
     lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
     tg = [x * (1 + SELL_GAP) for x in lv]
     stop_px = px * (1 - AUTO_STOP)
+    limit_entry = abs(px - float(o[e])) > 1e-9
     held = {0: px}
     realised = 0.0
     kind = None
@@ -75,7 +76,9 @@ def trade(df, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            if float(h[j]) >= held[k] * (1 + SELL_GAP):
+            _hit = (float(h[j]) >= held[k] * (1 + SELL_GAP)) if (dd > 0 or not limit_entry) \
+                else (float(c[j]) >= held[k] * (1 + SELL_GAP))
+            if _hit:
                 realised += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
         exit_day = int(df.index[min(j, len(df) - 1)].strftime("%Y%m%d"))

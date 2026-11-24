@@ -53,7 +53,9 @@ def trade(c, h, l, o, i):
             if k not in held and float(l[j]) <= lv[k]:
                 held[k] = lv[k]
         for k in list(held):
-            if float(h[j]) >= held[k] * (1 + SELL_GAP):
+            _hit = (float(h[j]) >= held[k] * (1 + SELL_GAP)) if (dd > 0 or not limit_entry) \
+                else (float(c[j]) >= held[k] * (1 + SELL_GAP))
+            if _hit:
                 net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 del held[k]
         if held and l[j] <= stop_px:

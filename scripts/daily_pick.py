@@ -247,6 +247,8 @@ def evaluate(code, df, sig, limit):
     lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
     tg = [x * (1 + SELL_GAP) for x in lv]
     stop_px = px * (1 - AUTO_STOP)
+    # 지정가 체결(시가>전일종가)이면 당일 고가가 체결 전일 수 있으므로 종가로 판정
+    limit_entry = abs(px - float(o[e])) > 1e-9
     held = [True, False, False]
     net = 0.0
     exit_kind = None
@@ -259,7 +261,10 @@ def evaluate(code, df, sig, limit):
             if not held[k] and float(l[j]) <= lv[k]:
                 held[k] = True
         for k in range(3):
-            if held[k] and float(h[j]) >= tg[k]:
+            if not held[k]:
+                continue
+            hit = (float(h[j]) >= tg[k]) if (dd > 0 or not limit_entry) else (float(c[j]) >= tg[k])
+            if hit:
                 held[k] = False
                 net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
                 exit_day = int(df.index[j].strftime("%Y%m%d"))
