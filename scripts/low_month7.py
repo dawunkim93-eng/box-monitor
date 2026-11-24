@@ -18,7 +18,7 @@ AUTO_STOP = 0.035
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD, SLOTS = 3, 7
-MIN_AMT, MAX_AMT, POS_MIN, SURGE = 10.0, 37.51, 89.47, 20.0
+MIN_AMT, MAX_AMT, POS_MIN, SURGE = 10.0, 37.51, 89.47, 40.0
 MONTHS = 24
 
 bands = json.loads(COND.read_text(encoding="utf-8"))

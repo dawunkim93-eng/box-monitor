@@ -29,7 +29,7 @@ SLOT = sum(AMTS) * 10_000
 HOLD = 3
 MIN_AMT, MAX_AMT = 10.0, 37.51
 PREF_TAIL = "579K"
-SURGE_MAX = 20.0
+SURGE_MAX = 40.0
 
 
 def blocked_days():
