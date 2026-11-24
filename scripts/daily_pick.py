@@ -406,6 +406,7 @@ def main():
     scanned = []
     # 이미 보유 중(청산 전)인 종목은 신규 신호에서 제외
     open_codes = set()
+    held_codes = set()
     for _p in picks:
         _d = load(_p["code"])
         if _d is None:
@@ -413,6 +414,7 @@ def main():
         _r = evaluate(_p["code"], _d, _p["sig"], float(_p["limit"]))
         if _r and _r.get("status") == "보유중":
             open_codes.add(_p["code"])
+            held_codes.add(_p["code"])
     _mkx = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
     _calx = [int(d.strftime("%Y%m%d")) for d in _mkx.index]
     _recent = {_p["code"] for _p in picks
@@ -449,12 +451,8 @@ def main():
                 f["close"] = real
                 lo, hi = min(f["lo30"], real), max(f["hi30"], real)
                 f["pos"] = (real - lo) / max(hi - lo, 1e-9) * 100
-        if f.get("ret1", 0.0) > SURGE_1D:      # 당일 급등(상한가) 제외
-            surged += 1
-            continue
-        if f["ret3"] > SURGE_MAX:          # 급등 추격 제외
-            surged += 1
-            continue
+        _s1d = f.get("ret1", 0.0) > SURGE_1D    # 당일 급등
+        _s3d = f["ret3"] > SURGE_MAX           # 3일 급등
         cond = []
         if f["amt"] >= MIN_AMT and f["amt"] <= 37.51 and f["pos"] >= 89.47:
             cond.append("A")
@@ -462,8 +460,12 @@ def main():
             cond.append("B")
         if "A" not in cond or (code, sig) in seen:   # 모의는 A(밴드 상단)만 추적
             continue
+        if _s1d or _s3d:
+            surged += 1                            # 매수는 막고 표에는 남긴다
         cand.append(dict(code=code, name=names.get(code, code), sig=sig,
                          limit=round(f["close"]), cond="+".join(cond), held=_held,
+                         recent=(code in _recent and code not in held_codes),
+                         s1d=_s1d, s3d=_s3d,
                          amt=round(f["amt"], 1), pos=round(f["pos"], 1),
                          atr=round(f["atr"], 2),
                          open=round(f["open"]),
@@ -492,8 +494,8 @@ def main():
             continue
         if _sealed or _past:   # 확정된 날 / 지난 날짜는 신규 등록 안 함
             continue
-        if rec.get("held"):    # 이미 보유 중인 종목은 신규 등록 금지
-            continue
+        if rec.get("held") or rec.get("recent") or rec.get("s1d") or rec.get("s3d"):
+            continue           # 보유중·최근매수·급등 종목은 신규 등록 금지
         picks.append(rec)
         added.append(rec)
         seen.add((rec["code"], rec["sig"]))
@@ -608,7 +610,16 @@ def main():
                            atr=c.get("atr"), score=c.get("score"), held=True)
                       for c in cand if c["sig"] == _sg and c.get("held")]
         _seen_codes = {x["code"] for x in picks if x["sig"] == _sg}
-        _extra = []          # 보유중 종목은 최초 매수 묶음에만 표시 (가격 중복 방지)
+        _extra = []          # 원장에 없는 조건 충족 종목도 표에 남긴다
+        if _sg == today:
+            _extra = [dict(code=c["code"], name=c["name"], sig=c["sig"],
+                           limit=c["limit"], cond=c.get("cond"), amt=c.get("amt"),
+                           pos=c.get("pos"), atr=c.get("atr"), score=c.get("score"),
+                           open=c.get("open"), gap=c.get("gap"),
+                           held=c.get("held"), recent=c.get("recent"),
+                           s1d=c.get("s1d"), s3d=c.get("s3d"))
+                      for c in cand
+                      if c["sig"] == _sg and c["code"] not in _seen_codes]
         for p in [x for x in picks if x["sig"] == _sg] + _extra:
             r = next((x for x in rows if x["code"] == p["code"] and x["sig"] == _sg), None)
             _mp = minute_res.get(f"{p['code']}:{_sg}")
@@ -651,10 +662,12 @@ def main():
                               amt=p.get("amt"), pos=p.get("pos"), atr=p.get("atr"),
                               open=(round(op) if op else None), gap=gp,
                               held=bool(p.get("held")),
-                              status=("보유중" if p.get("held") else
-                                      (_mstatus or
-                                       ("매수 예정" if (_hold is None or (_hold == 0 and not _closed)) else
-                                        (r or {}).get("status", "대기")))),
+                              status=(("보유중" if p.get("held") else
+                                       "최근 매수" if p.get("recent") else
+                                       "급등 제외" if (p.get("s1d") or p.get("s3d")) else
+                                       _mstatus or
+                                       ("매수 예정" if (_hold is None or (_hold == 0 and not _closed))
+                                        else (r or {}).get("status", "대기")))),
                               kind=(_mkind or (r or {}).get("kind")),
                               fill=(_mfill or (round((r or {}).get("px")) if (r or {}).get("px") else None)),
                               src=("분봉" if _mp else "일봉"),

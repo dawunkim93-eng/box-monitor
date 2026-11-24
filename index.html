@@ -2256,7 +2256,6 @@ async function init(){
   try{const r=await fetch("data/low_open.json?t="+Date.now(),{cache:"no-store"}); if(r.ok) og=await r.json();}catch(e){}
   if(og&&og.items){const m={}; og.items.forEach(x=>{m[x.code]=x;});
     (d&&d.today||[]).forEach(t=>{ if(m[t.code]){ t.open=m[t.code].open; t.gap=m[t.code].gap; } });}
-  loadPrev();
   const note=document.getElementById("lowlive-note");
   if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
   const cd=d.cooldown||{}, sm=d.summary||{};
@@ -2283,6 +2282,8 @@ async function init(){
     if(x.status==="보유중") return `<span class="wait">보유중</span>`;
     if(x.status==="미체결") return `<span class="sub">미체결</span>`;
     if(x.status==="매수 대기") return `<span class="sub">매수 예정</span>`;
+    if(x.status==="최근 매수") return `<span class="sub">최근 매수</span>`;
+    if(x.status==="급등 제외") return `<span class="deep">급등 제외</span>`;
     if(x.status==="매수 예정") return `<span class="sub">매수 예정</span>`;
     return `<span class="sub">매수 예정</span>`;
   };
@@ -2303,9 +2304,12 @@ async function init(){
     const dist=(g.dist==null?gi:g.dist);
     const lbl=(dist===0?"오늘 ":(dist===1?"하루 전 ":(dist===2?"2일 전 ":`${dist}일 전 `)));
     const pend=items.filter(x=>x.status==="매수 예정"||x.status==="매수 대기").length;
+    const nSurge=items.filter(x=>x.status==="급등 제외").length;
+    const nRec=items.filter(x=>x.status==="최근 매수").length;
     const _tag=(nHold&&nCl)?`보유 ${nHold} · 청산 ${nCl}`
                 :(nHold?`보유 ${nHold}`:(nCl?`청산 ${nCl}`:""));
-    const tagTxt=(gi===0?(pend?`매수 예정 ${pend}`:`매수 완료 ${items.length}`)
+    const _ex=(gi===0?(nSurge?` · 급등 제외 ${nSurge}`:"")+(nRec?` · 최근 매수 ${nRec}`:""):"");
+    const tagTxt=(gi===0?(pend?`매수 예정 ${pend}`:`매수 완료 ${items.length}`)+_ex
                   :(dist>=3?`${_tag} · <span class="deep">만기 대상</span>`:_tag));
     const head=`<div class="msub" style="margin:${gi?"12px":"2px"} 0 4px">
         <b>${lbl}${dash(g.sig)} 신호</b> · ${items.length}건${tagTxt?` <span class="sub">${tagTxt}</span>`:""}`
@@ -2503,7 +2507,6 @@ async function init(){
   const ls=live&&live.summary;
   const liveNote = ls? `<div class="msub" style="margin-top:12px"><b>실시간 모의 기록</b>(11/13 시작) — 진입 ${ls.entries||0}건 · 완료 ${ls.done||0} · 보유 ${ls.holding||0} · 승률 ${fx(ls.win)}% · 누적 ${fx(ls.tot,2)}%</div>` : "";
   loadMonth();
-  loadPrev();
 
   document.getElementById("dp-body").innerHTML=
     (kl?`<div class="msub" style="margin-top:6px">${kl}</div>`:"") + curve + rt + liveNote
@@ -2941,43 +2944,7 @@ async function loadMonth(){
   </table></div>`;
 }
 
-async function loadPrev(){
-  const anchor=document.getElementById("lowlive");
-  if(!anchor) return;
-  let box=document.getElementById("lowprev");
-  if(!box){
-    box=document.createElement("div");
-    box.id="lowprev";
-    anchor.parentNode.insertBefore(box, anchor);   // 후보 표 위에 표시
-  }
-  let d;
-  try{ d=await (await fetch("data/low_preview.json?t="+Date.now())).json(); }
-  catch(e){ box.hidden=true; return; }
-  // 원장에 같은 신호일 묶음이 있으면 미리보기는 숨긴다(표 중복 방지)
-  let pick=null;
-  try{ const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"});
-       if(r.ok) pick=await r.json(); }catch(e){}
-  if(pick && (pick.days||[]).some(g=>String(g.sig)===String(d.sig))){
-    box.hidden=true; box.innerHTML=""; return;
-  }
-  const rows=(d.rows||[]).filter(r=>!r.held);
-  if(!rows.length){ box.hidden=true; return; }
-  box.hidden=false;
-  const f=n=>Number(n).toLocaleString();
-  box.innerHTML=`<h2 class="sec" style="margin-top:14px">📋 오늘 ${String(d.sig).slice(4,6)}/${String(d.sig).slice(6)} 조건 충족 (${rows.length}건)</h2>
-    <div class="sub" style="margin:-4px 0 6px">오늘은 매수 기록이 없어 원장에 없습니다. 조건만 충족한 종목입니다.</div>`
-    + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th>`
-    + `<th>매수가</th><th title="자동매도 주문 가격 (매수가 -3.5%)">손절선</th>`
-    + `<th class="mhide">시가</th><th title="가장 최근 종가">현재가</th><th>결과</th>`
-    + `</tr></thead><tbody>`
-    + rows.map(r=>`<tr><td><b>${r.score.toFixed(1)}</b></td>`
-        + `<td class="nm">${r.name}</td>`
-        + `<td><b>${f(r.limit)}</b></td><td class="deep">${f(Math.round(r.limit*0.965))}</td>`
-        + `<td class="mhide">${f(r.open)}</td><td>${f(r.close)}</td>`
-        + `<td><span class="wait">조건 충족</span></td></tr>`).join("")
-    + `</tbody></table>`;
-}
-
+/* 미리보기 표 제거 — 원장 표가 조건 충족 전체를 보여준다 */
 </script>
 </body>
 </html>
