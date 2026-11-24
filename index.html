@@ -2953,6 +2953,13 @@ async function loadPrev(){
   let d;
   try{ d=await (await fetch("data/low_preview.json?t="+Date.now())).json(); }
   catch(e){ box.hidden=true; return; }
+  // 원장에 같은 신호일 묶음이 있으면 미리보기는 숨긴다(표 중복 방지)
+  let pick=null;
+  try{ const r=await fetch("data/daily_pick.json?t="+Date.now(),{cache:"no-store"});
+       if(r.ok) pick=await r.json(); }catch(e){}
+  if(pick && (pick.days||[]).some(g=>String(g.sig)===String(d.sig))){
+    box.hidden=true; box.innerHTML=""; return;
+  }
   const rows=(d.rows||[]).filter(r=>!r.held);
   if(!rows.length){ box.hidden=true; return; }
   box.hidden=false;
