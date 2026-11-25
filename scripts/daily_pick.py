@@ -512,9 +512,7 @@ def main():
             continue
         if _sealed or _past:   # 확정된 날 / 지난 날짜는 신규 등록 안 함
             continue
-        _skip = ("보유중" if rec.get("held") else
-                 "최근 매수" if rec.get("recent") else
-                 "급등 제외" if (rec.get("s1d") or rec.get("s3d")) else None)
+        _skip = ("급등 제외" if (rec.get("s1d") or rec.get("s3d")) else None)
         rec["skip"] = _skip   # 기록은 하되 매수 대상에서는 제외
         picks.append(rec)
         if _skip is None:
@@ -701,7 +699,7 @@ def main():
                               net=round((_mnet if _mnet is not None else (r or {}).get("net", 0)), 2)))
         if _sg == today:      # 오늘 표는 신호 목록 — 보유중·최근 매수도 '매수 예정'으로 통일
             for _it in items:
-                if _it["status"] != "급등 제외":
+                if _it["status"] not in ("급등 제외", "제외"):
                     _it["status"] = "매수 대기"
         items.sort(key=lambda x: (-(x["score"] or 0)))
         _why = ("기록 없음" if not items else "")

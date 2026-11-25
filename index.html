@@ -2288,6 +2288,7 @@ async function init(){
     if(x.status==="매수 대기") return `<span class="sub">매수 예정</span>`;
     if(x.status==="최근 매수") return `<span class="sub">최근 매수</span>`;
     if(x.status==="급등 제외") return `<span class="deep">급등 제외</span>`;
+    if(x.status==="제외") return `<span class="sub">제외(${x.kind||"-"})</span>`;
     if(x.status==="매수 예정") return `<span class="sub">매수 예정</span>`;
     return `<span class="sub">매수 예정</span>`;
   };
