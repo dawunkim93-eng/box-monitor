@@ -26,7 +26,7 @@ OUT = ROOT / "data" / "low_nov.json"
 
 SINCE, UNTIL = 20260901, 20261231
 BUY_GAP, SELL_GAP, FEE = 0.015, 0.020, 0.00015
-AUTO_STOP = 0.035
+AUTO_STOP = float(os.environ.get("AUTO_STOP", "0.035"))
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
