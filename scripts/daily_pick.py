@@ -719,6 +719,12 @@ def main():
                sig_date=today, summary=summary,
                today=todays,
                recent=sorted(rows, key=lambda r: -r["sig"])[:12],
+               ledger=[dict(code=r["code"], name=r["name"], sig=r["sig"],
+                            status=r.get("status"), kind=r.get("kind"),
+                            net=round(r.get("net", 0), 2), entry=r.get("entry"),
+                            exit=r.get("exit"), days=r.get("days"),
+                            px=(round(r["px"]) if r.get("px") else None))
+                       for r in sorted(rows, key=lambda x: (-x["sig"], x["name"]))],
                rule=dict(gap=BUY_GAP * 100, sell=SELL_GAP * 100, amts=AMTS, slot=SLOT, hold=HOLD,
                          cond_a="거래대금 ≤ 37.5억 & 밴드위치 ≥ 89.5%",
                          cond_b="거래대금 ≤ 37.5억 & ATR ≤ 5.85%",
