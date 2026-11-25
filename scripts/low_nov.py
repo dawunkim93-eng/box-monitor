@@ -16,6 +16,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from nasdaq_rule import shift_to_close  # noqa: E402
+
 ROOT = Path("/home/lucky/box-monitor")
 PIT = Path("/home/lucky/backtest/data/pit")
 UNIV = ROOT / "data" / "daily_universe.json"
@@ -51,14 +53,21 @@ def trade(df, i):
     e = i + 1
     if e >= len(df):
         return None
-    prev = float(c[i])
-    if float(o[e]) < prev:                       # 시가가 전일 종가보다 낮으면 시가 매수
-        px = float(o[e])
-    elif float(l[e]) <= prev:                    # 아니면 전일 종가 지정가
-        px = prev
+    _bd = int(df.index[e].strftime("%Y%m%d"))
+    _shift, _ = shift_to_close(_bd)
+    if _shift:                                   # 나스닥 급락 다음날 → 종가 매수
+        px = float(c[e])
+        _st = e + 1
     else:
-        return dict(status="청산완료", net=0.0, kind="미체결",
-                    entry_day=None, exit_day=None, rungs=0)
+        prev = float(c[i])
+        if float(o[e]) < prev:                   # 시가가 전일 종가보다 낮으면 시가 매수
+            px = float(o[e])
+        elif float(l[e]) <= prev:                # 아니면 전일 종가 지정가
+            px = prev
+        else:
+            return dict(status="청산완료", net=0.0, kind="미체결",
+                        entry_day=None, exit_day=None, rungs=0)
+        _st = e
     lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
     tg = [x * (1 + SELL_GAP) for x in lv]
     stop_px = px * (1 - AUTO_STOP)
@@ -68,7 +77,7 @@ def trade(df, i):
     kind = None
     entry_day = int(df.index[e].strftime("%Y%m%d"))
     exit_day = entry_day
-    for dd in range(HOLD):
+    for dd in range(_st - e, _st - e + HOLD):
         j = e + dd
         if j >= len(df):
             break
@@ -99,7 +108,7 @@ def trade(df, i):
             kind = kind or "전량익절"
             break
     if held:
-        j = min(e + HOLD - 1, len(df) - 1)
+        j = min(_st + HOLD - 1, len(df) - 1)
         for k in list(held):
             realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
         kind = kind or ("만기 청산" if e + HOLD - 1 <= len(df) - 1 else "보유중")

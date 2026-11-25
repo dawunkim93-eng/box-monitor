@@ -15,6 +15,12 @@ AMTS = [6, 6, 9]
 
 sys.path.insert(0, str(ROOT / "scripts"))
 from low_expiry_alert import load_env, send  # noqa: E402
+from nasdaq_rule import shift_to_close  # noqa: E402
+
+
+def pd_today():
+    from datetime import datetime
+    return datetime.now().strftime("%Y%m%d")
 
 
 def main():
@@ -46,10 +52,17 @@ def main():
         print("[INFO] 대상 없음")
         return
 
-    lines = [f"🌅 {str(sig)[4:6]}/{str(sig)[6:]} 확정 후보 {len(todays)}건",
-             "09:00에 아래 가격으로 주문하세요.",
-             "· 시가가 전일 종가보다 낮으면 → 시장가 매수",
-             "· 높으면 → 전일 종가 지정가 (안 내려오면 미체결)"]
+    _today = int(pd_today())
+    _shift, _nd = shift_to_close(_today)
+    lines = [f"🌅 {str(sig)[4:6]}/{str(sig)[6:]} 확정 후보 {len(todays)}건"]
+    if _shift:
+        lines += [f"⛔ 나스닥 {_nd:+.2f}% 급락 — 오늘은 장초반 매수 대신 장후반(15:20 종가)",
+                  "15:20 동시호가에 아래 가격으로 주문하세요.",
+                  "· 종가 매수 (당일 시가 매수 안 함)"]
+    else:
+        lines += ["09:00에 아래 가격으로 주문하세요.",
+                  "· 시가가 전일 종가보다 낮으면 → 시장가 매수",
+                  "· 높으면 → 전일 종가 지정가 (안 내려오면 미체결)"]
     for p in sorted(todays, key=lambda x: -(x.get("score") or 0)):
         st = round(float(p["limit"]) * (1 - GAP) ** 2)
         auto = round(float(p["limit"]) * 0.965)

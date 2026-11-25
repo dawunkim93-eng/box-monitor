@@ -9,6 +9,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from nasdaq_rule import shift_to_close  # noqa: E402
+
 ROOT = Path("/home/lucky/box-monitor")
 PIT = Path("/home/lucky/backtest/data/pit")
 UNIV = ROOT / "data" / "daily_universe.json"
@@ -30,23 +32,29 @@ def cooldown_days():
     return {dn[i] for i in range(1, len(dn)) if ret.iloc[i] <= -3.0}, m.index
 
 
-def trade(o, c, h, l, i):
+def trade(o, c, h, l, i, days=None):
     e = i + 1
     if e >= len(c):
         return None, None
-    prev = float(c[i])
-    if float(o[e]) < prev:
-        px = float(o[e])
-    elif float(l[e]) <= prev:
-        px = prev
+    _shift, _ = shift_to_close(days[e]) if days else (False, None)
+    if _shift:                       # 나스닥 급락 다음날 → 종가 매수
+        px = float(c[e])
+        _st = e + 1
     else:
-        return None, None
+        prev = float(c[i])
+        if float(o[e]) < prev:
+            px = float(o[e])
+        elif float(l[e]) <= prev:
+            px = prev
+        else:
+            return None, None
+        _st = e
     lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
     stop_px = px * (1 - AUTO_STOP)
     limit_entry = abs(px - float(o[e])) > 1e-9
     held = {0: px}
     net = 0.0
-    for dd in range(HOLD):
+    for dd in range(_st - e, _st - e + HOLD):
         j = e + dd
         if j >= len(c):
             break
@@ -71,7 +79,7 @@ def trade(o, c, h, l, i):
                 del held[k]
             return net, j
     if held:
-        j = min(e + HOLD - 1, len(c) - 1)
+        j = min(_st + HOLD - 1, len(c) - 1)
         for k in list(held):
             net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE)
         return net, j
@@ -104,6 +112,7 @@ for code in codes:
     cs = pd.Series(c)
     lo30 = cs.rolling(30).min().values; hi30 = cs.rolling(30).max().values
     amt20 = pd.Series(c * v).rolling(20).mean().values / 1e8
+    days = [int(x.strftime("%Y%m%d")) for x in df.index]
     for i in range(270, n - 1):
         if df.index[i] < start or lo30[i] <= 0 or hi30[i] <= lo30[i]:
             continue
@@ -115,7 +124,7 @@ for code in codes:
         d0 = int(df.index[i].strftime("%Y%m%d"))
         if d0 in blk:
             continue
-        net, jx = trade(o, c, h, l, i)
+        net, jx = trade(o, c, h, l, i, days)
         if net is None:
             continue
         d1 = int(df.index[min(jx, n - 1)].strftime("%Y%m%d"))

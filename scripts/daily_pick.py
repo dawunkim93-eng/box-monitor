@@ -24,6 +24,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from nasdaq_rule import shift_to_close  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 PIT = Path("/home/lucky/backtest/data/pit")
 UNIV = ROOT / "data" / "daily_universe.json"
@@ -221,6 +223,15 @@ def features(df):
                 lo30=float(lo30[i]), hi30=float(hi30[i]))
 
 
+def _ndq():
+    """오늘 아침 마감한 미국장 등락 → 매수 시점 판단"""
+    from datetime import datetime
+    today = int(datetime.now().strftime("%Y%m%d"))
+    _sh, _d = shift_to_close(today)
+    return dict(drop=(round(_d, 2) if _d is not None else None),
+                shift=bool(_sh), thr=-2.0)
+
+
 def evaluate(code, df, sig, limit):
     """다음 거래일 아침 매수 기준 결과 계산.
 
@@ -238,24 +249,30 @@ def evaluate(code, df, sig, limit):
     c = df["Close"].values.astype(float)
     h = df["High"].values.astype(float)
     l = df["Low"].values.astype(float)
-    prev = float(limit)
-    if float(o[e]) < prev:
-        px = float(o[e])
-    elif float(l[e]) <= prev:
-        px = prev
+    _shift, _ = shift_to_close(days[e])
+    if _shift:                      # 나스닥 급락 다음날 → 그날 종가 매수
+        px = float(c[e])
+        _st = e + 1
     else:
-        return dict(status="미체결", net=0.0, days=0, entry=None,
-                    exit=None, kind="미체결")
+        prev = float(limit)
+        if float(o[e]) < prev:
+            px = float(o[e])
+        elif float(l[e]) <= prev:
+            px = prev
+        else:
+            return dict(status="미체결", net=0.0, days=0, entry=None,
+                        exit=None, kind="미체결")
+        _st = e
     lv = [px * (1 - BUY_GAP) ** k for k in range(3)]
     tg = [x * (1 + SELL_GAP) for x in lv]
     stop_px = px * (1 - AUTO_STOP)
     # 지정가 체결(시가>전일종가)이면 당일 고가가 체결 전일 수 있으므로 종가로 판정
-    limit_entry = abs(px - float(o[e])) > 1e-9
+    limit_entry = (not _shift) and abs(px - float(o[e])) > 1e-9
     held = [True, False, False]
     net = 0.0
     exit_kind = None
     exit_day = None
-    for dd in range(HOLD):
+    for dd in range(_st - e, _st - e + HOLD):
         j = e + dd
         if j >= len(df):
             break
@@ -291,7 +308,7 @@ def evaluate(code, df, sig, limit):
             exit_kind = exit_kind or "전량익절"
             break
     if any(held):
-        full = e + HOLD - 1                 # 만기 (매수일 포함 3거래일)
+        full = _st + HOLD - 1               # 만기 (매수 후 3거래일)
         if full <= len(df) - 1:
             for k in range(3):
                 if held[k]:
@@ -697,6 +714,7 @@ def main():
                closed_today=closed_today,
                days=days_out,
                cooldown=dict(on=bool(cool_on), pct=cool_pct, thr=-3.0),
+               nasdaq=_ndq(),
                curve=curve[-40:],
                sig_date=today, summary=summary,
                today=todays,

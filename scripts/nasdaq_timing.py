@@ -132,7 +132,8 @@ for code in codes:
         b2 = run_trade(o, c, h, l, e, float(c[e]), HOLD, allow_day0_sell=False)   # 같은 창, 진입가만 종가
         if a is None or b is None:
             continue
-        rows.append(dict(net_open=a, net_close=b, net_close_same=b2, ndq=ur))
+        rows.append(dict(net_open=a, net_close=b, net_close_same=b2, ndq=ur,
+                         intraday=(float(c[e]) / max(float(o[e]), 1e-9) - 1) if float(o[e]) > 0 else 0.0))
 
 d = pd.DataFrame(rows)
 print(f"[INFO] 표본 {len(d):,}건 · 나스닥 급락일 매수 {int((d.ndq <= NDQ_DROP).sum()):,}건")
@@ -150,12 +151,25 @@ for label, sub in (("전체", d), (f"나스닥 -{abs(NDQ_DROP):.0f}% 이하 다�
     print(f"  같은 창·종가진입 승률 {(C>0).mean()*100:5.1f}% · 건당 {C.mean():+.3f}% · 합계 {sub.net_close_same.sum():+,.0f}원")
     print(f"  차이(종가-시가) 건당 {B.mean()-A.mean():+.3f}%p · 같은 창 기준 {C.mean()-A.mean():+.3f}%p")
 
-# 나스닥 등락 구간별
-print(f"\n{'나스닥 전일':<16}{'건수':>7}{'시가 건당%':>12}{'종가 건당%':>12}{'차이%p':>9}")
-for lo, hi, lab in ((-99, -3, "-3% 이하"), (-3, -1.5, "-3~-1.5%"), (-1.5, 0, "-1.5~0%"),
-                    (0, 1.5, "0~+1.5%"), (1.5, 99, "+1.5% 이상")):
+# 나스닥 등락 구간별 (같은 보유 구간 기준)
+print(f"\n{'나스닥 전일':<14}{'건수':>7}{'시가 건당%':>11}{'같은구간 종가':>13}{'차이%p':>9}{'당일 시가→종가':>14}")
+for lo, hi, lab in ((-99, -3, "-3% 이하"), (-3, -2, "-3~-2%"), (-2, -1.5, "-2~-1.5%"),
+                    (-1.5, 0, "-1.5~0%"), (0, 1.5, "0~+1.5%"), (1.5, 99, "+1.5% 이상")):
     x = d[(d.ndq > lo) & (d.ndq <= hi)]
     if not len(x):
         continue
-    A = x.net_open.values / SLOT * 100; B = x.net_close.values / SLOT * 100
-    print(f"{lab:<16}{len(x):>7,}{A.mean():>+12.3f}{B.mean():>+12.3f}{B.mean()-A.mean():>+9.3f}")
+    A = x.net_open.values / SLOT * 100
+    C = x.net_close_same.values / SLOT * 100
+    intra = x.intraday.values * 100
+    print(f"{lab:<14}{len(x):>7,}{A.mean():>+11.3f}{C.mean():>+13.3f}{C.mean()-A.mean():>+9.3f}{intra.mean():>+13.2f}%")
+
+# 임계값 2% / 2.5% / 3%
+print(f"\n{'임계값':<12}{'건수':>7}{'시가 승률':>10}{'시가 건당%':>12}{'종가 건당%':>12}{'차이%p':>9}")
+for thr in (-2.0, -2.5, -3.0):
+    x = d[d.ndq <= thr]
+    if not len(x):
+        continue
+    A = x.net_open.values / SLOT * 100
+    B = x.net_close.values / SLOT * 100        # 종가 매수 후 3거래일 보유
+    print(f"나스닥 {thr:.1f}%↓{'':<2}{len(x):>7,}{(A>0).mean()*100:>9.1f}%{A.mean():>+12.3f}{B.mean():>+12.3f}{B.mean()-A.mean():>+9.3f}"
+          f"   (종가 승률 {(B>0).mean()*100:.1f}%)")
