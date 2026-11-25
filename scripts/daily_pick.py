@@ -424,7 +424,7 @@ def main():
     # 이미 보유 중(청산 전)인 종목은 신규 신호에서 제외
     open_codes = set()
     held_codes = set()
-    for _p in picks:
+    for _p in [x for x in picks if not x.get("skip")]:
         _d = load(_p["code"])
         if _d is None:
             continue
@@ -435,7 +435,8 @@ def main():
     _mkx = pd.read_csv(ROOT / "data" / "ks11.csv", parse_dates=["Date"]).set_index("Date")
     _calx = [int(d.strftime("%Y%m%d")) for d in _mkx.index]
     _recent = {_p["code"] for _p in picks
-               if _p.get("sig") and len([d for d in _calx if d > _p["sig"]]) <= HOLD}
+               if (not _p.get("skip")) and _p.get("sig")
+               and len([d for d in _calx if d > _p["sig"]]) <= HOLD}
     open_codes |= _recent           # 최근 HOLD일 내 매수분도 재매수 금지
     if open_codes:
         print(f"[INFO] 보유중 매수 제외 {len(open_codes)}종목")
@@ -511,10 +512,13 @@ def main():
             continue
         if _sealed or _past:   # 확정된 날 / 지난 날짜는 신규 등록 안 함
             continue
-        if rec.get("held") or rec.get("recent") or rec.get("s1d") or rec.get("s3d"):
-            continue           # 보유중·최근매수·급등 종목은 신규 등록 금지
+        _skip = ("보유중" if rec.get("held") else
+                 "최근 매수" if rec.get("recent") else
+                 "급등 제외" if (rec.get("s1d") or rec.get("s3d")) else None)
+        rec["skip"] = _skip   # 기록은 하되 매수 대상에서는 제외
         picks.append(rec)
-        added.append(rec)
+        if _skip is None:
+            added.append(rec)
         seen.add((rec["code"], rec["sig"]))
     # 최근 30일 밖 신호는 정리
     cutoff = int((pd.Timestamp.now() - pd.Timedelta(days=30)).strftime("%Y%m%d"))
@@ -535,20 +539,26 @@ def main():
         df = load(p["code"])
         if df is None:
             continue
-        r = evaluate(p["code"], df, p["sig"], float(p["limit"]))
-        if r is None:
-            r = dict(status="대기", net=0.0, days=0, entry=None, exit=None)
+        if p.get("skip"):
+            r = dict(status="제외", net=0.0, days=0, entry=None, exit=None,
+                     kind=p.get("skip"))
+        else:
+            r = evaluate(p["code"], df, p["sig"], float(p["limit"]))
+            if r is None:
+                r = dict(status="대기", net=0.0, days=0, entry=None, exit=None)
         rows.append({**p, **r})
 
+    trade_rows = [r for r in rows if r["status"] != "제외"]
     done = [r for r in rows if r["status"] == "청산완료"]
-    fills = [r for r in rows if r["status"] not in ("미체결", "대기")]
+    fills = [r for r in trade_rows if r["status"] not in ("미체결", "대기")]
     holding = [r for r in rows if r["status"] == "보유중"]
     tot = sum(r["net"] for r in done)
     summary = dict(
-        picks=len(rows), entries=len(fills), filled=len(fills),
+        picks=len(trade_rows), entries=len(fills), filled=len(fills),
         done=len(done), holding=len(holding),
-        fill_rate=round(len(fills) / max(len(rows), 1) * 100, 1),
+        fill_rate=round(len(fills) / max(len(trade_rows), 1) * 100, 1),
         win=round(sum(1 for r in done if r["net"] > 0) / max(len(done), 1) * 100, 1),
+        skipped=len(rows) - len(trade_rows),
         avg=round(tot / max(len(done), 1), 3), tot=round(tot, 1),
         period=dict(start=min((r["sig"] for r in fills), default=None),
                     end=max((r["sig"] for r in fills), default=None)))

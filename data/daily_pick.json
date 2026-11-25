@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-25 16:07",
+ "updated_at": "2026-11-25 16:10",
  "closed_today": [],
  "days": [
   {
@@ -1242,6 +1242,7 @@
   "holding": 2,
   "fill_rate": 88.3,
   "win": 74.3,
+  "skipped": 0,
   "avg": 0.457,
   "tot": 46.1,
   "period": {
