@@ -1197,7 +1197,8 @@ function mobileRowHTML(r){
     <div class="mtop"><input type="checkbox" class="heldchk" data-c="${r.code}" ${chk?"checked":""} aria-label="보유 체크">
       ${strong}<b class="mname">${r.name}</b>${tag}${risk}${status}${scoreBadge}</div>
     <div class="mrow">${fmt(r.price)}원 <span class="${cn(r.chg_pct)}">${pct(r.chg_pct)}</span>${r.no_trade?' <span class="deep">⛔</span>':""} · 위치 ${posBarHTML(r)} ${posTxt}</div>
-    <div class="mrow">하단 ${pl} · ${atr} · ${esc} · 손절 <b>${r.exit_line!=null?fmt(r.exit_line):"-"}</b>원<span class="sub">(종가 기준)</span></div>
+    <div class="mrow">하단 ${pl} · ${atr} · ${esc}</div>
+    <div class="mrow" style="color:${r.exit_line!=null&&r.price<r.exit_line?"var(--red)":"var(--dim)"}">⛔ 자동 손절가 <b>${r.exit_line!=null?fmt(r.exit_line):"-"}</b>원 <span class="sub">— 종가가 이 아래면 청산</span></div>
     ${(r.held&&r.rungs_left!=null)?`<div class="mrow" style="color:${r.rungs_left<=1?"var(--red)":"var(--dim)"}">📏 청산선 ${fmt(r.exit_line)}원 · 남은 차수 <b>${r.rungs_left}개</b>${r.rungs_left<=1?" — 추가 매수 금지(청산선 바로 위)":""}</div>`:(r.holdoff?`<div class="mrow" style="color:var(--red)">⚠ 하단 15% 이내 — 추가 차수 보류 (13년 이 자리 당일붕괴 163건 전부 손실 · 건당 -7,052원)</div>`:"")}
     ${r.cand&&r.limit?`<div class="mrow" style="color:${r.price<=r.limit?"var(--green)":"var(--amber)"}">🎯 매수가 <b>${fmt(r.limit)}원</b>${r.limit_date?` <span class="sub">(${r.limit_date} 종가)</span>`:""} ${r.price<=r.limit?"✅ 지금 매수가 이하":"⛔ 현재가가 매수가 위 — 추격 금지"}</div>`:""}
     ${r.amts?`<div class="mrow" style="color:${r.boost===2?"var(--green)":"var(--dim)"}">${r.boost===2?"🟢 매물대 위 ×2":"매물대 아래"} · 사다리 ${r.amts.join("·")}만원</div>`:""}
