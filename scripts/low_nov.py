@@ -10,6 +10,7 @@
   - 슬롯 무제한 (박스권 11월 블록과 동일 가정)
 """
 import json
+import os
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -29,6 +30,9 @@ AUTO_STOP = 0.035
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD = 3
+SLIP_BUY = float(os.environ.get("SLIP_BUY", "0")) / 100
+SLIP_SELL = float(os.environ.get("SLIP_SELL", "0")) / 100
+SLIP_STOP = float(os.environ.get("SLIP_STOP", "0")) / 100
 MIN_AMT, MAX_AMT = 10.0, 37.51
 PREF_TAIL = "579K"
 SURGE_MAX = 40.0
@@ -72,7 +76,7 @@ def trade(df, i):
     tg = [x * (1 + SELL_GAP) for x in lv]
     stop_px = px * (1 - AUTO_STOP)
     limit_entry = abs(px - float(o[e])) > 1e-9
-    held = {0: px}
+    held = {0: px * (1 + SLIP_BUY)}
     realised = 0.0
     kind = None
     entry_day = int(df.index[e].strftime("%Y%m%d"))
@@ -88,7 +92,7 @@ def trade(df, i):
             _hit = (float(h[j]) >= held[k] * (1 + SELL_GAP)) if (dd > 0 or not limit_entry) \
                 else (float(c[j]) >= held[k] * (1 + SELL_GAP))
             if _hit:
-                realised += AMTS[k] * 10_000 * (SELL_GAP - FEE)
+                realised += AMTS[k] * 10_000 * (SELL_GAP - SLIP_SELL - FEE)
                 del held[k]
         exit_day = int(df.index[min(j, len(df) - 1)].strftime("%Y%m%d"))
         if held and float(l[j]) <= stop_px:       # 장중 자동매도 (-3.5%)
@@ -100,7 +104,7 @@ def trade(df, i):
             break
         if held and float(c[j]) < lv[2]:          # 종가가 3차 아래면 그날 청산
             for k in list(held):
-                realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
+                realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE - SLIP_SELL)
                 del held[k]
             kind = "손절선 청산"
             break
@@ -110,7 +114,7 @@ def trade(df, i):
     if held:
         j = min(_st + HOLD - 1, len(df) - 1)
         for k in list(held):
-            realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE)
+            realised += AMTS[k] * 10_000 * (float(c[j]) / held[k] - 1 - FEE - SLIP_SELL)
         kind = kind or ("만기 청산" if e + HOLD - 1 <= len(df) - 1 else "보유중")
         exit_day = int(df.index[j].strftime("%Y%m%d"))
     return dict(status=("보유중" if kind == "보유중" else "청산완료"),

@@ -3,6 +3,8 @@
 슬롯 7개 × 21만원 = 147만원. 매일 점수 높은 순으로 빈 슬롯을 채움.
 """
 import json
+import os
+import os
 from collections import defaultdict
 from pathlib import Path
 
@@ -20,6 +22,9 @@ AUTO_STOP = 0.035
 AMTS = [6, 6, 9]
 SLOT = sum(AMTS) * 10_000
 HOLD, SLOTS = 3, 7
+SLIP_BUY = float(os.environ.get("SLIP_BUY", "0")) / 100
+SLIP_SELL = float(os.environ.get("SLIP_SELL", "0")) / 100
+SLIP_STOP = float(os.environ.get("SLIP_STOP", "0")) / 100
 MIN_AMT, MAX_AMT, POS_MIN, SURGE = 10.0, 37.51, 89.47, 40.0
 MONTHS = 24
 
@@ -72,7 +77,7 @@ def trade(o, c, h, l, i, days=None):
     tg = [x * (1 + SELL_GAP) for x in lv]
     stop_px = px * (1 - AUTO_STOP)
     limit_entry = abs(px - float(o[e])) > 1e-9
-    held = {0: px}
+    held = {0: px * (1 + SLIP_BUY)}
     net = 0.0
     for dd in range(_st - e, _st - e + HOLD):
         j = e + dd
@@ -85,23 +90,23 @@ def trade(o, c, h, l, i, days=None):
             _hit = (h[j] >= held[k] * (1 + SELL_GAP)) if (dd > 0 or not limit_entry) \
                 else (c[j] >= held[k] * (1 + SELL_GAP))
             if _hit:
-                net += AMTS[k] * 10_000 * (SELL_GAP - FEE)
+                net += AMTS[k] * 10_000 * (SELL_GAP - SLIP_SELL - FEE)
                 del held[k]
         if held and l[j] <= stop_px:              # 장중 자동매도
             fill = min(stop_px, float(o[j])) if float(o[j]) < stop_px else stop_px
             for k in list(held):
-                net += AMTS[k] * 10_000 * (fill / held[k] - 1 - FEE)
+                net += AMTS[k] * 10_000 * (fill / held[k] - 1 - FEE - SLIP_STOP)
                 del held[k]
             return net, j
         if held and c[j] < lv[2]:                 # 종가 3차 이탈
             for k in list(held):
-                net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE)
+                net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE - SLIP_SELL)
                 del held[k]
             return net, j
     if held:
         j = min(_st + HOLD - 1, len(c) - 1)
         for k in list(held):
-            net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE)
+            net += AMTS[k] * 10_000 * (c[j] / held[k] - 1 - FEE - SLIP_SELL)
         return net, j
     return net, e
 
