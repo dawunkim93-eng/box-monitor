@@ -239,6 +239,13 @@
   .pcx[data-edit]{color:var(--blue)}
   #view-pen{max-width:900px}
   .ptblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  .segrow{display:flex;justify-content:flex-end;margin:0 0 6px}
+  .seg{display:inline-flex;background:#161a22;border:1px solid var(--line);
+    border-radius:999px;padding:2px;gap:2px}
+  .seg-b{border:0;background:transparent;color:var(--dim);font-size:11px;
+    font-weight:700;letter-spacing:.2px;padding:4px 11px;border-radius:999px;
+    cursor:pointer;line-height:1.1}
+  .seg-b.on{background:#2c3442;color:var(--txt)}
   @media(max-width:640px){
     .pform{grid-template-columns:1fr} .psubb{font-size:15px;min-height:48px}
     .pcard{padding:9px 10px} .prow2{grid-template-columns:50px 1fr 76px}
@@ -289,10 +296,10 @@
   </div>
   </div>
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
-  <div class="tabs" id="live-sub" role="tablist" style="margin:0 0 8px">
-    <button class="psubb tab on" data-l="low" role="tab" aria-selected="true">저변동</button>
-    <button class="psubb tab" data-l="box" role="tab" aria-selected="false">주봉</button>
-  </div>
+  <div class="segrow"><div class="seg" id="live-sub" role="tablist">
+    <button class="seg-b on" data-l="low" role="tab" aria-selected="true">저변동</button>
+    <button class="seg-b" data-l="box" role="tab" aria-selected="false">주봉</button>
+  </div></div>
   <div class="stats" id="stats"></div>
   <div id="cdbanner"></div>
   <div id="live-box-top" hidden>
@@ -2271,7 +2278,7 @@ function apply(mode){
   low.hidden=!isLow;
   bt.hidden=isLow;
   bm.hidden=isLow;
-  document.querySelectorAll("#live-sub .psubb").forEach(b=>{
+  document.querySelectorAll("#live-sub .seg-b").forEach(b=>{
     const on=b.dataset.l===mode;
     b.classList.toggle("on",on);
     b.setAttribute("aria-selected",on?"true":"false");
