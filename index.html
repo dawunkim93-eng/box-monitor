@@ -289,8 +289,13 @@
   </div>
   </div>
   <div id="view-live" role="tabpanel" aria-labelledby="tb-live">
+  <div class="tabs" id="live-sub" role="tablist" style="margin:0 0 8px">
+    <button class="psubb tab on" data-l="low" role="tab" aria-selected="true">저변동</button>
+    <button class="psubb tab" data-l="box" role="tab" aria-selected="false">주봉</button>
+  </div>
   <div class="stats" id="stats"></div>
   <div id="cdbanner"></div>
+  <div id="live-box-top" hidden>
   <h2 class="sec" id="hold-sec" hidden>📋 보유 현황 (<span id="hold-cnt"></span>)
     <button id="btn-hold" class="tblbtn" type="button" title="체크한 보유 종목 코드 복사 → 텔레그램 전송 = 보유 목록 자동 갱신 (2분 내)" disabled>☑ 보유 목록 복사</button></h2>
   <table id="hold-tbl" hidden>
@@ -301,12 +306,16 @@
   </table>
   <div id="mobile-holds" class="mob-list"></div>
   <div class="sub" id="hold-mismatch" hidden style="margin:4px 0 8px;color:var(--amber)"></div>
+  </div>
+  <div id="live-low">
   <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
     <h2 class="sec" id="lowlive-sec" style="margin-bottom:4px">🎯 저변동 후보 (다음날 09:00 매수)</h2>
     <span class="sub" id="lowlive-upd" style="white-space:nowrap;font-size:11px"></span>
   </div>
   <div class="sub" id="lowlive-note">로딩 중…</div>
   <div id="lowlive"></div>
+  </div>
+  <div id="live-box-main" hidden>
 
   <h2 class="sec">전체 목록</h2>
   <div class="toolbar">
@@ -372,6 +381,7 @@
     </table>
     <div id="lbox-mob"></div>
   </details>
+  </div>
   </div>
   <div id="view-valid" hidden role="tabpanel" aria-labelledby="tb-valid">
     <h2 class="sec">📊 7슬롯 진입 시뮬레이션</h2>
@@ -2249,6 +2259,37 @@ setInterval(()=>{
     loadPrices(true).then(()=>{ renderHold(); renderBal(); });
   }
 },1800000);
+})();
+/* ══════════ 실시간 하위 탭 (저변동 / 주봉) ══════════ */
+(function(){
+function apply(mode){
+  const low=document.getElementById("live-low");
+  const bt=document.getElementById("live-box-top");
+  const bm=document.getElementById("live-box-main");
+  if(!low||!bt||!bm) return;
+  const isLow=(mode==="low");
+  low.hidden=!isLow;
+  bt.hidden=isLow;
+  bm.hidden=isLow;
+  document.querySelectorAll("#live-sub .psubb").forEach(b=>{
+    const on=b.dataset.l===mode;
+    b.classList.toggle("on",on);
+    b.setAttribute("aria-selected",on?"true":"false");
+  });
+  try{ localStorage.setItem("livesub",mode); }catch(e){}
+}
+function init(){
+  const box=document.getElementById("live-sub");
+  if(!box) return;
+  box.addEventListener("click",e=>{
+    const b=e.target.closest("[data-l]");
+    if(b) apply(b.dataset.l);
+  });
+  let m="low";
+  try{ m=localStorage.getItem("livesub")||"low"; }catch(e){}
+  apply(m);
+}
+document.addEventListener("DOMContentLoaded",init);
 })();
 /* ══════════ 실시간: 저변동 후보 ══════════ */
 (function(){
