@@ -2265,7 +2265,8 @@ async function init(){
   if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
   const _upd=document.getElementById("lowlive-upd");
   if(_upd){
-    const t=(d.live_updated||d.updated_at||"");
+    const _a=d.live_updated||"", _b=d.updated_at||"";
+    const t=(_a>_b?_a:_b);
     _upd.textContent = t? `최종 ${String(t).slice(5,16)}` : "";
   }
   const cd=d.cooldown||{}, sm=d.summary||{};
