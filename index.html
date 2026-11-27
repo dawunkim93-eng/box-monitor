@@ -2338,7 +2338,7 @@ async function init(){
         + `<td class="nm">${t.name}${t.src==="분봉"?'<span class="sub" style="font-size:8px"> 분봉</span>':''}</td>`
         + `<td><b>${f(t.fill||t.limit)}</b></td>`
         + `<td class="deep">${f(s3)}</td>`
-        + `<td class="mhide">${f(t.open)}</td><td class="${t.cur&&t.limit?(t.cur>t.limit?'up':(t.cur<t.limit?'dn':'')):''}">${t.cur?f(t.cur):'-'}</td>`
+        + `<td class="mhide">${f(t.open)}</td><td class="${t.cur&&t.limit?(t.cur>t.limit?'up':(t.cur<t.limit?'dn':'')):''}">${t.cur?f(t.cur):'-'}${(t.cur&&(t.fill||t.limit))?`<div class="sub" style="font-size:10px">${((t.cur/(t.fill||t.limit)-1)*100>0?"+":"")}${((t.cur/(t.fill||t.limit)-1)*100).toFixed(1)}%</div>`:""}</td>`
         + `<td>${(t.under&&t.status==="보유중")?'<span class="deep">손절</span>':stCell(t)}</td></tr>`;
     }).join("");
     return head + `<table class="ptbl"><thead><tr><th>점수</th><th class="nm">종목</th>`
