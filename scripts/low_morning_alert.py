@@ -16,6 +16,7 @@ AMTS = [6, 6, 9]
 sys.path.insert(0, str(ROOT / "scripts"))
 from low_expiry_alert import load_env, send  # noqa: E402
 from nasdaq_rule import shift_to_close  # noqa: E402
+from daily_pick import fix_limits  # noqa: E402
 
 
 def pd_today():
@@ -47,6 +48,15 @@ def main():
     if str(sig) not in seal:
         print(f"[INFO] {sig}는 장중 확정분이 아님 — 스킵")
         return
+    # 발송 직전, 확정 종가로 매수가 재보정 (전일 저녁 데이터가 잠정값이었던 경우 대비)
+    try:
+        _n = fix_limits(picks, sig)
+        if _n:
+            PICKS.write_text(json.dumps(picks, ensure_ascii=False, indent=1), encoding="utf-8")
+            print(f"[INFO] 매수가 재보정 {_n}건")
+            todays = [p for p in picks if p["sig"] == sig]
+    except Exception as e:
+        print(f"[WARN] 보정 실패 {e}")
     todays = [p for p in picks if p["sig"] == sig]
     if not todays:
         print("[INFO] 대상 없음")

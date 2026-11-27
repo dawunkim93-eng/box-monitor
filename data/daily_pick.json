@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-27 18:46",
+ "updated_at": "2026-11-27 20:58",
  "closed_today": [
   {
    "code": "136540",
@@ -141,13 +141,13 @@
   {
    "sig": 20261127,
    "dist": 0,
-   "n": 55,
+   "n": 56,
    "items": [
     {
      "code": "004100",
      "name": "태양금속",
-     "limit": 3275,
-     "stop": 3177,
+     "limit": 3250,
+     "stop": 3153,
      "cur": 3250,
      "under": false,
      "hold": 0,
@@ -156,8 +156,8 @@
      "amt": 14.5,
      "pos": 97.4,
      "atr": 5.79,
-     "open": 3130,
-     "gap": -4.43,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -168,8 +168,8 @@
     {
      "code": "230240",
      "name": "에치에프알",
-     "limit": 10940,
-     "stop": 10614,
+     "limit": 10910,
+     "stop": 10585,
      "cur": 10910,
      "under": false,
      "hold": 0,
@@ -178,8 +178,8 @@
      "amt": 13.3,
      "pos": 100.0,
      "atr": 7.95,
-     "open": 9450,
-     "gap": -13.62,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -190,8 +190,8 @@
     {
      "code": "0120G0",
      "name": "삼양바이오팜",
-     "limit": 46700,
-     "stop": 45310,
+     "limit": 46550,
+     "stop": 45164,
      "cur": 46550,
      "under": false,
      "hold": 0,
@@ -200,8 +200,8 @@
      "amt": 11.4,
      "pos": 100.0,
      "atr": 6.53,
-     "open": 41100,
-     "gap": -11.99,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -212,8 +212,8 @@
     {
      "code": "059120",
      "name": "아진엑스텍",
-     "limit": 6800,
-     "stop": 6598,
+     "limit": 6840,
+     "stop": 6636,
      "cur": 6840,
      "under": false,
      "hold": 0,
@@ -222,8 +222,8 @@
      "amt": 12.5,
      "pos": 100.0,
      "atr": 7.38,
-     "open": 6320,
-     "gap": -7.06,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -234,8 +234,8 @@
     {
      "code": "473980",
      "name": "노머스",
-     "limit": 12420,
-     "stop": 12050,
+     "limit": 12450,
+     "stop": 12079,
      "cur": 12450,
      "under": false,
      "hold": 0,
@@ -244,8 +244,8 @@
      "amt": 12.7,
      "pos": 100.0,
      "atr": 7.12,
-     "open": 11970,
-     "gap": -3.62,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -256,8 +256,8 @@
     {
      "code": "493280",
      "name": "아이엠바이오로직스",
-     "limit": 16300,
-     "stop": 15815,
+     "limit": 16130,
+     "stop": 15650,
      "cur": 16130,
      "under": false,
      "hold": 0,
@@ -266,8 +266,8 @@
      "amt": 12.6,
      "pos": 100.0,
      "atr": 9.28,
-     "open": 13950,
-     "gap": -14.42,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -278,8 +278,8 @@
     {
      "code": "117730",
      "name": "티로보틱스",
-     "limit": 13630,
-     "stop": 13224,
+     "limit": 13700,
+     "stop": 13292,
      "cur": 13700,
      "under": false,
      "hold": 0,
@@ -288,8 +288,8 @@
      "amt": 13.2,
      "pos": 99.4,
      "atr": 7.17,
-     "open": 13460,
-     "gap": -1.25,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -300,8 +300,8 @@
     {
      "code": "051160",
      "name": "지어소프트",
-     "limit": 16500,
-     "stop": 16009,
+     "limit": 16460,
+     "stop": 15970,
      "cur": 16460,
      "under": false,
      "hold": 0,
@@ -310,8 +310,8 @@
      "amt": 11.7,
      "pos": 100.0,
      "atr": 6.28,
-     "open": 15900,
-     "gap": -3.64,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -322,8 +322,8 @@
     {
      "code": "053030",
      "name": "바이넥스",
-     "limit": 7740,
-     "stop": 7510,
+     "limit": 7800,
+     "stop": 7568,
      "cur": 7800,
      "under": false,
      "hold": 0,
@@ -332,8 +332,8 @@
      "amt": 11.2,
      "pos": 100.0,
      "atr": 5.03,
-     "open": 7040,
-     "gap": -9.04,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -344,8 +344,8 @@
     {
      "code": "170790",
      "name": "파이오링크",
-     "limit": 11660,
-     "stop": 11313,
+     "limit": 11650,
+     "stop": 11303,
      "cur": 11650,
      "under": false,
      "hold": 0,
@@ -354,8 +354,8 @@
      "amt": 10.1,
      "pos": 100.0,
      "atr": 6.57,
-     "open": 11170,
-     "gap": -4.2,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -376,8 +376,8 @@
      "amt": 10.8,
      "pos": 100.0,
      "atr": 9.87,
-     "open": 1590,
-     "gap": -16.54,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": "급등 제외",
@@ -388,8 +388,8 @@
     {
      "code": "212560",
      "name": "네오오토",
-     "limit": 10890,
-     "stop": 10566,
+     "limit": 10950,
+     "stop": 10624,
      "cur": 10950,
      "under": false,
      "hold": 0,
@@ -397,9 +397,9 @@
      "cond": "A",
      "amt": 10.1,
      "pos": 100.0,
-     "atr": 7.43,
-     "open": 10300,
-     "gap": -5.42,
+     "atr": 7.37,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -410,8 +410,8 @@
     {
      "code": "003570",
      "name": "SNT다이내믹스",
-     "limit": 30200,
-     "stop": 29301,
+     "limit": 30500,
+     "stop": 29592,
      "cur": 30500,
      "under": false,
      "hold": 0,
@@ -420,8 +420,8 @@
      "amt": 22.1,
      "pos": 96.1,
      "atr": 5.74,
-     "open": 29750,
-     "gap": -1.49,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -432,8 +432,8 @@
     {
      "code": "323350",
      "name": "다원넥스뷰",
-     "limit": 14430,
-     "stop": 14000,
+     "limit": 14530,
+     "stop": 14097,
      "cur": 14530,
      "under": false,
      "hold": 0,
@@ -442,8 +442,8 @@
      "amt": 17.5,
      "pos": 89.5,
      "atr": 11.37,
-     "open": 14790,
-     "gap": 2.49,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -454,8 +454,8 @@
     {
      "code": "018290",
      "name": "브이티",
-     "limit": 12330,
-     "stop": 11963,
+     "limit": 12370,
+     "stop": 12002,
      "cur": 12370,
      "under": false,
      "hold": 0,
@@ -464,8 +464,8 @@
      "amt": 17.3,
      "pos": 89.8,
      "atr": 5.28,
-     "open": 11950,
-     "gap": -3.08,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -476,8 +476,8 @@
     {
      "code": "082270",
      "name": "젬백스",
-     "limit": 9940,
-     "stop": 9644,
+     "limit": 9950,
+     "stop": 9654,
      "cur": 9950,
      "under": false,
      "hold": 0,
@@ -486,8 +486,8 @@
      "amt": 16.6,
      "pos": 91.9,
      "atr": 7.25,
-     "open": 8730,
-     "gap": -12.17,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -508,8 +508,8 @@
      "amt": 24.8,
      "pos": 92.2,
      "atr": 9.24,
-     "open": 4395,
-     "gap": 0.8,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -530,8 +530,8 @@
      "amt": 17.6,
      "pos": 91.7,
      "atr": 3.89,
-     "open": 2540,
-     "gap": 0.0,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -542,8 +542,8 @@
     {
      "code": "086900",
      "name": "메디톡스",
-     "limit": 71700,
-     "stop": 69565,
+     "limit": 72000,
+     "stop": 69856,
      "cur": 72000,
      "under": false,
      "hold": 0,
@@ -552,8 +552,8 @@
      "amt": 17.7,
      "pos": 93.6,
      "atr": 4.88,
-     "open": 69100,
-     "gap": -3.63,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -564,8 +564,8 @@
     {
      "code": "215200",
      "name": "메가스터디교육",
-     "limit": 41850,
-     "stop": 40604,
+     "limit": 41800,
+     "stop": 40555,
      "cur": 41800,
      "under": false,
      "hold": 0,
@@ -574,8 +574,8 @@
      "amt": 13.0,
      "pos": 100.0,
      "atr": 4.15,
-     "open": 41600,
-     "gap": -0.6,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -596,8 +596,8 @@
      "amt": 11.4,
      "pos": 100.0,
      "atr": 4.72,
-     "open": 90900,
-     "gap": -2.88,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -608,8 +608,8 @@
     {
      "code": "206650",
      "name": "유바이오로직스",
-     "limit": 9220,
-     "stop": 8945,
+     "limit": 9260,
+     "stop": 8984,
      "cur": 9260,
      "under": false,
      "hold": 0,
@@ -618,8 +618,8 @@
      "amt": 11.9,
      "pos": 100.0,
      "atr": 4.44,
-     "open": 8900,
-     "gap": -3.47,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -630,8 +630,8 @@
     {
      "code": "003090",
      "name": "대웅",
-     "limit": 17210,
-     "stop": 16698,
+     "limit": 17250,
+     "stop": 16736,
      "cur": 17250,
      "under": false,
      "hold": 0,
@@ -640,8 +640,8 @@
      "amt": 10.7,
      "pos": 100.0,
      "atr": 4.49,
-     "open": 16650,
-     "gap": -3.25,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -652,8 +652,8 @@
     {
      "code": "145720",
      "name": "덴티움",
-     "limit": 43050,
-     "stop": 41768,
+     "limit": 43000,
+     "stop": 41720,
      "cur": 43000,
      "under": false,
      "hold": 0,
@@ -662,8 +662,8 @@
      "amt": 10.1,
      "pos": 100.0,
      "atr": 3.81,
-     "open": 40900,
-     "gap": -4.99,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -674,8 +674,8 @@
     {
      "code": "137310",
      "name": "에스디바이오센서",
-     "limit": 7370,
-     "stop": 7151,
+     "limit": 7360,
+     "stop": 7141,
      "cur": 7360,
      "under": false,
      "hold": 0,
@@ -684,8 +684,8 @@
      "amt": 11.1,
      "pos": 100.0,
      "atr": 4.76,
-     "open": 7260,
-     "gap": -1.49,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -696,8 +696,8 @@
     {
      "code": "053300",
      "name": "한국정보인증",
-     "limit": 5730,
-     "stop": 5559,
+     "limit": 5740,
+     "stop": 5569,
      "cur": 5740,
      "under": false,
      "hold": 0,
@@ -706,8 +706,8 @@
      "amt": 10.7,
      "pos": 100.0,
      "atr": 4.97,
-     "open": 5530,
-     "gap": -3.49,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -718,8 +718,8 @@
     {
      "code": "090360",
      "name": "로보스타",
-     "limit": 65000,
-     "stop": 63065,
+     "limit": 65100,
+     "stop": 63162,
      "cur": 65100,
      "under": false,
      "hold": 0,
@@ -728,8 +728,8 @@
      "amt": 33.8,
      "pos": 100.0,
      "atr": 6.87,
-     "open": 61700,
-     "gap": -5.08,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -740,8 +740,8 @@
     {
      "code": "065350",
      "name": "신성델타테크",
-     "limit": 32500,
-     "stop": 31532,
+     "limit": 32550,
+     "stop": 31581,
      "cur": 32550,
      "under": false,
      "hold": 0,
@@ -750,8 +750,8 @@
      "amt": 26.1,
      "pos": 100.0,
      "atr": 6.23,
-     "open": 29450,
-     "gap": -9.38,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -762,8 +762,8 @@
     {
      "code": "067920",
      "name": "이글루",
-     "limit": 7050,
-     "stop": 6840,
+     "limit": 7100,
+     "stop": 6889,
      "cur": 7100,
      "under": false,
      "hold": 0,
@@ -772,8 +772,8 @@
      "amt": 32.0,
      "pos": 97.2,
      "atr": 7.72,
-     "open": 6970,
-     "gap": -1.13,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -784,8 +784,8 @@
     {
      "code": "029460",
      "name": "케이씨",
-     "limit": 49100,
-     "stop": 47638,
+     "limit": 49400,
+     "stop": 47929,
      "cur": 49400,
      "under": false,
      "hold": 0,
@@ -794,8 +794,8 @@
      "amt": 25.1,
      "pos": 100.0,
      "atr": 7.91,
-     "open": 45350,
-     "gap": -7.64,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -816,8 +816,8 @@
      "amt": 32.7,
      "pos": 100.0,
      "atr": 9.74,
-     "open": 3550,
-     "gap": -19.41,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "급등 제외",
      "kind": "급등 제외",
@@ -838,8 +838,8 @@
      "amt": 22.0,
      "pos": 100.0,
      "atr": 8.24,
-     "open": 5330,
-     "gap": 0.0,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "급등 제외",
      "kind": "급등 제외",
@@ -850,8 +850,8 @@
     {
      "code": "112040",
      "name": "위메이드",
-     "limit": 15620,
-     "stop": 15155,
+     "limit": 15600,
+     "stop": 15136,
      "cur": 15600,
      "under": false,
      "hold": 0,
@@ -860,8 +860,8 @@
      "amt": 23.4,
      "pos": 100.0,
      "atr": 5.78,
-     "open": 14310,
-     "gap": -8.39,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -882,8 +882,8 @@
      "amt": 23.3,
      "pos": 100.0,
      "atr": 8.18,
-     "open": 15580,
-     "gap": -13.06,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -894,8 +894,8 @@
     {
      "code": "004830",
      "name": "덕성",
-     "limit": 3835,
-     "stop": 3721,
+     "limit": 3850,
+     "stop": 3735,
      "cur": 3850,
      "under": false,
      "hold": 0,
@@ -904,8 +904,8 @@
      "amt": 21.7,
      "pos": 100.0,
      "atr": 5.71,
-     "open": 3555,
-     "gap": -7.3,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -916,8 +916,8 @@
     {
      "code": "489460",
      "name": "바이오비쥬",
-     "limit": 16600,
-     "stop": 16106,
+     "limit": 16560,
+     "stop": 16067,
      "cur": 16560,
      "under": false,
      "hold": 0,
@@ -926,8 +926,8 @@
      "amt": 20.2,
      "pos": 97.7,
      "atr": 5.1,
-     "open": 16440,
-     "gap": -0.96,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -938,8 +938,8 @@
     {
      "code": "397030",
      "name": "에이프릴바이오",
-     "limit": 15560,
-     "stop": 15097,
+     "limit": 15600,
+     "stop": 15136,
      "cur": 15600,
      "under": false,
      "hold": 0,
@@ -948,8 +948,8 @@
      "amt": 21.8,
      "pos": 100.0,
      "atr": 7.3,
-     "open": 14090,
-     "gap": -9.45,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -970,8 +970,8 @@
      "amt": 20.7,
      "pos": 100.0,
      "atr": 6.13,
-     "open": 7560,
-     "gap": -8.92,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -982,8 +982,8 @@
     {
      "code": "389500",
      "name": "에스비비테크",
-     "limit": 38250,
-     "stop": 37111,
+     "limit": 38550,
+     "stop": 37402,
      "cur": 38550,
      "under": false,
      "hold": 0,
@@ -992,8 +992,8 @@
      "amt": 23.1,
      "pos": 100.0,
      "atr": 8.45,
-     "open": 36400,
-     "gap": -4.84,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1004,8 +1004,8 @@
     {
      "code": "199430",
      "name": "케이엔알시스템",
-     "limit": 17430,
-     "stop": 16911,
+     "limit": 17690,
+     "stop": 17163,
      "cur": 17690,
      "under": false,
      "hold": 0,
@@ -1014,8 +1014,8 @@
      "amt": 18.5,
      "pos": 100.0,
      "atr": 7.43,
-     "open": 16390,
-     "gap": -5.97,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1026,8 +1026,8 @@
     {
      "code": "340570",
      "name": "티앤엘",
-     "limit": 29750,
-     "stop": 28864,
+     "limit": 29900,
+     "stop": 29010,
      "cur": 29900,
      "under": false,
      "hold": 0,
@@ -1036,8 +1036,8 @@
      "amt": 18.2,
      "pos": 100.0,
      "atr": 5.07,
-     "open": 29150,
-     "gap": -2.02,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1048,8 +1048,8 @@
     {
      "code": "136540",
      "name": "윈스테크넷",
-     "limit": 13070,
-     "stop": 12681,
+     "limit": 13060,
+     "stop": 12671,
      "cur": 13060,
      "under": false,
      "hold": 0,
@@ -1058,8 +1058,8 @@
      "amt": 17.1,
      "pos": 100.0,
      "atr": 5.58,
-     "open": 12580,
-     "gap": -3.75,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1070,8 +1070,8 @@
     {
      "code": "388720",
      "name": "유일로보틱스",
-     "limit": 66200,
-     "stop": 64229,
+     "limit": 66700,
+     "stop": 64714,
      "cur": 66700,
      "under": false,
      "hold": 0,
@@ -1080,8 +1080,8 @@
      "amt": 15.6,
      "pos": 100.0,
      "atr": 6.34,
-     "open": 62900,
-     "gap": -4.98,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1092,8 +1092,8 @@
     {
      "code": "304840",
      "name": "타임X AI",
-     "limit": 2175,
-     "stop": 2110,
+     "limit": 2060,
+     "stop": 1999,
      "cur": 2060,
      "under": false,
      "hold": 0,
@@ -1102,8 +1102,8 @@
      "amt": 24.8,
      "pos": 100.0,
      "atr": 13.48,
-     "open": 1874,
-     "gap": -13.84,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -1114,8 +1114,8 @@
     {
      "code": "068760",
      "name": "셀트리온제약",
-     "limit": 43000,
-     "stop": 41720,
+     "limit": 43100,
+     "stop": 41817,
      "cur": 43100,
      "under": false,
      "hold": 0,
@@ -1124,8 +1124,8 @@
      "amt": 34.4,
      "pos": 100.0,
      "atr": 3.94,
-     "open": 41750,
-     "gap": -2.91,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1136,8 +1136,8 @@
     {
      "code": "002790",
      "name": "아모레퍼시픽홀딩스",
-     "limit": 28450,
-     "stop": 27603,
+     "limit": 28550,
+     "stop": 27700,
      "cur": 28550,
      "under": false,
      "hold": 0,
@@ -1146,8 +1146,8 @@
      "amt": 29.5,
      "pos": 94.4,
      "atr": 4.02,
-     "open": 29200,
-     "gap": 2.64,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1156,10 +1156,32 @@
      "net": 0.0
     },
     {
+     "code": "010660",
+     "name": "화천기계",
+     "limit": 3685,
+     "stop": 3575,
+     "cur": 3685,
+     "under": false,
+     "hold": 0,
+     "score": 46.2,
+     "cond": "A+B",
+     "amt": 11.1,
+     "pos": 90.9,
+     "atr": 5.76,
+     "open": null,
+     "gap": null,
+     "held": false,
+     "status": "매수 대기",
+     "kind": null,
+     "fill": null,
+     "src": "일봉",
+     "net": 0
+    },
+    {
      "code": "010640",
      "name": "진양폴리",
-     "limit": 4130,
-     "stop": 4007,
+     "limit": 4120,
+     "stop": 3997,
      "cur": 4120,
      "under": false,
      "hold": 0,
@@ -1168,8 +1190,8 @@
      "amt": 27.2,
      "pos": 93.0,
      "atr": 10.03,
-     "open": 4390,
-     "gap": 6.3,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1180,8 +1202,8 @@
     {
      "code": "053610",
      "name": "프로텍",
-     "limit": 68300,
-     "stop": 66266,
+     "limit": 67200,
+     "stop": 65199,
      "cur": 67200,
      "under": false,
      "hold": 0,
@@ -1190,8 +1212,8 @@
      "amt": 25.1,
      "pos": 91.1,
      "atr": 9.24,
-     "open": 63700,
-     "gap": -6.73,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -1212,8 +1234,8 @@
      "amt": 26.1,
      "pos": 93.2,
      "atr": 9.71,
-     "open": 6470,
-     "gap": 0.15,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -1224,18 +1246,18 @@
     {
      "code": "122900",
      "name": "아이마켓코리아",
-     "limit": 8650,
-     "stop": 8392,
+     "limit": 8660,
+     "stop": 8402,
      "cur": 8660,
      "under": false,
      "hold": 0,
      "score": 38.5,
      "cond": "A+B",
-     "amt": 10.0,
+     "amt": 10.1,
      "pos": 100.0,
      "atr": 2.76,
-     "open": 8610,
-     "gap": -0.46,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -1256,8 +1278,8 @@
      "amt": 21.6,
      "pos": 100.0,
      "atr": 3.52,
-     "open": 60500,
-     "gap": -2.89,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -1278,8 +1300,8 @@
      "amt": 17.0,
      "pos": 100.0,
      "atr": 4.85,
-     "open": 163500,
-     "gap": -0.97,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1300,8 +1322,8 @@
      "amt": 30.2,
      "pos": 92.5,
      "atr": 2.37,
-     "open": 171100,
-     "gap": -0.52,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1312,8 +1334,8 @@
     {
      "code": "058850",
      "name": "KTcs",
-     "limit": 2360,
-     "stop": 2290,
+     "limit": 2370,
+     "stop": 2299,
      "cur": 2370,
      "under": false,
      "hold": 0,
@@ -1322,8 +1344,8 @@
      "amt": 15.8,
      "pos": 100.0,
      "atr": 3.37,
-     "open": 2295,
-     "gap": -2.75,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "매수 대기",
      "kind": null,
@@ -1334,8 +1356,8 @@
     {
      "code": "002900",
      "name": "TYM",
-     "limit": 7300,
-     "stop": 7083,
+     "limit": 7290,
+     "stop": 7073,
      "cur": 7290,
      "under": false,
      "hold": 0,
@@ -1344,8 +1366,8 @@
      "amt": 29.4,
      "pos": 94.7,
      "atr": 5.08,
-     "open": 6900,
-     "gap": -5.48,
+     "open": null,
+     "gap": null,
      "held": true,
      "status": "매수 대기",
      "kind": null,
@@ -1631,7 +1653,7 @@
      "limit": 4435,
      "stop": 4303,
      "cur": 4120,
-     "under": true,
+     "under": false,
      "hold": 1,
      "score": 76.9,
      "cond": "A",
@@ -1748,8 +1770,8 @@
      "amt": 22.0,
      "pos": 100.0,
      "atr": 8.24,
-     "open": 5330,
-     "gap": 0.0,
+     "open": null,
+     "gap": null,
      "held": false,
      "status": "급등 제외",
      "kind": "급등 제외",
@@ -2332,7 +2354,7 @@
   {
    "code": "068760",
    "name": "셀트리온제약",
-   "limit": 43000,
+   "limit": 43100,
    "cond": "A+B",
    "amt": 34.4,
    "pos": 100.0,
@@ -2341,16 +2363,16 @@
    "open": 41750,
    "gap": 1.09,
    "rungs": [
-    43000,
-    42355,
-    41720
+    43100,
+    42454,
+    41817
    ],
-   "stop": 41720
+   "stop": 41817
   },
   {
    "code": "090360",
    "name": "로보스타",
-   "limit": 65000,
+   "limit": 65100,
    "cond": "A",
    "amt": 33.8,
    "pos": 100.0,
@@ -2359,11 +2381,11 @@
    "open": 61700,
    "gap": 2.32,
    "rungs": [
-    65000,
-    64025,
-    63065
+    65100,
+    64124,
+    63162
    ],
-   "stop": 63065
+   "stop": 63162
   },
   {
    "code": "078590",
@@ -2386,7 +2408,7 @@
   {
    "code": "067920",
    "name": "이글루",
-   "limit": 7050,
+   "limit": 7100,
    "cond": "A",
    "amt": 32.0,
    "pos": 97.2,
@@ -2395,11 +2417,11 @@
    "open": 6970,
    "gap": 1.46,
    "rungs": [
-    7050,
-    6944,
-    6840
+    7100,
+    6994,
+    6889
    ],
-   "stop": 6840
+   "stop": 6889
   },
   {
    "code": "093320",
@@ -2422,7 +2444,7 @@
   {
    "code": "002790",
    "name": "아모레퍼시픽홀딩스",
-   "limit": 28450,
+   "limit": 28550,
    "cond": "A+B",
    "amt": 29.5,
    "pos": 94.4,
@@ -2431,16 +2453,16 @@
    "open": 29200,
    "gap": 1.04,
    "rungs": [
-    28450,
-    28023,
-    27603
+    28550,
+    28122,
+    27700
    ],
-   "stop": 27603
+   "stop": 27700
   },
   {
    "code": "002900",
    "name": "TYM",
-   "limit": 7300,
+   "limit": 7290,
    "cond": "A+B",
    "amt": 29.4,
    "pos": 94.7,
@@ -2449,16 +2471,16 @@
    "open": 6900,
    "gap": 1.02,
    "rungs": [
-    7300,
-    7190,
-    7083
+    7290,
+    7181,
+    7073
    ],
-   "stop": 7083
+   "stop": 7073
   },
   {
    "code": "010640",
    "name": "진양폴리",
-   "limit": 4130,
+   "limit": 4120,
    "cond": "A",
    "amt": 27.2,
    "pos": 93.0,
@@ -2467,16 +2489,16 @@
    "open": 4390,
    "gap": -1.01,
    "rungs": [
-    4130,
-    4068,
-    4007
+    4120,
+    4058,
+    3997
    ],
-   "stop": 4007
+   "stop": 3997
   },
   {
    "code": "065350",
    "name": "신성델타테크",
-   "limit": 32500,
+   "limit": 32550,
    "cond": "A",
    "amt": 26.1,
    "pos": 100.0,
@@ -2485,11 +2507,11 @@
    "open": 29450,
    "gap": -0.34,
    "rungs": [
-    32500,
-    32012,
-    31532
+    32550,
+    32062,
+    31581
    ],
-   "stop": 31532
+   "stop": 31581
   },
   {
    "code": "417010",
@@ -2512,7 +2534,7 @@
   {
    "code": "053610",
    "name": "프로텍",
-   "limit": 68300,
+   "limit": 67200,
    "cond": "A",
    "amt": 25.1,
    "pos": 91.1,
@@ -2521,16 +2543,16 @@
    "open": 63700,
    "gap": 1.27,
    "rungs": [
-    68300,
-    67276,
-    66266
+    67200,
+    66192,
+    65199
    ],
-   "stop": 66266
+   "stop": 65199
   },
   {
    "code": "029460",
    "name": "케이씨",
-   "limit": 49100,
+   "limit": 49400,
    "cond": "A",
    "amt": 25.1,
    "pos": 100.0,
@@ -2539,16 +2561,16 @@
    "open": 45350,
    "gap": -0.55,
    "rungs": [
-    49100,
-    48364,
-    47638
+    49400,
+    48659,
+    47929
    ],
-   "stop": 47638
+   "stop": 47929
   },
   {
    "code": "304840",
    "name": "타임X AI",
-   "limit": 2175,
+   "limit": 2060,
    "cond": "A",
    "amt": 24.8,
    "pos": 100.0,
@@ -2557,11 +2579,11 @@
    "open": 1874,
    "gap": -1.99,
    "rungs": [
-    2175,
-    2142,
-    2110
+    2060,
+    2029,
+    1999
    ],
-   "stop": 2110
+   "stop": 1999
   },
   {
    "code": "048770",
@@ -2584,7 +2606,7 @@
   {
    "code": "112040",
    "name": "위메이드",
-   "limit": 15620,
+   "limit": 15600,
    "cond": "A+B",
    "amt": 23.4,
    "pos": 100.0,
@@ -2593,11 +2615,11 @@
    "open": 14310,
    "gap": -0.07,
    "rungs": [
-    15620,
-    15386,
-    15155
+    15600,
+    15366,
+    15136
    ],
-   "stop": 15155
+   "stop": 15136
   },
   {
    "code": "024850",
@@ -2620,7 +2642,7 @@
   {
    "code": "389500",
    "name": "에스비비테크",
-   "limit": 38250,
+   "limit": 38550,
    "cond": "A",
    "amt": 23.1,
    "pos": 100.0,
@@ -2629,16 +2651,16 @@
    "open": 36400,
    "gap": 1.96,
    "rungs": [
-    38250,
-    37676,
-    37111
+    38550,
+    37972,
+    37402
    ],
-   "stop": 37111
+   "stop": 37402
   },
   {
    "code": "003570",
    "name": "SNT다이내믹스",
-   "limit": 30200,
+   "limit": 30500,
    "cond": "A+B",
    "amt": 22.1,
    "pos": 96.1,
@@ -2647,11 +2669,11 @@
    "open": 29750,
    "gap": 0.17,
    "rungs": [
-    30200,
-    29747,
-    29301
+    30500,
+    30042,
+    29592
    ],
-   "stop": 29301
+   "stop": 29592
   },
   {
    "code": "009310",
@@ -2674,7 +2696,7 @@
   {
    "code": "397030",
    "name": "에이프릴바이오",
-   "limit": 15560,
+   "limit": 15600,
    "cond": "A",
    "amt": 21.8,
    "pos": 100.0,
@@ -2683,16 +2705,16 @@
    "open": 14090,
    "gap": 5.15,
    "rungs": [
-    15560,
-    15327,
-    15097
+    15600,
+    15366,
+    15136
    ],
-   "stop": 15097
+   "stop": 15136
   },
   {
    "code": "004830",
    "name": "덕성",
-   "limit": 3835,
+   "limit": 3850,
    "cond": "A+B",
    "amt": 21.7,
    "pos": 100.0,
@@ -2701,11 +2723,11 @@
    "open": 3555,
    "gap": 0.0,
    "rungs": [
-    3835,
-    3777,
-    3721
+    3850,
+    3792,
+    3735
    ],
-   "stop": 3721
+   "stop": 3735
   },
   {
    "code": "009450",
@@ -2746,7 +2768,7 @@
   {
    "code": "489460",
    "name": "바이오비쥬",
-   "limit": 16600,
+   "limit": 16560,
    "cond": "A+B",
    "amt": 20.2,
    "pos": 97.7,
@@ -2755,16 +2777,16 @@
    "open": 16440,
    "gap": 0.55,
    "rungs": [
-    16600,
-    16351,
-    16106
+    16560,
+    16312,
+    16067
    ],
-   "stop": 16106
+   "stop": 16067
   },
   {
    "code": "199430",
    "name": "케이엔알시스템",
-   "limit": 17430,
+   "limit": 17690,
    "cond": "A",
    "amt": 18.5,
    "pos": 100.0,
@@ -2773,16 +2795,16 @@
    "open": 16390,
    "gap": 2.12,
    "rungs": [
-    17430,
-    17169,
-    16911
+    17690,
+    17425,
+    17163
    ],
-   "stop": 16911
+   "stop": 17163
   },
   {
    "code": "340570",
    "name": "티앤엘",
-   "limit": 29750,
+   "limit": 29900,
    "cond": "A+B",
    "amt": 18.2,
    "pos": 100.0,
@@ -2791,16 +2813,16 @@
    "open": 29150,
    "gap": 0.0,
    "rungs": [
-    29750,
-    29304,
-    28864
+    29900,
+    29452,
+    29010
    ],
-   "stop": 28864
+   "stop": 29010
   },
   {
    "code": "086900",
    "name": "메디톡스",
-   "limit": 71700,
+   "limit": 72000,
    "cond": "A+B",
    "amt": 17.7,
    "pos": 93.6,
@@ -2809,11 +2831,11 @@
    "open": 69100,
    "gap": -0.43,
    "rungs": [
-    71700,
-    70624,
-    69565
+    72000,
+    70920,
+    69856
    ],
-   "stop": 69565
+   "stop": 69856
   },
   {
    "code": "000400",
@@ -2836,7 +2858,7 @@
   {
    "code": "323350",
    "name": "다원넥스뷰",
-   "limit": 14430,
+   "limit": 14530,
    "cond": "A",
    "amt": 17.5,
    "pos": 89.5,
@@ -2845,16 +2867,16 @@
    "open": 14790,
    "gap": 4.15,
    "rungs": [
-    14430,
-    14214,
-    14000
+    14530,
+    14312,
+    14097
    ],
-   "stop": 14000
+   "stop": 14097
   },
   {
    "code": "018290",
    "name": "브이티",
-   "limit": 12330,
+   "limit": 12370,
    "cond": "A+B",
    "amt": 17.3,
    "pos": 89.8,
@@ -2863,16 +2885,16 @@
    "open": 11950,
    "gap": -0.42,
    "rungs": [
-    12330,
-    12145,
-    11963
+    12370,
+    12184,
+    12002
    ],
-   "stop": 11963
+   "stop": 12002
   },
   {
    "code": "136540",
    "name": "윈스테크넷",
-   "limit": 13070,
+   "limit": 13060,
    "cond": "A+B",
    "amt": 17.1,
    "pos": 100.0,
@@ -2881,11 +2903,11 @@
    "open": 12580,
    "gap": 0.48,
    "rungs": [
-    13070,
-    12874,
-    12681
+    13060,
+    12864,
+    12671
    ],
-   "stop": 12681
+   "stop": 12671
   },
   {
    "code": "298050",
@@ -2908,7 +2930,7 @@
   {
    "code": "082270",
    "name": "젬백스",
-   "limit": 9940,
+   "limit": 9950,
    "cond": "A",
    "amt": 16.6,
    "pos": 91.9,
@@ -2917,16 +2939,16 @@
    "open": 8730,
    "gap": 0.0,
    "rungs": [
-    9940,
-    9791,
-    9644
+    9950,
+    9801,
+    9654
    ],
-   "stop": 9644
+   "stop": 9654
   },
   {
    "code": "058850",
    "name": "KTcs",
-   "limit": 2360,
+   "limit": 2370,
    "cond": "A+B",
    "amt": 15.8,
    "pos": 100.0,
@@ -2935,16 +2957,16 @@
    "open": 2295,
    "gap": 0.66,
    "rungs": [
-    2360,
-    2325,
-    2290
+    2370,
+    2334,
+    2299
    ],
-   "stop": 2290
+   "stop": 2299
   },
   {
    "code": "388720",
    "name": "유일로보틱스",
-   "limit": 66200,
+   "limit": 66700,
    "cond": "A",
    "amt": 15.6,
    "pos": 100.0,
@@ -2953,16 +2975,16 @@
    "open": 62900,
    "gap": 1.78,
    "rungs": [
-    66200,
-    65207,
-    64229
+    66700,
+    65700,
+    64714
    ],
-   "stop": 64229
+   "stop": 64714
   },
   {
    "code": "004100",
    "name": "태양금속",
-   "limit": 3275,
+   "limit": 3250,
    "cond": "A+B",
    "amt": 14.5,
    "pos": 97.4,
@@ -2971,16 +2993,16 @@
    "open": 3130,
    "gap": -0.48,
    "rungs": [
-    3275,
-    3226,
-    3177
+    3250,
+    3201,
+    3153
    ],
-   "stop": 3177
+   "stop": 3153
   },
   {
    "code": "230240",
    "name": "에치에프알",
-   "limit": 10940,
+   "limit": 10910,
    "cond": "A",
    "amt": 13.3,
    "pos": 100.0,
@@ -2989,16 +3011,16 @@
    "open": 9450,
    "gap": 4.3,
    "rungs": [
-    10940,
-    10776,
-    10614
+    10910,
+    10746,
+    10585
    ],
-   "stop": 10614
+   "stop": 10585
   },
   {
    "code": "117730",
    "name": "티로보틱스",
-   "limit": 13630,
+   "limit": 13700,
    "cond": "A",
    "amt": 13.2,
    "pos": 99.4,
@@ -3007,16 +3029,16 @@
    "open": 13460,
    "gap": 4.26,
    "rungs": [
-    13630,
-    13426,
-    13224
+    13700,
+    13494,
+    13292
    ],
-   "stop": 13224
+   "stop": 13292
   },
   {
    "code": "215200",
    "name": "메가스터디교육",
-   "limit": 41850,
+   "limit": 41800,
    "cond": "A+B",
    "amt": 13.0,
    "pos": 100.0,
@@ -3025,16 +3047,16 @@
    "open": 41600,
    "gap": 0.85,
    "rungs": [
-    41850,
-    41222,
-    40604
+    41800,
+    41173,
+    40555
    ],
-   "stop": 40604
+   "stop": 40555
   },
   {
    "code": "473980",
    "name": "노머스",
-   "limit": 12420,
+   "limit": 12450,
    "cond": "A",
    "amt": 12.7,
    "pos": 100.0,
@@ -3043,16 +3065,16 @@
    "open": 11970,
    "gap": -0.08,
    "rungs": [
-    12420,
-    12234,
-    12050
+    12450,
+    12263,
+    12079
    ],
-   "stop": 12050
+   "stop": 12079
   },
   {
    "code": "493280",
    "name": "아이엠바이오로직스",
-   "limit": 16300,
+   "limit": 16130,
    "cond": "A",
    "amt": 12.6,
    "pos": 100.0,
@@ -3061,16 +3083,16 @@
    "open": 13950,
    "gap": 1.01,
    "rungs": [
-    16300,
-    16056,
-    15815
+    16130,
+    15888,
+    15650
    ],
-   "stop": 15815
+   "stop": 15650
   },
   {
    "code": "059120",
    "name": "아진엑스텍",
-   "limit": 6800,
+   "limit": 6840,
    "cond": "A",
    "amt": 12.5,
    "pos": 100.0,
@@ -3079,16 +3101,16 @@
    "open": 6320,
    "gap": 2.76,
    "rungs": [
-    6800,
-    6698,
-    6598
+    6840,
+    6737,
+    6636
    ],
-   "stop": 6598
+   "stop": 6636
   },
   {
    "code": "206650",
    "name": "유바이오로직스",
-   "limit": 9220,
+   "limit": 9260,
    "cond": "A+B",
    "amt": 11.9,
    "pos": 100.0,
@@ -3097,16 +3119,16 @@
    "open": 8900,
    "gap": 1.71,
    "rungs": [
-    9220,
-    9082,
-    8945
+    9260,
+    9121,
+    8984
    ],
-   "stop": 8945
+   "stop": 8984
   },
   {
    "code": "051160",
    "name": "지어소프트",
-   "limit": 16500,
+   "limit": 16460,
    "cond": "A",
    "amt": 11.7,
    "pos": 100.0,
@@ -3115,11 +3137,11 @@
    "open": 15900,
    "gap": 0.63,
    "rungs": [
-    16500,
-    16252,
-    16009
+    16460,
+    16213,
+    15970
    ],
-   "stop": 16009
+   "stop": 15970
   },
   {
    "code": "000640",
@@ -3142,7 +3164,7 @@
   {
    "code": "0120G0",
    "name": "삼양바이오팜",
-   "limit": 46700,
+   "limit": 46550,
    "cond": "A",
    "amt": 11.4,
    "pos": 100.0,
@@ -3151,16 +3173,16 @@
    "open": 41100,
    "gap": 0.74,
    "rungs": [
-    46700,
-    46000,
-    45310
+    46550,
+    45852,
+    45164
    ],
-   "stop": 45310
+   "stop": 45164
   },
   {
    "code": "053030",
    "name": "바이넥스",
-   "limit": 7740,
+   "limit": 7800,
    "cond": "A+B",
    "amt": 11.2,
    "pos": 100.0,
@@ -3169,16 +3191,16 @@
    "open": 7040,
    "gap": 0.86,
    "rungs": [
-    7740,
-    7624,
-    7510
+    7800,
+    7683,
+    7568
    ],
-   "stop": 7510
+   "stop": 7568
   },
   {
    "code": "137310",
    "name": "에스디바이오센서",
-   "limit": 7370,
+   "limit": 7360,
    "cond": "A+B",
    "amt": 11.1,
    "pos": 100.0,
@@ -3187,11 +3209,11 @@
    "open": 7260,
    "gap": 0.28,
    "rungs": [
-    7370,
-    7259,
-    7151
+    7360,
+    7250,
+    7141
    ],
-   "stop": 7151
+   "stop": 7141
   },
   {
    "code": "208640",
@@ -3214,7 +3236,7 @@
   {
    "code": "003090",
    "name": "대웅",
-   "limit": 17210,
+   "limit": 17250,
    "cond": "A+B",
    "amt": 10.7,
    "pos": 100.0,
@@ -3223,16 +3245,16 @@
    "open": 16650,
    "gap": 1.09,
    "rungs": [
-    17210,
-    16952,
-    16698
+    17250,
+    16991,
+    16736
    ],
-   "stop": 16698
+   "stop": 16736
   },
   {
    "code": "053300",
    "name": "한국정보인증",
-   "limit": 5730,
+   "limit": 5740,
    "cond": "A+B",
    "amt": 10.7,
    "pos": 100.0,
@@ -3241,16 +3263,16 @@
    "open": 5530,
    "gap": -0.54,
    "rungs": [
-    5730,
-    5644,
-    5559
+    5740,
+    5654,
+    5569
    ],
-   "stop": 5559
+   "stop": 5569
   },
   {
    "code": "145720",
    "name": "덴티움",
-   "limit": 43050,
+   "limit": 43000,
    "cond": "A+B",
    "amt": 10.1,
    "pos": 100.0,
@@ -3259,16 +3281,16 @@
    "open": 40900,
    "gap": 1.36,
    "rungs": [
-    43050,
-    42404,
-    41768
+    43000,
+    42355,
+    41720
    ],
-   "stop": 41768
+   "stop": 41720
   },
   {
    "code": "170790",
    "name": "파이오링크",
-   "limit": 11660,
+   "limit": 11650,
    "cond": "A",
    "amt": 10.1,
    "pos": 100.0,
@@ -3277,11 +3299,11 @@
    "open": 11170,
    "gap": 0.54,
    "rungs": [
-    11660,
-    11485,
-    11313
+    11650,
+    11475,
+    11303
    ],
-   "stop": 11313
+   "stop": 11303
   }
  ],
  "recent": [
@@ -3313,7 +3335,7 @@
    "code": "010640",
    "name": "진양폴리",
    "sig": 20261127,
-   "limit": 4130,
+   "limit": 4120,
    "cond": "A",
    "held": true,
    "recent": true,
@@ -3337,7 +3359,7 @@
    "code": "068760",
    "name": "셀트리온제약",
    "sig": 20261127,
-   "limit": 43000,
+   "limit": 43100,
    "cond": "A+B",
    "held": true,
    "recent": true,
@@ -3361,7 +3383,7 @@
    "code": "002790",
    "name": "아모레퍼시픽홀딩스",
    "sig": 20261127,
-   "limit": 28450,
+   "limit": 28550,
    "cond": "A+B",
    "held": true,
    "recent": true,
@@ -3385,7 +3407,7 @@
    "code": "090360",
    "name": "로보스타",
    "sig": 20261127,
-   "limit": 65000,
+   "limit": 65100,
    "cond": "A",
    "held": false,
    "recent": false,
@@ -3409,7 +3431,7 @@
    "code": "003570",
    "name": "SNT다이내믹스",
    "sig": 20261127,
-   "limit": 30200,
+   "limit": 30500,
    "cond": "A+B",
    "held": true,
    "recent": true,
@@ -3433,7 +3455,7 @@
    "code": "002900",
    "name": "TYM",
    "sig": 20261127,
-   "limit": 7300,
+   "limit": 7290,
    "cond": "A+B",
    "held": true,
    "recent": true,
@@ -3457,7 +3479,7 @@
    "code": "053610",
    "name": "프로텍",
    "sig": 20261127,
-   "limit": 68300,
+   "limit": 67200,
    "cond": "A",
    "held": false,
    "recent": false,
@@ -3481,7 +3503,7 @@
    "code": "065350",
    "name": "신성델타테크",
    "sig": 20261127,
-   "limit": 32500,
+   "limit": 32550,
    "cond": "A",
    "held": false,
    "recent": false,
@@ -3505,7 +3527,7 @@
    "code": "067920",
    "name": "이글루",
    "sig": 20261127,
-   "limit": 7050,
+   "limit": 7100,
    "cond": "A",
    "held": false,
    "recent": false,
@@ -4313,7 +4335,7 @@
    "sig": 20261126,
    "status": "보유중",
    "kind": "보유중",
-   "net": 0.41,
+   "net": 0.38,
    "entry": 20261127,
    "exit": null,
    "days": 0,
@@ -4373,7 +4395,7 @@
    "sig": 20261126,
    "status": "보유중",
    "kind": "보유중",
-   "net": -0.27,
+   "net": -0.17,
    "entry": 20261127,
    "exit": null,
    "days": 0,
@@ -6303,6 +6325,5 @@
   "min_amt": 10.0,
   "entry": "전일 종가 지정가",
   "stop": "종가가 3차 가격(-3%) 아래면 그날 청산 (1~3일차 매일 적용)"
- },
- "live_updated": "2026-11-27 20:32"
+ }
 }
