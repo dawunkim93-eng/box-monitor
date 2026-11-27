@@ -38,6 +38,11 @@ def main():
             q = live.get(x.get("code"))
             if q:
                 x["cur"] = round(q[3])
+                if q[0] and not x.get("open"):
+                    x["open"] = round(q[0])
+                    lim = x.get("limit") or 0
+                    if lim:
+                        x["gap"] = round((q[0] / lim - 1) * 100, 2)
                 n += 1
         # 손절선 이탈 표시 갱신
         for x in g.get("items") or []:
