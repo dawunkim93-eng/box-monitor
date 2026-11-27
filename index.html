@@ -2280,7 +2280,7 @@ async function init(){
   if(note){
     note.innerHTML=`신호일 ${d.sig_date||"-"} · 원장 진입 ${sm.entries||0}건(완료 ${sm.done||0}, 보유 ${sm.holding||0})`
       + (cd.on?` · <span style="color:var(--amber)">⛔ 급락 쿨다운 — 오늘 신규 진입 없음</span>`:"")
-      + (d.live_updated?` · 현재가 ${String(d.live_updated).slice(11,16)} 기준`:"")
+
       + (d.nasdaq&&d.nasdaq.drop!=null?` · 나스닥 ${d.nasdaq.drop>0?"+":""}${d.nasdaq.drop}%`
           +(d.nasdaq.shift?` <span style="color:var(--amber)">→ 오늘은 장후반(15:20 종가) 매수</span>`:` <span class="sub">→ 장초반 매수</span>`):"");
   }
