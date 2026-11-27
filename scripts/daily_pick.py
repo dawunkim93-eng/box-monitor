@@ -113,9 +113,21 @@ def _append_live(df, bar, day):
 
 
 def naver_close(code, day=None):
-    """네이버 일봉의 확정 종가 (day=YYYYMMDD 없으면 마지막 봉)."""
+    """확정 종가. 오늘(또는 당일 장 마감 후)은 실시간 API를 먼저 쓴다.
+
+    일봉 API(siseJson)는 마감 직후 잠정값을 한동안 유지하는 경우가 있어
+    장 마감 뒤에는 실시간(polling) API의 종가가 더 정확하다.
+    """
     import re
     import urllib.request
+    try:
+        _today = int(pd.Timestamp.now().strftime("%Y%m%d"))
+        if day is None or int(day) == _today:
+            q = _live_quotes([code])
+            if code in q and q[code][3] > 0:
+                return float(q[code][3])
+    except Exception:
+        pass
     try:
         end = pd.Timestamp.now()
         st = (end - pd.Timedelta(days=20)).strftime("%Y%m%d")
