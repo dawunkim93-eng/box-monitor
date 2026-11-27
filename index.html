@@ -1668,11 +1668,6 @@ function renderHoldingsHistory(){
   if(!tb) return;
   const H=(DATA&&DATA.holdings_history)||[];
   const note=document.getElementById("hh-note");
-  const _upd=document.getElementById("lowlive-upd");
-  if(_upd){
-    const t=(d.live_updated||d.updated_at||"");
-    _upd.textContent = t? `최종 ${String(t).slice(5,16)}` : "";
-  }
   if(note){
     note.textContent=(DATA&&DATA.holdings_history_since)
       ?`기록 시작 ${DATA.holdings_history_since} · 텔레그램 보유 변경 시점 기준 · 과거 이력은 기록 시작 전까지 없음`
@@ -2268,6 +2263,11 @@ async function init(){
     (d&&d.today||[]).forEach(t=>{ if(m[t.code]){ t.open=m[t.code].open; t.gap=m[t.code].gap; } });}
   const note=document.getElementById("lowlive-note");
   if(!d){ if(note) note.textContent="저변동 데이터가 없습니다."; return; }
+  const _upd=document.getElementById("lowlive-upd");
+  if(_upd){
+    const t=(d.live_updated||d.updated_at||"");
+    _upd.textContent = t? `최종 ${String(t).slice(5,16)}` : "";
+  }
   const cd=d.cooldown||{}, sm=d.summary||{};
   const DAYS=(d.days&&d.days.length)?d.days:[{sig:d.sig_date,n:(d.today||[]).length,items:(d.today||[])}];
   // 진입일 시가·갭 보강 (09:05 수집분)
